@@ -19,6 +19,7 @@ export default function App() {
 
       {/* Puedes añadir más si quieres, ¡son reutilizables! */}
       <Contador />
+      
 
       <StatusBar style="auto" />
     </View>

@@ -1,1 +1,2 @@
-npm start
+npm start para iniciar la apps
+npm expo start

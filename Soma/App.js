@@ -1,41 +1,55 @@
 // App.js
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
+import { ActivityIndicator, View } from 'react-native';
 
-import React from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-
-// 1. ¡IMPORTAMOS NUESTRO JUGUETE!
-// Le decimos a App.js dónde encontrar el componente Contador.
-import Contador from './src/components/Contador';
+import AuthNavigator from './src/navigation/AuthNavigator';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
+  // Estado para saber si estamos comprobando el token (para mostrar una pantalla de carga)
+  const [isLoading, setIsLoading] = useState(true);
+  // Estado para guardar el token del usuario
+  const [userToken, setUserToken] = useState(null);
+
+  // Este useEffect se ejecuta UNA SOLA VEZ cuando la app arranca
+  useEffect(() => {
+    const bootstrapAsync = async () => {
+      let token;
+      try {
+        // 1. El "portero" intenta coger la "pulsera" (token) del bolsillo (SecureStore)
+        token = await SecureStore.getItemAsync('userToken');
+      } catch (e) {
+        console.error('Error al restaurar el token', e);
+      }
+      // 2. Actualizamos nuestro estado con el resultado. Si no había token, será null.
+      setUserToken(token);
+      setIsLoading(false); // Dejamos de cargar
+    };
+
+    bootstrapAsync();
+  }, []);
+
+  // Mientras estamos comprobando, mostramos una pantalla de carga para evitar parpadeos
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>¡Bienvenido a mi App de Juguetes!</Text>
-      
-      {/* 2. ¡USAMOS NUESTRO JUGUETE AQUÍ!
-          Lo llamamos como si fuera una etiqueta de HTML. */}
-      <Contador />
-
-      {/* Puedes añadir más si quieres, ¡son reutilizables! */}
-      <Contador />
-      
-
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      {/* 3. El "portero" toma la decisión */}
+      {userToken == null ? (
+        // No hay pulsera -> A la taquilla (AuthNavigator)
+        <AuthNavigator />
+      ) : (
+        // Sí hay pulsera -> A la discoteca (AppNavigator)
+        <AppNavigator />
+      )}
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-  }
-});

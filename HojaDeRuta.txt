@@ -1,2 +1,94 @@
+Librerias
+
 npm start para iniciar la apps
 npm expo start
+npx expo install expo-secure-store //para la seguridad de las apps
+npx expo install @react-navigation/native @react-navigation/stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context
+
+
+
+
+
+
+
+
+USO DE REACT
+Uso:
+
+    Guardar el token (en LoginScreen después de un login exitoso):
+    code JavaScript
+
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+
+    
+import * as SecureStore from 'expo-secure-store';
+
+await SecureStore.setItemAsync('userToken', 'el_token_que_me_dio_el_backend');
+
+  
+
+Borrar el token (en ProfileScreen al cerrar sesión):
+code JavaScript
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+
+    
+await SecureStore.deleteItemAsync('userToken');
+
+  
+
+    src (Source/Fuente): Genial. Todo el código que escribas vivirá aquí dentro. Esto lo mantiene separado de los archivos de configuración del proyecto.
+
+    src/assets: Perfecto. Aquí pondrás imágenes (como logos, iconos), fuentes de letra personalizadas, etc.
+
+    src/components: El corazón de React. Aquí crearás todas tus piezas reutilizables. Contador.js está exactamente donde debe estar. Otros ejemplos que vivirán aquí: CustomButton.js, ProfileAvatar.js, DataCard.js.
+
+    src/constants: ¡Excelente! Una carpeta muy profesional. Sirve para evitar "números o textos mágicos" en tu código. Aquí crearás archivos como:
+
+        colors.js: Para definir tu paleta de colores (¡lo haremos más abajo!).
+
+        spacing.js: Para definir tamaños consistentes (ej. padding: spacing.medium).
+
+        api.js: Para guardar la URL base de tu backend (https://api.soma.com/).
+
+    src/navigation: Ideal. Toda la lógica de la navegación (tus StackNavigator, TabNavigator, etc.) vivirá aquí, manteniendo tu App.js súper limpio.
+
+    src/screens: Correcto. Cada archivo aquí es una vista completa de tu aplicación, un destino al que el usuario puede navegar. Ejemplos: HomeScreen.js, LoginScreen.js, ProfileScreen.js.
+
+    src/services: Muy buena decisión. Aquí abstraes la lógica que no es visual. Es el lugar perfecto para poner tu ApiService.js, que se encargará de todas las llamadas a tu backend de Spring Boot.
+
+
+
+ 2. ¿Cómo sé cuándo algo es un Componente o una Screen (Página)?
+
+Esta es la pregunta fundamental de React. La mejor forma de entenderlo es con una analogía y una regla simple.
+
+La Analogía de la Casa de LEGO:
+
+    Una Screen (Pantalla) es una habitación completa de la casa: la "Cocina", el "Dormitorio", el "Baño". Es un lugar específico al que vas. La cocina tiene un propósito claro y está compuesta por muchos objetos.
+
+    Un Componente es un mueble u objeto individual que puedes usar en cualquier habitación: una "Silla", una "Mesa", una "Lámpara". Son piezas genéricas y reutilizables. Puedes poner una silla en la cocina, en el dormitorio o en el salón.
+
+La Regla de la Reutilización y el Propósito:
+Hazte estas dos preguntas sobre lo que estás a punto de crear:
+
+    ¿Voy a necesitar esto, o algo muy parecido, en más de un lugar de mi aplicación?
+
+        Sí: Es casi seguro un Componente. (Ej: un botón de inicio de sesión, una tarjeta para mostrar datos, un avatar de perfil).
+
+        No: Podría ser una Screen.
+
+    ¿Es un destino principal al que el usuario navega?
+
+        Sí: Definitivamente es una Screen. (Ej: la pantalla de "Inicio", la de "Ajustes", la de "Ver Historial").
+
+        No: Probablemente es un Componente.
+
+Ejemplo Práctico en SOMA:
+
+    LoginScreen.js es una SCREEN. Es una vista completa, un destino de navegación. Dentro de ella, tendrás varios componentes.
+
+    CustomInput.js (un campo de texto con tu estilo personalizado) es un COMPONENTE. Lo usarás en la LoginScreen, en la RegisterScreen, en la pantalla de búsqueda, etc.
+
+    DataCard.js (una tarjeta que muestra "Estrés: 7/10") es un COMPONENTE. La usarás en la HomeScreen para mostrar el dato actual y también la podrías usar en la HistoryScreen para mostrar datos pasados.

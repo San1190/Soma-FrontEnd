@@ -1,0 +1,264 @@
+# HOJA DE RUTA PARA APRENDER REACT NATIVE Y COMUNICACIÓN CON APIs
+
+## 1. FUNDAMENTOS DE REACT NATIVE
+
+### Instalación y configuración
+- Instalar Node.js y npm
+- Instalar Expo CLI: `npm install -g expo-cli`
+- Crear un nuevo proyecto: `npx create-expo-app MiAplicacion`
+- Iniciar el proyecto: `cd MiAplicacion && npx expo start`
+
+### Componentes básicos
+- View (equivalente a div en web)
+- Text (para mostrar texto)
+- Image (para imágenes)
+- ScrollView (para contenido desplazable)
+- FlatList (para listas eficientes)
+
+### Estilizado
+- StyleSheet para crear estilos
+- Flexbox para layouts
+- Responsive design con Dimensions
+
+### Navegación
+- React Navigation: `npm install @react-navigation/native`
+- Tipos de navegación: Stack, Tab, Drawer
+
+## 2. COMUNICACIÓN CON APIs RESTful
+
+### Métodos para comunicarse con APIs
+1. **Fetch API** (incluido en JavaScript)
+2. **Axios** (biblioteca popular)
+
+### Ejemplo con Fetch API:
+
+```javascript
+// GET Request
+fetch('https://api.ejemplo.com/datos')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Error en la respuesta de la red');
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Datos recibidos:', data);
+    // Aquí puedes actualizar el estado con los datos recibidos
+    this.setState({ datos: data });
+    // o con hooks:
+    // setDatos(data);
+  })
+  .catch(error => {
+    console.error('Error al obtener datos:', error);
+  });
+
+// POST Request
+fetch('https://api.ejemplo.com/datos', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    nombre: 'Usuario',
+    edad: 30,
+  }),
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log('Respuesta:', data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+```
+
+### Ejemplo con Axios:
+
+```javascript
+// Primero instalar: npm install axios
+
+import axios from 'axios';
+
+// GET Request
+axios.get('https://api.ejemplo.com/datos')
+  .then(response => {
+    console.log('Datos recibidos:', response.data);
+    // Actualizar estado
+    this.setState({ datos: response.data });
+    // o con hooks:
+    // setDatos(response.data);
+  })
+  .catch(error => {
+    console.error('Error al obtener datos:', error);
+  });
+
+// POST Request
+axios.post('https://api.ejemplo.com/datos', {
+  nombre: 'Usuario',
+  edad: 30,
+})
+  .then(response => {
+    console.log('Respuesta:', response.data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+```
+
+### Ejemplo completo en un componente funcional:
+
+```javascript
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import axios from 'axios';
+
+const ApiExample = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Función para obtener datos
+    const fetchData = async () => {
+      try {
+        // Puedes usar una API pública para pruebas como JSONPlaceholder
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
+        setData(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Error al cargar datos');
+        setLoading(false);
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Renderizar un elemento de la lista
+  const renderItem = ({ item }) => (
+    <View style={styles.item}>
+      <Text style={styles.title}>{item.title}</Text>
+      <Text>{item.body}</Text>
+    </View>
+  );
+
+  // Mostrar indicador de carga mientras se obtienen los datos
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Cargando datos...</Text>
+      </View>
+    );
+  }
+
+  // Mostrar mensaje de error si ocurrió algún problema
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.error}>{error}</Text>
+      </View>
+    );
+  }
+
+  // Mostrar la lista de datos
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Datos de la API</Text>
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={item => item.id.toString()}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  item: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    marginVertical: 8,
+    borderRadius: 5,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  error: {
+    color: 'red',
+    fontSize: 18,
+  },
+});
+
+export default ApiExample;
+```
+
+## 3. CONCEPTOS AVANZADOS
+
+### Estado y Props
+- useState para componentes funcionales
+- useEffect para efectos secundarios (como llamadas API)
+- Props para pasar datos entre componentes
+
+### Manejo de formularios
+- TextInput para entrada de texto
+- Validación de formularios
+- Envío de datos a API
+
+### Autenticación
+- JWT (JSON Web Tokens)
+- OAuth
+- Almacenamiento seguro con SecureStore
+
+### Almacenamiento local
+- AsyncStorage para datos persistentes
+- Context API o Redux para estado global
+
+## 4. RECURSOS DE APRENDIZAJE
+
+### Documentación oficial
+- React Native: https://reactnative.dev/docs/getting-started
+- Expo: https://docs.expo.dev/
+
+### Cursos recomendados
+- React Native - The Practical Guide (Udemy)
+- CS50's Mobile App Development with React Native (Harvard)
+- React Native: Advanced Concepts (Udemy)
+
+### Comunidad y soporte
+- Stack Overflow
+- GitHub
+- Discord de React Native
+
+## 5. PROYECTOS PRÁCTICOS PARA PRACTICAR
+
+1. **App de Tareas**: Crear, leer, actualizar y eliminar tareas (CRUD)
+2. **App de Clima**: Consumir API de clima y mostrar pronósticos
+3. **App de Noticias**: Mostrar noticias desde una API pública
+4. **App de Recetas**: Buscar y guardar recetas favoritas
+5. **App de Chat**: Implementar comunicación en tiempo real
+
+## CONSEJOS FINALES
+
+- Practica regularmente
+- Construye proyectos pequeños y ve aumentando la complejidad
+- Participa en la comunidad
+- Mantente actualizado con las nuevas versiones y características
+- Aprende a depurar y solucionar problemas comunes

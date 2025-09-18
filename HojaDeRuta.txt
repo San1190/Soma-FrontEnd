@@ -4,10 +4,10 @@ npm start para iniciar la apps
 npm expo start
 npx expo install expo-secure-store //para la seguridad de las apps
 npx expo install @react-navigation/native @react-navigation/stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context
+npx expo install axios //para la api
 
 
-
-
+    
 
 
 

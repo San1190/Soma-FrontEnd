@@ -1,0 +1,268 @@
+e lo voy a explicar con una analogía y luego te daré el código paso a paso para que lo implementes.
+La Analogía: El Restaurante (Tu App)
+
+    El Cliente (El Usuario): Está sentado en la mesa (LoginScreen.js).
+
+    La Cocina (Tu API de Spring Boot): Está en la parte de atrás, preparando los datos y la lógica.
+
+    El Camarero (Nuestro Servicio API): Es la pieza que comunica al cliente con la cocina. No es ni el cliente ni la cocina, es el intermediario. Su trabajo es tomar el pedido ({email, password}), llevarlo a la cocina, esperar la respuesta ({token, userInfo}) y traérsela de vuelta al cliente.
+
+Vamos a construir a nuestro "camarero" profesional.
+Paso 0: El Ingrediente Secreto - Instalar Axios
+
+Aunque React Native tiene una función fetch para hacer llamadas de red, la comunidad profesional usa casi universalmente una librería llamada Axios.
+
+    ¿Por qué Axios y no fetch?
+
+        Convierte automáticamente los datos a JSON.
+
+        Maneja mucho mejor los errores.
+
+        Te permite crear una "instancia" centralizada (nuestro camarero) con una configuración base.
+
+    Instalación:
+
+        Detén tu servidor de Expo (Ctrl + C).
+
+        Ejecuta este comando en tu terminal:
+        code Bash
+
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+
+    
+npx expo install axios
+
+  
+
+
+
+Paso 1: La Dirección de la Cocina (Configurar la URL Base)
+
+Tu aplicación móvil necesita saber la dirección IP de tu ordenador donde se está ejecutando el backend de Spring Boot.
+
+¡MUY IMPORTANTE! No puedes usar http://localhost:8080. localhost dentro del teléfono se refiere al propio teléfono, no a tu ordenador. Necesitas la dirección IP de tu red local.
+
+    Encuentra la IP de tu ordenador:
+
+        En Windows: Abre cmd o PowerShell y escribe ipconfig. Busca la dirección "IPv4 Address". Suele ser algo como 192.168.1.100.
+
+        En Mac/Linux: Abre la terminal y escribe ifconfig o ip addr. Busca la dirección bajo en0 o wlan0.
+
+    Crea el archivo de configuración en src/constants/api.js:
+    code JavaScript
+
+    IGNORE_WHEN_COPYING_START
+    IGNORE_WHEN_COPYING_END
+
+        
+    // src/constants/api.js
+
+    // REEMPLAZA ESTA IP CON LA TUYA
+    const API_BASE_URL = 'http://192.168.1.100:8080'; 
+
+    export default API_BASE_URL;
+
+      
+
+Paso 2: Construir el "Camarero" (El Servicio API)
+
+Ahora creamos el servicio que se encargará de toda la comunicación.
+
+    Crea el archivo src/services/apiService.js:
+
+    Pega el siguiente código. Este es un servicio profesional y reutilizable.
+
+code JavaScript
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+
+    
+// src/services/apiService.js
+
+import axios from 'axios';
+import API_BASE_URL from '../constants/api';
+
+// 1. Creamos una instancia de Axios con la configuración base.
+// Nuestro "camarero" ya sabe la dirección de la cocina.
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// 2. Definimos las funciones específicas para cada "pedido" a la cocina.
+
+/**
+ * Pide a la API que inicie sesión un usuario.
+ * @param {string} email - El email del usuario.
+ * @param {string} password - La contraseña del usuario.
+ * @returns {Promise<Object>} - La respuesta de la API (ej. { token, user }).
+ */
+export const loginUser = async (email, password) => {
+  try {
+    // El camarero lleva el pedido al endpoint '/auth/login'
+    const response = await apiClient.post('/auth/login', {
+      email,
+      password,
+    });
+    // Si la cocina responde bien, devolvemos los datos.
+    return response.data; 
+  } catch (error) {
+    // Si la cocina dice que hay un error (ej. contraseña incorrecta),
+    // lo relanzamos para que la pantalla lo gestione.
+    throw error;
+  }
+};
+
+/**
+ * Pide a la API que registre un nuevo usuario.
+ * @param {string} name - El nombre del usuario.
+ * @param {string} email - El email del usuario.
+ * @param {string} password - La contraseña del usuario.
+ * @returns {Promise<Object>} - La respuesta de la API.
+ */
+export const registerUser = async (name, email, password) => {
+  try {
+    const response = await apiClient.post('/auth/register', {
+      name,
+      email,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Aquí añadirías más funciones como: fetchUserData, updateProfile, etc.
+
+  
+
+Paso 3: Llamar al "Camarero" desde la Pantalla LoginScreen
+
+Ahora que el camarero está listo, el cliente en la LoginScreen puede llamarlo.
+
+Modifica tu archivo src/screens/LoginScreen.js:
+code JavaScript
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+
+    
+// src/screens/LoginScreen.js
+
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import colors from '../constants/colors';
+import CustomInput from '../components/CustomInput';
+import CustomButton from '../components/CustomButton';
+import * as SecureStore from 'expo-secure-store';
+
+// 1. ¡Importamos a nuestro camarero!
+import { loginUser } from '../services/apiService';
+
+const LoginScreen = ({ navigation }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // 2. Estados para gestionar la carga y los errores
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Por favor, completa todos los campos.');
+      return;
+    }
+
+    setIsLoading(true); // Empezamos a mostrar el spinner de carga
+
+    try {
+      // 3. ¡Llamamos al camarero para que haga el pedido!
+      const data = await loginUser(email, password);
+
+      console.log('Login exitoso:', data);
+      
+      // 4. Guardamos la "pulsera" (el token) de forma segura
+      await SecureStore.setItemAsync('userToken', data.token);
+
+      // (Aquí iría la lógica para actualizar el estado global y navegar
+      // al AppNavigator que vimos antes)
+
+    } catch (error) {
+      // 5. Si el camarero vuelve con un error de la cocina...
+      console.error('Error en el login:', error.response?.data || error.message);
+      Alert.alert('Error de inicio de sesión', 'El correo o la contraseña son incorrectos.');
+    } finally {
+      // 6. Pase lo que pase, dejamos de cargar
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.innerContainer}>
+        {/* ... (el resto del JSX de tu pantalla) */}
+
+        {/* 7. Reemplazamos el botón con una lógica para mostrar el spinner */}
+        {isLoading ? (
+          <ActivityIndicator size="large" color={colors.primary} />
+        ) : (
+          <CustomButton title="Iniciar Sesión" onPress={handleLogin} />
+        )}
+        
+        {/* ... (el resto del JSX) */}
+      </View>
+    </KeyboardAvoidingView>
+  );
+};
+
+// ... (tus estilos)
+
+export default LoginScreen;
+
+  
+
+BONUS: Configuración CRÍTICA en Spring Boot (CORS)
+
+Tu backend de Spring Boot, por seguridad, rechazará las peticiones que vengan de un origen desconocido (como tu app móvil). Tienes que decirle explícitamente que confíe en tu aplicación. A esto se le llama CORS (Cross-Origin Resource Sharing).
+
+Añade esta configuración en tu proyecto de Spring Boot:
+code Java
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+
+    
+// En una clase de configuración, por ejemplo SecurityConfig.java o una nueva WebConfig.java
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig {
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                // Permite que CUALQUIER origen (*) se conecte.
+                // Para producción, deberías restringirlo a tu dominio web.
+                // Para desarrollo móvil, '*' es la opción más sencilla.
+                registry.addMapping("/**") // Aplica a todos los endpoints
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*");
+            }
+        };
+    }
+}
+
+  
+
+¡Y ya lo tienes! Con esta estructura, has conectado tu frontend y tu backend de una forma profesional, segura y escalable. Ahora puedes hacer lo mismo para el registro y para el resto de funcionalidades de SOMA.

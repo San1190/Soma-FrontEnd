@@ -12,9 +12,8 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Aquí irá la lógica para llamar a tu API de Spring Boot
     console.log('Login con:', email, password);
-    // Si el login es exitoso, navegarías a la app principal
+    navigation.navigate('App'); // Navega al navegador principal
   };
 
   return (

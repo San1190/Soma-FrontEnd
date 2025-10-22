@@ -1,18 +1,22 @@
 {
   "name": "soma",
-  "license": "0BSD",
   "version": "1.0.0",
+  "license": "0BSD",
   "main": "index.js",
+  "private": true,
+
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
+
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.7",
-    "@react-navigation/native": "^7.1.17",
-    "@react-navigation/stack": "^7.4.8",
+    "@react-navigation/native": "^7.1.18",
+    "@react-navigation/stack": "^7.4.10",
     "axios": "^1.12.2",
     "expo": "~54.0.7",
     "expo-secure-store": "~15.0.7",
@@ -24,5 +28,6 @@
     "react-native-screens": "~4.16.0",
     "react-native-web": "^0.21.0"
   },
-  "private": true
+
+  "proxy": "http://localhost:8080"
 }

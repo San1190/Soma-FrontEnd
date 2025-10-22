@@ -1,24 +1,40 @@
-// src/screens/LoginScreen.js
-
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
+import axios from 'axios';
 import colors from '../constants/colors';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 
-// El prop "navigation" nos lo da React Navigation para poder movernos entre pantallas
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    console.log('Login con:', email, password);
-    navigation.navigate('App'); // Navega al navegador principal
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Por favor, ingresa tu correo y contraseña.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:8080/api/users/login', {
+        email,
+        password_hash: password,
+      });
+
+      console.log('Login exitoso:', response.data);
+      Alert.alert('Éxito', 'Inicio de sesión exitoso.');
+      navigation.navigate('App');
+    } catch (error) {
+      console.error('Error en el login:', error.response ? error.response.data : error.message);
+      Alert.alert('Error', 'Credenciales inválidas. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    // KeyboardAvoidingView es un componente clave para que el teclado
-    // no tape los inputs cuando se abre.
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
@@ -38,10 +54,10 @@ const LoginScreen = ({ navigation }) => {
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry // Esto oculta la contraseña
+          secureTextEntry
         />
 
-        <CustomButton title="Iniciar Sesión" onPress={handleLogin} />
+        <CustomButton title="Iniciar Sesión" onPress={handleLogin} disabled={loading} />
 
         <View style={styles.registerContainer}>
           <Text style={styles.registerText}>¿No tienes una cuenta? </Text>

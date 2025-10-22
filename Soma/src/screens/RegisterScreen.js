@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
+import axios from 'axios';
 import colors from '../constants/colors';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
@@ -8,10 +9,31 @@ const RegisterScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
-    // Aquí irá la lógica para llamar al endpoint de registro de tu API
-    console.log('Registro con:', name, email, password);
+  const handleRegister = async () => {
+    if (!name || !email || !password) {
+      Alert.alert('Error', 'Por favor, completa todos los campos.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:8080/api/users/register', {
+        first_name: name.split(' ')[0],
+        last_name: name.split(' ').slice(1).join(' '),
+        email,
+        password_hash: password, // El backend espera password_hash
+      });
+      console.log('Registro exitoso:', response.data);
+      Alert.alert('Éxito', 'Usuario registrado correctamente. Por favor, inicia sesión.');
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error en el registro:', error.response ? error.response.data : error.message);
+      Alert.alert('Error', 'Hubo un problema al registrar el usuario. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +64,7 @@ const RegisterScreen = ({ navigation }) => {
           secureTextEntry
         />
 
-        <CustomButton title="Crear Cuenta" onPress={handleRegister} />
+        <CustomButton title="Crear Cuenta" onPress={handleRegister} disabled={loading} />
 
         <View style={styles.loginContainer}>
           <Text style={styles.loginText}>¿Ya tienes una cuenta? </Text>

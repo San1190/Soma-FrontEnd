@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { getAllUsers } from '../services/users';
+import { clearUserSession } from '../services/session'; // Importa para cerrar sesión
+import { useNavigation } from '@react-navigation/native'; // Para redirigir
 
 export default function HomeScreen() {
   const [users, setUsers] = useState([]);
+  const navigation = useNavigation();
 
   const handleGetUsers = async () => {
     try {
@@ -14,10 +17,34 @@ export default function HomeScreen() {
     }
   };
 
+  const handleLogout = async () => {
+  try {
+    await clearUserSession();
+    Alert.alert('Sesión cerrada', 'Has cerrado sesión correctamente.');
+
+    // Obtener el navegador padre (nivel raíz)
+    const rootNavigation = navigation.getParent();
+
+    // Resetear navegación a AuthNavigator
+    rootNavigation.reset({
+      index: 0,
+      routes: [{ name: 'Auth' }],
+    });
+  } catch (error) {
+    console.error('Error cerrando sesión:', error);
+  }
+};
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pantalla de Inicio (Home)</Text>
-      <Button title="Cargar Usuarios" onPress={handleGetUsers} />
+
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        <Button title="Cargar Usuarios" onPress={handleGetUsers} />
+        <Button title="Cerrar Sesión" color="red" onPress={handleLogout} />
+      </View>
+
       <FlatList
         data={users}
         keyExtractor={item => item.user_id.toString()}

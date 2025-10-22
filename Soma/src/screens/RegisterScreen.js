@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
-import axios from 'axios';
 import colors from '../constants/colors';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
+import { register } from '../services/auth';
 
 const RegisterScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -17,15 +17,13 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
 
+    const first_name = name.split(' ')[0];
+    const last_name = name.split(' ').slice(1).join(' ');
+
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8080/api/users/register', {
-        first_name: name.split(' ')[0],
-        last_name: name.split(' ').slice(1).join(' '),
-        email,
-        password_hash: password, // El backend espera password_hash
-      });
-      console.log('Registro exitoso:', response.data);
+      const user = await register({ first_name, last_name, email, password });
+      console.log('Registro exitoso:', user);
       Alert.alert('Éxito', 'Usuario registrado correctamente. Por favor, inicia sesión.');
       navigation.navigate('Login');
     } catch (error) {
@@ -115,5 +113,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
 
 export default RegisterScreen;

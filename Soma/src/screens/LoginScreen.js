@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
-import axios from 'axios';
 import colors from '../constants/colors';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
+import { login } from '../services/auth';
+import { saveUserSession } from '../services/session';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -18,14 +19,11 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8080/api/users/login', {
-        email,
-        password_hash: password,
-      });
-
-      console.log('Login exitoso:', response.data);
+      const user = await login(email, password);
+      await saveUserSession(user); // Guarda la sesión del usuario
+      console.log('Login exitoso:', user);
       Alert.alert('Éxito', 'Inicio de sesión exitoso.');
-      navigation.navigate('App');
+      navigation.navigate('Home'); // Redirige al HomeScreen
     } catch (error) {
       console.error('Error en el login:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'Credenciales inválidas. Inténtalo de nuevo.');
@@ -61,7 +59,7 @@ const LoginScreen = ({ navigation }) => {
 
         <View style={styles.registerContainer}>
           <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+          <TouchableOpacity onPress={() => navigation.navigate('RegisterScreen')}>
             <Text style={styles.registerLink}>Regístrate</Text>
           </TouchableOpacity>
         </View>

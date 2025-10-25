@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { getUserById } from '../services/users';
+import { updateUser } from '../services/users.js';
 
 const ProfileScreen = () => {
   return (

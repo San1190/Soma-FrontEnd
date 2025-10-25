@@ -11,7 +11,8 @@ const HydrationScreen = () => {
 
     useEffect(() => {
         fetchHydrationStatus();
-        Alert.alert('Test Alert', 'This is a test alert to check if Alert.alert works.');
+        // Eliminar la alerta de prueba después de verificar su funcionalidad
+        // Alert.alert('Test Alert', 'This is a test alert to check Alert.alert functionality.');
     }, []);
 
     const fetchHydrationStatus = async () => {
@@ -53,11 +54,13 @@ const HydrationScreen = () => {
             console.log('Attempting to send hydration reminder...');
             const response = await axios.post(`${API_BASE_URL}/trigger-reminder`, { userId: userId });
             console.log('Hydration reminder response:', response.data);
-            Alert.alert('Recordatorio enviado', 'Se ha intentado enviar un recordatorio de hidratación.');
-        } catch (error) {
-            console.error('Error triggering reminder:', error.response ? error.response.data : error.message);
-            Alert.alert('Error', 'No se pudo enviar el recordatorio.');
-        }
+             console.log('Attempting to show Alert.alert for success.');
+             Alert.alert('Recordatorio enviado', 'Se ha intentado enviar un recordatorio de hidratación.');
+         } catch (error) {
+             console.error('Error triggering reminder:', error.response ? error.response.data : error.message);
+             console.log('Attempting to show Alert.alert for error.');
+             Alert.alert('Error', 'No se pudo enviar el recordatorio.');
+         }
     };
 
     return (

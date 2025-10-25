@@ -6,7 +6,7 @@ import CustomButton from '../components/CustomButton';
 import { login } from '../services/auth';
 import { saveUserSession } from '../services/session';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, onAuthSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,10 @@ const LoginScreen = ({ navigation }) => {
       await saveUserSession(user); // Guarda la sesión del usuario
       console.log('Login exitoso:', user);
       Alert.alert('Éxito', 'Inicio de sesión exitoso.');
-      navigation.navigate('Home'); // Redirige al HomeScreen
+      if (onAuthSuccess) {
+        onAuthSuccess();
+      }
+      // navigation.navigate('Home'); // Redirige al HomeScreen
     } catch (error) {
       console.error('Error en el login:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'Credenciales inválidas. Inténtalo de nuevo.');

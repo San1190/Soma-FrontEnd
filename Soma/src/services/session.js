@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-async function setItem(key, value) {
+export async function setItem(key, value) {
   if (Platform.OS === 'web') {
     await AsyncStorage.setItem(key, value);
   } else {
@@ -10,7 +10,7 @@ async function setItem(key, value) {
   }
 }
 
-async function getItem(key) {
+export async function getItem(key) {
   if (Platform.OS === 'web') {
     return await AsyncStorage.getItem(key);
   } else {
@@ -18,7 +18,7 @@ async function getItem(key) {
   }
 }
 
-async function deleteItem(key) {
+export async function deleteItem(key) {
   if (Platform.OS === 'web') {
     await AsyncStorage.removeItem(key);
   } else {

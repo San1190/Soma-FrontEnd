@@ -1,36 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator, Text } from 'react-native';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
-import { getUserSession } from './src/services/session'; // Verifica sesión guardada
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Stack = createStackNavigator();
 
-export default function App() {
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+function AppContent() {
+  const { user, isLoading, login } = useAuth();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const user = await getUserSession();
-        if (user) {
-          console.log('Usuario autenticado:', user.email);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error('Error verificando sesión:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkSession();
-  }, []);
-
-  // Pantalla temporal mientras se verifica sesión
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#00BCD4" />
@@ -42,14 +23,22 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
+        {user ? (
           <Stack.Screen name="App" component={AppNavigator} />
         ) : (
           <Stack.Screen name="Auth">
-            {(props) => <AuthNavigator {...props} onAuthSuccess={() => setIsAuthenticated(true)} />}
+            {(props) => <AuthNavigator {...props} onAuthSuccess={login} />}
           </Stack.Screen>
         )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

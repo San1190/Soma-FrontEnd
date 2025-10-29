@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator, Button, Platform } from 'react-native';
 import { getUserById, updateUser } from '../services/users';
-import { useAuth } from '../context/AuthContext'; // Asumiendo que tienes un contexto de autenticación para obtener el ID del usuario
+import { useAuth } from '../context/AuthContext';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 
 const ProfileScreen = () => {
-  const { user } = useAuth(); // Obtener el usuario del contexto de autenticación
+  const { user, logout } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-
-  // Estados para los campos editables
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+  const [editableUserData, setEditableUserData] = useState({
+    first_name: '',
+    last_name: '',
+    date_of_birth: '',
+    gender: '',
+    weight_kg: '',
+    height_cm: '',
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -26,10 +31,14 @@ const ProfileScreen = () => {
       try {
         const data = await getUserById(user.id);
         setUserData(data);
-        setName(data.name);
-        setEmail(data.email);
-        setWeight(data.biometricData?.weight ? String(data.biometricData.weight) : '');
-        setHeight(data.biometricData?.height ? String(data.biometricData.height) : '');
+        setEditableUserData({
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          date_of_birth: data.date_of_birth || '',
+          gender: data.gender || '',
+          weight_kg: String(data.weight_kg) || '',
+          height_cm: String(data.height_cm) || '',
+        });
       } catch (err) {
         setError('Failed to fetch user data: ' + err.message);
         console.error('Error fetching user data:', err);
@@ -43,30 +52,33 @@ const ProfileScreen = () => {
 
   const handleSave = async () => {
     try {
-      const updatedUserData = {
-        ...userData,
-        name,
-        email,
-        biometricData: {
-          ...userData.biometricData,
-          weight: parseFloat(weight),
-          height: parseFloat(height),
-        },
+      const dataToUpdate = {
+        ...editableUserData,
+        weight_kg: parseFloat(editableUserData.weight_kg),
+        height_cm: parseFloat(editableUserData.height_cm),
       };
-      await updateUser(user.id, updatedUserData);
-      setUserData(updatedUserData);
+      await updateUser(user.id, dataToUpdate);
+      setUserData(dataToUpdate);
       setIsEditing(false);
-      Alert.alert('Éxito', 'Perfil actualizado correctamente.');
-    } catch (err) {
-      Alert.alert('Error', 'No se pudo actualizar el perfil: ' + err.message);
-      console.error('Error updating user data:', err);
+      Alert.alert('Éxito', 'Datos actualizados correctamente.');
+    } catch (error) {
+      console.error('Error al guardar los datos:', error);
+      Alert.alert('Error', 'No se pudieron guardar los datos.');
+    }
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      setEditableUserData({ ...editableUserData, date_of_birth: formattedDate });
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text>Cargando perfil...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
@@ -80,76 +92,115 @@ const ProfileScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Mi Perfil</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Mi Perfil</Text>
+        <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
+          <Text style={styles.editButtonText}>{isEditing ? 'Cancelar' : 'Editar'}</Text>
+        </TouchableOpacity>
+      </View>
 
+      <Button title="Cerrar Sesión" onPress={logout} color="#FF6347" />
+
+      <Text style={styles.sectionTitle}>Información de Login</Text>
       <View style={styles.infoContainer}>
         <Text style={styles.label}>Correo de Login:</Text>
-        <Text style={styles.value}>{userData.email}</Text>
+        <TextInput
+          style={styles.value}
+          value={user?.email}
+          editable={false}
+        />
       </View>
 
+      <Text style={styles.sectionTitle}>Información Personal</Text>
       <View style={styles.infoContainer}>
         <Text style={styles.label}>Nombre:</Text>
-        {isEditing ? (
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
-        ) : (
-          <Text style={styles.value}>{userData.name}</Text>
-        )}
+        <TextInput
+          style={isEditing ? styles.editableValue : styles.value}
+          value={editableUserData?.first_name}
+          onChangeText={(text) => setEditableUserData({ ...editableUserData, first_name: text })}
+          editable={isEditing}
+        />
       </View>
-
       <View style={styles.infoContainer}>
-        <Text style={styles.label}>Email:</Text>
+        <Text style={styles.label}>Apellido:</Text>
+        <TextInput
+          style={isEditing ? styles.editableValue : styles.value}
+          value={editableUserData?.last_name}
+          onChangeText={(text) => setEditableUserData({ ...editableUserData, last_name: text })}
+          editable={isEditing}
+        />
+      </View>
+      <View style={styles.infoContainer}>
+        <Text style={styles.label}>Fecha de Nacimiento:</Text>
         {isEditing ? (
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
+          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.editableValue}>
+            <Text>{editableUserData.date_of_birth || 'Seleccionar Fecha'}</Text>
+          </TouchableOpacity>
         ) : (
-          <Text style={styles.value}>{userData.email}</Text>
+          <TextInput
+            style={styles.value}
+            value={editableUserData?.date_of_birth}
+            editable={false}
+          />
+        )}
+        {showDatePicker && (
+          <DateTimePicker
+            value={editableUserData.date_of_birth ? new Date(editableUserData.date_of_birth) : new Date()}
+            mode="date"
+            display="default"
+            onChange={onDateChange}
+          />
         )}
       </View>
-
+      <View style={styles.infoContainer}>
+        <Text style={styles.label}>Género:</Text>
+        {isEditing ? (
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={editableUserData.gender}
+              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, gender: itemValue })}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccionar Género" value="" />
+              <Picker.Item label="Hombre" value="Hombre" />
+              <Picker.Item label="Mujer" value="Mujer" />
+              <Picker.Item label="Otro" value="Otro" />
+            </Picker>
+          </View>
+        ) : (
+          <TextInput
+            style={styles.value}
+            value={editableUserData?.gender}
+            editable={false}
+          />
+        )}
+      </View>
       <View style={styles.infoContainer}>
         <Text style={styles.label}>Peso (kg):</Text>
-        {isEditing ? (
-          <TextInput
-            style={styles.input}
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="numeric"
-          />
-        ) : (
-          <Text style={styles.value}>{userData.biometricData?.weight || 'N/A'}</Text>
-        )}
+        <TextInput
+          style={isEditing ? styles.editableValue : styles.value}
+          value={editableUserData?.weight_kg?.toString()}
+          onChangeText={(text) => setEditableUserData({ ...editableUserData, weight_kg: parseFloat(text) })}
+          keyboardType="numeric"
+          editable={isEditing}
+        />
       </View>
-
       <View style={styles.infoContainer}>
         <Text style={styles.label}>Altura (cm):</Text>
-        {isEditing ? (
-          <TextInput
-            style={styles.input}
-            value={height}
-            onChangeText={setHeight}
-            keyboardType="numeric"
-          />
-        ) : (
-          <Text style={styles.value}>{userData.biometricData?.height || 'N/A'}</Text>
-        )}
+        <TextInput
+          style={isEditing ? styles.editableValue : styles.value}
+          value={editableUserData?.height_cm?.toString()}
+          onChangeText={(text) => setEditableUserData({ ...editableUserData, height_cm: parseFloat(text) })}
+          keyboardType="numeric"
+          editable={isEditing}
+        />
       </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
-      >
-        <Text style={styles.buttonText}>{isEditing ? 'Guardar Cambios' : 'Editar Perfil'}</Text>
-      </TouchableOpacity>
-    </View>
+      {isEditing && (
+        <Button title="Guardar Cambios" onPress={handleSave} color="#007BFF" />
+      )}
+    </ScrollView>
   );
 };
 
@@ -159,20 +210,38 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f8f8f8',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
     color: '#333',
   },
+  editButtonText: {
+    fontSize: 18,
+    color: '#007BFF',
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#555',
+    marginTop: 20,
+    marginBottom: 10,
+  },
   infoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
     backgroundColor: '#fff',
     padding: 15,
     borderRadius: 10,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -180,23 +249,22 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   label: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#555',
-    width: 100,
+    color: '#333',
+    marginBottom: 5,
   },
   value: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#666',
-    flex: 1,
+    paddingVertical: 5,
   },
-  input: {
-    flex: 1,
-    fontSize: 18,
+  editableValue: {
+    fontSize: 16,
     color: '#333',
+    paddingVertical: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    paddingVertical: 5,
   },
   button: {
     backgroundColor: '#007bff',
@@ -214,6 +282,16 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 16,
     textAlign: 'center',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
 });
 

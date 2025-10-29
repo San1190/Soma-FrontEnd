@@ -19,12 +19,12 @@ export async function getUserById(id) {
   }
 }
 
-export async function updateUser(id, userData) {
+export const updateUser = async (id, userData) => {
   try {
     const response = await axios.put(`${API_BASE_URL}/users/${id}`, userData);
     return response.data;
   } catch (error) {
-      console.error('Error actualizando los datos del usuario:', error);
-      throw error;
+    console.error("Error updating user:", error);
+    throw error;
   }
-}
+};

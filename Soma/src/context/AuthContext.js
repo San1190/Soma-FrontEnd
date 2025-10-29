@@ -27,8 +27,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setIsLoading(true);
     try {
-      const response = await loginService(email, password);
-      const userData = { id: response.id, email: email, token: response.token }; // Ajusta según la respuesta de tu API
+        const response = await loginService(email, password);
+        console.log('Backend login response:', response); // Added for debugging
+        const userData = { id: response.user_id, email: email, token: response.token }; // Ajusta según la respuesta de tu API
       setUser(userData);
       await setItem('user', JSON.stringify(userData));
       return true;

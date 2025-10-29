@@ -10,9 +10,13 @@ export async function getAllUsers() {
 }
 
 export async function getUserById(id) {
-  const res = await axios.get(`${API_BASE_URL}/users/${id}`);
-  if (!res.ok) throw new Error('Error al obtener usuario');
-  return res.data;
+  try {
+    const res = await axios.get(`${API_BASE_URL}/users/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error('Error al obtener usuario por ID:', error);
+    throw new Error('Error al obtener usuario');
+  }
 }
 
 export async function updateUser(id, userData) {

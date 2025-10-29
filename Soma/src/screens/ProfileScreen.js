@@ -84,6 +84,11 @@ const ProfileScreen = () => {
       <Text style={styles.title}>Mi Perfil</Text>
 
       <View style={styles.infoContainer}>
+        <Text style={styles.label}>Correo de Login:</Text>
+        <Text style={styles.value}>{userData.email}</Text>
+      </View>
+
+      <View style={styles.infoContainer}>
         <Text style={styles.label}>Nombre:</Text>
         {isEditing ? (
           <TextInput

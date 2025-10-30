@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacit
 import colors from '../constants/colors';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
-import { login } from '../services/auth';
-import { saveUserSession } from '../services/session';
+import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -19,14 +19,15 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const user = await login(email, password);
-      await saveUserSession(user); // Guarda la sesión del usuario
-      console.log('Login exitoso:', user);
-      Alert.alert('Éxito', 'Inicio de sesión exitoso.');
-      navigation.navigate('Home'); // Redirige al HomeScreen
+      const success = await login(email, password);
+      if (success) {
+        Alert.alert('Éxito', 'Inicio de sesión exitoso.');
+      } else {
+        Alert.alert('Error', 'Credenciales inválidas. Inténtalo de nuevo.');
+      }
     } catch (error) {
       console.error('Error en el login:', error.response ? error.response.data : error.message);
-      Alert.alert('Error', 'Credenciales inválidas. Inténtalo de nuevo.');
+      Alert.alert('Error', 'Ocurrió un error durante el inicio de sesión.');
     } finally {
       setLoading(false);
     }

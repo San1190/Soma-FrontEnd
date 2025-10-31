@@ -2,6 +2,7 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import Calories from '../components/Calories';
 import HeartRate from '../components/HeartRate';
+import SomaticMirror from '../components/SomaticMirror'; // Importar SomaticMirror
 
 const DashboardScreen = () => {
   return (
@@ -15,6 +16,7 @@ const DashboardScreen = () => {
       />
 
       <HeartRate />
+      <SomaticMirror />
 
       {/* Aquí irán los demás componentes del dashboard */}
       {/* <ChartCard /> */}

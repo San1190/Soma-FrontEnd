@@ -23,13 +23,15 @@ function AppContent() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
-          <Stack.Screen name="App" component={AppNavigator} />
-        ) : (
-          <Stack.Screen name="Auth">
-            {(props) => <AuthNavigator {...props} onAuthSuccess={login} />}
-          </Stack.Screen>
-        )}
+        <Stack.Group>
+          {user ? (
+            <Stack.Screen name="App" component={AppNavigator} />
+          ) : (
+            <Stack.Screen name="Auth">
+              {(props) => <AuthNavigator {...props} onAuthSuccess={login} />}
+            </Stack.Screen>
+          )}
+        </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
   );

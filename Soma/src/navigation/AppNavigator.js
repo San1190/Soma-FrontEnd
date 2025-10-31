@@ -6,6 +6,7 @@ import HydrationScreen from '../screens/HydrationScreen';
 import GuidedBreathingScreen from '../screens/GuidedBreathingScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import AlarmScreen from '../screens/AlarmScreen';
+import SomaticMirror from '../components/SomaticMirror'; // Importar SomaticMirror
 
 
 const Tab = createBottomTabNavigator();

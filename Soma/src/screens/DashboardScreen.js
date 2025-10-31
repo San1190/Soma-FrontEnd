@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import Calories from '../components/Calories';
+import HeartRate from '../components/HeartRate';
 
 const DashboardScreen = () => {
   return (
@@ -12,6 +13,8 @@ const DashboardScreen = () => {
         style={{ marginTop: 8 }}
         chartProps={{}}
       />
+
+      <HeartRate />
 
       {/* Aquí irán los demás componentes del dashboard */}
       {/* <ChartCard /> */}

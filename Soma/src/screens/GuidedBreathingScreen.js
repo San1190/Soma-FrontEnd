@@ -42,7 +42,7 @@ const GuidedBreathingScreen = ({ navigation }) => {
       const fetchStressLevel = async () => {
         if (user && user.userId) {
           try {
-            const response = await fetch(`http://192.168.1.141:8080/api/stress/users/${user.userId}`);
+            const response = await fetch(`http://192.168.0.227:8080/api/stress/users/${user.userId}`);
             const data = await response.json();
             setStressLevel(data.stressLevel); // Asume que el backend devuelve { stressLevel: "Bajo" }
           } catch (error) {

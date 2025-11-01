@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert, ScrollView, TextInput } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import colors from '../constants/colors';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 import { register } from '../services/auth';
+import { useTheme } from '../context/ThemeContext';
 
 const GENDERS = [
   { label: 'Hombre', value: 'Hombre' },
@@ -27,6 +27,7 @@ const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { currentTheme } = useTheme();
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
@@ -85,6 +86,39 @@ const RegisterScreen = ({ navigation }) => {
     </View>
   );
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: currentTheme.background },
+    innerContainer: { flexGrow: 1, justifyContent: 'center', padding: 20, paddingBottom: 30 },
+    title: { fontSize: 32, fontWeight: 'bold', color: currentTheme.textPrimary, textAlign: 'center', marginBottom: 10 },
+    subtitle: { fontSize: 17, color: currentTheme.accent1, textAlign: 'center', marginBottom: 40 },
+    input: { marginBottom: 18 },
+    dateInput: {
+      borderWidth: 1,
+      borderColor: currentTheme.borderColor,
+      borderRadius: 10,
+      padding: 12,
+      backgroundColor: currentTheme.cardBackground,
+      marginBottom: 14,
+    },
+    label: { color: currentTheme.accent1, fontWeight: '600', marginBottom: 7, marginLeft: 4 },
+    genderPillContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
+    genderPill: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: currentTheme.borderColor,
+      backgroundColor: currentTheme.cardBackground,
+      marginHorizontal: 4,
+    },
+    genderPillText: { color: currentTheme.textPrimary, fontWeight: '500' },
+    selectedPill: { backgroundColor: currentTheme.primary },
+    selectedPillText: { color: currentTheme.textPrimary },
+    loginContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 22 },
+    loginText: { color: currentTheme.textPrimary, fontSize: 16 },
+    loginLink: { color: currentTheme.primary, fontSize: 16, fontWeight: 'bold' },
+  });
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -114,14 +148,14 @@ const RegisterScreen = ({ navigation }) => {
             <TextInput
               placeholder="Fecha de nacimiento (obligatorio)"
               type="date"
-              style={{height: 40, fontSize: 16, color: dateOfBirth ? colors.textPrimary : '#aaa'}}
+              style={{height: 40, fontSize: 16, color: dateOfBirth ? currentTheme.textPrimary : currentTheme.textSecondary}}
               value={dateOfBirth}
               onChangeText={setDateOfBirth}
               onFocus={e => { e.target.type = 'date'; }}
               onBlur={e => { if(!dateOfBirth) e.target.type = 'text'; }}
             />
           ) : (
-            <Text style={{ color: dateOfBirth ? colors.textPrimary : '#aaa', fontSize: 16 }}>
+            <Text style={{ color: dateOfBirth ? currentTheme.textPrimary : currentTheme.textSecondary, fontSize: 16 }}>
               {dateOfBirth ? `Nacido el: ${dateOfBirth}` : 'Fecha de nacimiento (obligatorio)'}
             </Text>
           )}
@@ -183,38 +217,5 @@ const RegisterScreen = ({ navigation }) => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#eef8f3' },
-  innerContainer: { flexGrow: 1, justifyContent: 'center', padding: 20, paddingBottom: 30 },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#184e46', textAlign: 'center', marginBottom: 10 },
-  subtitle: { fontSize: 17, color: '#317a6c', textAlign: 'center', marginBottom: 40 },
-  input: { marginBottom: 18 },
-  dateInput: {
-    borderWidth: 1,
-    borderColor: '#b4dbce',
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: '#fff',
-    marginBottom: 14,
-  },
-  label: { color: '#317a6c', fontWeight: '600', marginBottom: 7, marginLeft: 4 },
-  genderPillContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
-  genderPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#b4dbce',
-    backgroundColor: '#fff',
-    marginHorizontal: 4,
-  },
-  genderPillText: { color: '#184e46', fontWeight: '500' },
-  selectedPill: { backgroundColor: '#317a6c' },
-  selectedPillText: { color: '#fff' },
-  loginContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 22 },
-  loginText: { color: '#184e46', fontSize: 16 },
-  loginLink: { color: '#317a6c', fontSize: 16, fontWeight: 'bold' },
-});
 
 export default RegisterScreen;

@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
-import colors from '../constants/colors';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { currentTheme } = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -32,6 +33,45 @@ const LoginScreen = ({ navigation }) => {
       setLoading(false);
     }
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: currentTheme.background,
+    },
+    innerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 30,
+    },
+    logo: {
+      fontSize: 60,
+      fontWeight: 'bold',
+      color: currentTheme.primary,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    subtitle: {
+      fontSize: 18,
+      color: currentTheme.accent1,
+      textAlign: 'center',
+      marginBottom: 40,
+    },
+    registerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 20,
+    },
+    registerText: {
+      color: currentTheme.textPrimary,
+      fontSize: 16,
+    },
+    registerLink: {
+      color: currentTheme.primary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -68,44 +108,5 @@ const LoginScreen = ({ navigation }) => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  innerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 30,
-  },
-  logo: {
-    fontSize: 60,
-    fontWeight: 'bold',
-    color: colors.primary,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: colors.accent1,
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  registerText: {
-    color: colors.textPrimary,
-    fontSize: 16,
-  },
-  registerLink: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
 export default LoginScreen;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.1.31:8080/api/hydration'; // Asegúrate de que esta URL sea correcta
+const API_BASE_URL = 'http://192.168.1.141:8080/api/hydration'; // Asegúrate de que esta URL sea correcta
 
 const HydrationScreen = () => {
     const [hydrationStatus, setHydrationStatus] = useState('Cargando estado...');

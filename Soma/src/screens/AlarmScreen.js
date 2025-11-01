@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, Platform, Switch } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker'; // Asumiendo que esta librería está instalada
+import SmartClock from '../components/Clock'; 
 
 const AlarmScreen = () => {
   const [alarmStartTime, setAlarmStartTime] = useState(new Date());
@@ -51,6 +52,9 @@ const AlarmScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Reloj</Text>
+      <SmartClock size={200} style={{ marginBottom: 16 }} />
+
       <Text style={styles.title}>Configurar Alarma Inteligente</Text>
 
       {isAlarmActive && (

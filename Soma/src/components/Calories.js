@@ -4,36 +4,39 @@ import { LineChart } from 'react-native-gifted-charts';
 
 const defaultLabels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 
-// Datos de ejemplo: cada punto necesita { value, label }
-const defaultA = [900, 980, 1050, 1120, 1200, 1250, 1180].map((v, i) => ({
-  value: v,            // valor del día
-  label: defaultLabels[i], // etiqueta del eje X
-}));
-const defaultB = [650, 720, 760, 800, 820, 860, 900].map((v, i) => ({
-  value: v,
-  label: defaultLabels[i],
-}));
+// Datos reales (sin el punto sintético)
+const baseA = [900, 980, 1050, 1120, 1200, 1250, 1180];
+const baseB = [650, 720, 760, 800, 820, 860, 900];
+
+const STATIC_POINT_A = 850;
+const STATIC_POINT_B = 700;
+
+const addStaticHeadPoint = (arr, staticValue) => [
+  { value: staticValue, label: '' },      // punto fijo
+  ...arr.map((v, i) => ({ value: v, label: defaultLabels[i] })), // resto
+];
+
+const defaultA = addStaticHeadPoint(baseA, STATIC_POINT_A);
+const defaultB = addStaticHeadPoint(baseB, STATIC_POINT_B);
 
 const HealthStackedArea = (props) => {
   const {
     title = 'Calorías (semana)',
-    seriesA = defaultA,     //calorias quemadas
-    seriesB = defaultB,     //calorias consumidas
-    colorA = '#6cbf6c',   // verde 1
-    colorB = '#a6d88a',   // verde 2
-    height = 220,           //alto del lienzo
+    seriesA = defaultA,
+    seriesB = defaultB,
+    colorA = '#6cbf6c',
+    colorB = '#a6d88a',
+    height = 220,
     style,
     chartProps = {},
   } = props;
 
-  // xAxisLabelTexts: toma etiquetas de la primera serie para el eje X
   const xLabels = seriesA.map(p => p.label ?? '');
 
   return (
     <View style={[styles.card, style]}>
       <Text style={styles.title}>{title}</Text>
 
-      {/* Leyenda simple con puntos de color */}
       <View style={styles.legend}>
         <View style={[styles.dot, { backgroundColor: colorA }]} />
         <Text style={styles.legendText}>Calorías Quemadas</Text>
@@ -42,32 +45,39 @@ const HealthStackedArea = (props) => {
       </View>
 
       <LineChart
-        areaChart              // relleno bajo la línea
-        curved                 // curva las líneas
-        data={seriesA}         
-        data2={seriesB}       
+        areaChart
+        curved
+        data={seriesA}
+        data2={seriesB}
         height={height}
-        thickness={2}          // grosor de las líneas
-        color={colorA}         
-        color2={colorB}        
-        startFillColor={colorA}    
-        startFillColor2={colorB}  
-        startOpacity={0.35}        // opacidad superior del relleno
+        thickness={2}
+        color={colorA}
+        color2={colorB}
+        startFillColor={colorA}
+        startFillColor2={colorB}
+        startOpacity={0.35}
         startOpacity2={0.35}
-        endOpacity={0.05}          // opacidad inferior
+        endOpacity={0.05}
         endOpacity2={0.05}
-        xAxisLabelTexts={xLabels}  // etiquetas eje X
-        hideDataPoints             // oculta puntos 
-        hideRules                  // oculta líneas guía horizontales
-        yAxisTextStyle={{ color: '#94a3b8' }}   
-        xAxisLabelTextStyle={{ color: '#94a3b8' }} 
-        initialSpacing={16}        // margen antes del 1er punto
-        spacing={28}               // separación entre puntos
-        adjustToWidth              // ajusta al ancho disponible
+        xAxisLabelTexts={xLabels}
+        hideRules
+        yAxisTextStyle={{ color: '#94a3b8' }}
+        xAxisLabelTextStyle={{ color: '#94a3b8', fontSize: 11 }}
+        showDataPoints              
+        showDataPoints2             
+        dataPointsColor="#1f2937"   
+        dataPointsColor2="#2563eb"  
+        dataPointsRadius={2.5}      
+        xAxisLabelWidth={34}
+        initialSpacing={0}          
+        endSpacing={0}  
+
+        spacing={28}
+        adjustToWidth
         backgroundColor="transparent"
-        intersectionAreaColor="#ffffff" // limpia solape en tema claro
+        intersectionAreaColor="#ffffff"
         intersectionOpacity={1}
-        {...chartProps}            // props extra opcionales
+        {...chartProps}
       />
     </View>
   );
@@ -83,7 +93,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 0, 0, 0.06)',
     marginBottom: 15,
   },
-
   title: { fontSize: 16, fontWeight: '600', color: '#1f2937', marginBottom: 8 },
   legend: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
   dot: { width: 10, height: 10, borderRadius: 5, marginRight: 6 },

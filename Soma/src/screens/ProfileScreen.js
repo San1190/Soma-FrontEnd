@@ -18,6 +18,9 @@ const ProfileScreen = () => {
     gender: '',
     weight_kg: '',
     height_cm: '',
+    sleep_goal_hours: '',
+    water_goal_liters: '',
+    activity_goal_minutes: '',
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -38,6 +41,9 @@ const ProfileScreen = () => {
           gender: data.gender || '',
           weight_kg: String(data.weight_kg) || '',
           height_cm: String(data.height_cm) || '',
+          sleep_goal_hours: String(data.sleep_goal_hours) || '',
+          water_goal_liters: String(data.water_goal_liters) || '',
+          activity_goal_minutes: String(data.activity_goal_minutes) || '',
         });
       } catch (err) {
         setError('Failed to fetch user data: ' + err.message);
@@ -56,6 +62,9 @@ const ProfileScreen = () => {
         ...editableUserData,
         weight_kg: parseFloat(editableUserData.weight_kg),
         height_cm: parseFloat(editableUserData.height_cm),
+        sleep_goal_hours: parseFloat(editableUserData.sleep_goal_hours),
+        water_goal_liters: parseFloat(editableUserData.water_goal_liters),
+        activity_goal_minutes: parseFloat(editableUserData.activity_goal_minutes),
       };
       await updateUser(user.id, dataToUpdate);
       setUserData(dataToUpdate);
@@ -195,6 +204,74 @@ const ProfileScreen = () => {
           keyboardType="numeric"
           editable={isEditing}
         />
+      </View>
+
+      <Text style={styles.sectionTitle}>Mis Objetivos</Text>
+      <View style={styles.infoContainer}>
+        <Text style={styles.label}>Horas de Sueño (horas):</Text>
+        {isEditing ? (
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={editableUserData?.sleep_goal_hours?.toString()}
+              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, sleep_goal_hours: parseFloat(itemValue) })}
+              style={styles.picker}
+            >
+              {[...Array(17).keys()].map((i) => (
+                <Picker.Item key={i} label={(4 + i * 0.5).toFixed(1)} value={(4 + i * 0.5).toFixed(1)} />
+              ))}
+            </Picker>
+          </View>
+        ) : (
+          <TextInput
+            style={styles.value}
+            value={editableUserData?.sleep_goal_hours?.toString()}
+            editable={false}
+          />
+        )}
+      </View>
+      <View style={styles.infoContainer}>
+        <Text style={styles.label}>Consumo de Agua (litros):</Text>
+        {isEditing ? (
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={editableUserData?.water_goal_liters?.toString()}
+              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, water_goal_liters: parseFloat(itemValue) })}
+              style={styles.picker}
+            >
+              {[...Array(9).keys()].map((i) => (
+                <Picker.Item key={i} label={(1 + i * 0.5).toFixed(1)} value={(1 + i * 0.5).toFixed(1)} />
+              ))}
+            </Picker>
+          </View>
+        ) : (
+          <TextInput
+            style={styles.value}
+            value={editableUserData?.water_goal_liters?.toString()}
+            editable={false}
+          />
+        )}
+      </View>
+      <View style={styles.infoContainer}>
+        <Text style={styles.label}>Actividad Física (minutos):</Text>
+        {isEditing ? (
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={editableUserData?.activity_goal_minutes?.toString()}
+              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, activity_goal_minutes: parseFloat(itemValue) })}
+              style={styles.picker}
+            >
+              {[...Array(11).keys()].map((i) => (
+                <Picker.Item key={i} label={(30 + i * 15).toString()} value={(30 + i * 15).toString()} />
+              ))}
+            </Picker>
+          </View>
+        ) : (
+          <TextInput
+            style={styles.value}
+            value={editableUserData?.activity_goal_minutes?.toString()}
+            editable={false}
+          />
+        )}
       </View>
 
       {isEditing && (

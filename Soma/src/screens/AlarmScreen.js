@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, Platform, Switch, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, Platform, Switch, TouchableOpacity, ScrollView, Alert, Modal } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker'; // Asumiendo que esta librería está instalada
-import SmartClock from '../components/Clock'; 
+import SmartClock from '../components/Clock';
 import { Ionicons } from '@expo/vector-icons'; // Asumiendo que expo/vector-icons está instalado
 
 const AlarmScreen = () => {
@@ -13,27 +13,33 @@ const AlarmScreen = () => {
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [isVibrationEnabled, setIsVibrationEnabled] = useState(true);
   const [isAlarmActive, setIsAlarmActive] = useState(true);
-  
+
   // Estado para los días seleccionados
   const [selectedDays, setSelectedDays] = useState([false, false, false, false, false, false, false]); // [L,M,X,J,V,S,D]
-  
+
   // Estado para la lista de alarmas guardadas
   const [alarms, setAlarms] = useState([]);
-  
+
   // Estado para indicar si estamos editando una alarma existente
   const [editingAlarmIndex, setEditingAlarmIndex] = useState(-1);
-  
+
+  // Nuevo estado para controlar el modal
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [pickerMode, setPickerMode] = useState('start');
+  const [tempStartTime, setTempStartTime] = useState(new Date());
+  const [tempEndTime, setTempEndTime] = useState(new Date());
+
   // Cargar alarmas existentes al iniciar
   useEffect(() => {
     fetchAlarms();
   }, []);
-  
+
   // Función para obtener las alarmas del usuario desde el backend
   const fetchAlarms = async () => {
     try {
       const userId = 1; // Reemplazar con el ID real del usuario logueado
       const response = await fetch(`http://localhost:8080/api/alarm-config/user/${userId}`);
-      
+
       if (response.ok) {
         const data = await response.json();
         setAlarms(data);
@@ -50,8 +56,8 @@ const AlarmScreen = () => {
     if (event.type === 'set' && selectedDate) { // Solo actualizar si se seleccionó una fecha
       const now = new Date();
       // Verificar que la hora seleccionada no sea anterior a la hora actual
-      if (selectedDate.getHours() < now.getHours() || 
-          (selectedDate.getHours() === now.getHours() && selectedDate.getMinutes() < now.getMinutes())) {
+      if (selectedDate.getHours() < now.getHours() ||
+        (selectedDate.getHours() === now.getHours() && selectedDate.getMinutes() < now.getMinutes())) {
         // Si es anterior, establecer la hora actual + 5 minutos
         const adjustedTime = new Date();
         adjustedTime.setMinutes(adjustedTime.getMinutes() + 5);
@@ -67,9 +73,9 @@ const AlarmScreen = () => {
     setShowEndTimePicker(false); // Ocultar el selector después de la interacción
     if (event.type === 'set' && selectedDate) { // Solo actualizar si se seleccionó una fecha
       // Verificar que la hora de fin sea posterior a la hora de inicio
-      if (selectedDate.getHours() < alarmStartTime.getHours() || 
-          (selectedDate.getHours() === alarmStartTime.getHours() && 
-           selectedDate.getMinutes() <= alarmStartTime.getMinutes())) {
+      if (selectedDate.getHours() < alarmStartTime.getHours() ||
+        (selectedDate.getHours() === alarmStartTime.getHours() &&
+          selectedDate.getMinutes() <= alarmStartTime.getMinutes())) {
         // Si es anterior o igual, establecer la hora de inicio + 30 minutos
         const adjustedTime = new Date(alarmStartTime);
         adjustedTime.setMinutes(adjustedTime.getMinutes() + 30);
@@ -80,23 +86,23 @@ const AlarmScreen = () => {
       }
     }
   };
-  
+
   // Función para alternar la selección de un día
   const toggleDay = (index) => {
     const newSelectedDays = [...selectedDays];
     newSelectedDays[index] = !newSelectedDays[index];
     setSelectedDays(newSelectedDays);
   };
-  
+
   // Función para convertir el array de días seleccionados a string para el backend
   const getDaysOfWeekString = () => {
     const selectedIndices = selectedDays
       .map((selected, index) => selected ? index + 1 : null)
       .filter(day => day !== null);
-    
+
     return selectedIndices.length > 0 ? selectedIndices.join(',') : "1,2,3,4,5"; // Por defecto días laborables si no hay selección
   };
-  
+
   // Función para convertir el string de días del backend a array para la UI
   const parseDaysOfWeekString = (daysString) => {
     const daysArray = [false, false, false, false, false, false, false];
@@ -110,22 +116,22 @@ const AlarmScreen = () => {
     }
     return daysArray;
   };
-  
+
   // Función para editar una alarma existente
   const editAlarm = (index) => {
     const alarm = alarms[index];
-    
+
     // Convertir strings de tiempo a objetos Date
     const today = new Date();
-    
+
     const startTimeParts = alarm.windowStartTime.split(':');
     const startTime = new Date(today);
     startTime.setHours(parseInt(startTimeParts[0]), parseInt(startTimeParts[1]), 0);
-    
+
     const endTimeParts = alarm.windowEndTime.split(':');
     const endTime = new Date(today);
     endTime.setHours(parseInt(endTimeParts[0]), parseInt(endTimeParts[1]), 0);
-    
+
     // Actualizar el estado con los valores de la alarma seleccionada
     setAlarmStartTime(startTime);
     setAlarmEndTime(endTime);
@@ -133,14 +139,14 @@ const AlarmScreen = () => {
     setSelectedDays(parseDaysOfWeekString(alarm.daysOfWeek));
     setEditingAlarmIndex(index);
   };
-  
+
   // Función para eliminar una alarma
   const deleteAlarm = async (alarmId) => {
     try {
       const response = await fetch(`http://localhost:8080/api/alarm-config/${alarmId}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
         // Actualizar la lista de alarmas
         fetchAlarms();
@@ -153,7 +159,7 @@ const AlarmScreen = () => {
       Alert.alert('Error', 'Error al eliminar la alarma: ' + error.message);
     }
   };
-  
+
   // Función para confirmar eliminación
   const confirmDeleteAlarm = (alarmId) => {
     Alert.alert(
@@ -173,10 +179,10 @@ const AlarmScreen = () => {
         Alert.alert('Error', 'Debes seleccionar al menos un día de la semana');
         return;
       }
-      
+
       // Obtener el userId del almacenamiento local o estado global
       const userId = 1; // Reemplazar con el ID real del usuario logueado
-      
+
       // Formatear los datos para enviar al backend
       const alarmConfigData = {
         user: { user_id: userId },
@@ -186,14 +192,14 @@ const AlarmScreen = () => {
         windowEndTime: alarmEndTime.toISOString().substr(11, 8), // HH:MM:SS
         daysOfWeek: getDaysOfWeekString()
       };
-      
+
       // Si estamos editando, incluir el ID
       if (editingAlarmIndex >= 0 && alarms[editingAlarmIndex]) {
         alarmConfigData.alarmConfigId = alarms[editingAlarmIndex].alarmConfigId;
       }
-      
+
       console.log('Enviando configuración de alarma:', alarmConfigData);
-      
+
       // Enviar datos al backend
       const response = await fetch('http://localhost:8080/api/alarm-config', {
         method: 'POST',
@@ -202,27 +208,27 @@ const AlarmScreen = () => {
         },
         body: JSON.stringify(alarmConfigData),
       });
-      
+
       if (!response.ok) {
         throw new Error('Error al guardar la configuración de alarma');
       }
-      
+
       const savedConfig = await response.json();
       console.log('Configuración guardada exitosamente:', savedConfig);
-      
+
       // Actualizar la lista de alarmas
       fetchAlarms();
-      
+
       // Resetear el formulario
       resetForm();
-      
+
       Alert.alert('Éxito', 'Configuración de alarma guardada!');
     } catch (error) {
       console.error('Error al guardar la configuración de alarma:', error);
       Alert.alert('Error', 'Error al guardar la configuración: ' + error.message);
     }
   };
-  
+
   // Función para resetear el formulario
   const resetForm = () => {
     setEditingAlarmIndex(-1);
@@ -235,6 +241,30 @@ const AlarmScreen = () => {
     setIsAlarmActive(!isAlarmActive);
   };
 
+  // Función para abrir el modal
+  const openPicker = (mode) => {
+    setPickerMode(mode);
+    setIsModalVisible(true);
+  };
+
+  // Función al cambiar la hora
+  const handleTimeChange = (event, selectedDate) => {
+    if (event?.type === 'dismissed') {
+      setIsModalVisible(false);
+      return;
+    }
+    if (selectedDate) {
+      if (pickerMode === 'start') {
+        onChangeStartTime(event, selectedDate);
+      } else {
+        onChangeEndTime(event, selectedDate);
+      }
+    }
+
+    setIsModalVisible(false);
+  };
+
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -242,20 +272,20 @@ const AlarmScreen = () => {
         <SmartClock size={200} style={{ marginBottom: 16 }} />
 
         <Text style={styles.title}>Configurar Alarma Inteligente</Text>
-        
+
         {/* Panel de días de la semana */}
         <View style={styles.daysContainer}>
           {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, index) => (
-            <TouchableOpacity 
-              key={index} 
+            <TouchableOpacity
+              key={index}
               style={[
-                styles.dayCircle, 
+                styles.dayCircle,
                 selectedDays[index] && styles.dayCircleSelected
               ]}
               onPress={() => toggleDay(index)}
             >
               <Text style={[
-                styles.dayText, 
+                styles.dayText,
                 selectedDays[index] && styles.dayTextSelected
               ]}>
                 {day}
@@ -267,109 +297,171 @@ const AlarmScreen = () => {
         {/* Formulario de configuración de alarma */}
         <View style={styles.settingItem}>
           <Text style={styles.settingLabel}>Ventana de Despertar:</Text>
+
           <View style={styles.timePickerContainer}>
-            <Button onPress={() => setShowStartTimePicker(true)} title={alarmStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} />
-            {showStartTimePicker && (
-              <DateTimePicker
-                testID="startTimePicker"
-                value={alarmStartTime}
-              mode="time"
-              is24Hour={true}
-              display="default"
-              onChange={onChangeStartTime}
+            <Button
+              title={alarmStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              onPress={() => openPicker('start')}
             />
-          )}
-          <Text style={styles.timeSeparator}> - </Text>
-          <Button onPress={() => setShowEndTimePicker(true)} title={alarmEndTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} />
-          {showEndTimePicker && (
-            <DateTimePicker
-              testID="endTimePicker"
-              value={alarmEndTime}
-              mode="time"
-              is24Hour={true}
-              display="default"
-              onChange={onChangeEndTime}
+            <Text style={styles.timeSeparator}> - </Text>
+            <Button
+              title={alarmEndTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              onPress={() => openPicker('end')}
+            />
+          </View>
+        </View>
+
+        {/* Modal para el selector de hora */}
+        <Modal transparent animationType="fade" visible={isModalVisible}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {pickerMode === 'start' ? 'Selecciona hora de inicio' : 'Selecciona hora de fin'}
+              </Text>
+
+              {Platform.OS === "web" ? (
+                //  input HTML para web
+                <input
+                  type="time"
+                  value={
+                    pickerMode === 'start'
+                      ? tempStartTime.toISOString().substring(11, 16)
+                      : tempEndTime.toISOString().substring(11, 16)
+                  }
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value.split(":");
+                    const newDate = new Date();
+                    newDate.setHours(parseInt(hours));
+                    newDate.setMinutes(parseInt(minutes));
+                    if (pickerMode === 'start') setTempStartTime(newDate);
+                    else setTempEndTime(newDate);
+                  }}
+                  style={styles.webTimeInput}
+                />
+              ) : (
+                // picker para moviles (Android/iOS)
+                <DateTimePicker
+                  value={pickerMode === 'start' ? tempStartTime : tempEndTime}
+                  mode="time"
+                  is24Hour={true}
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) {
+                      if (pickerMode === 'start') setTempStartTime(selectedDate);
+                      else setTempEndTime(selectedDate);
+                    }
+                  }}
+                />
+              )}
+
+              <View style={styles.modalButtons}>
+                <View style={styles.buttonContainer}>
+                  <Button
+                    title="Cambiar hora"
+                    color="#2196F3"
+                    onPress={() => {
+                      if (pickerMode === 'start') {
+                        onChangeStartTime({ type: 'set' }, tempStartTime);
+                      } else {
+                        onChangeEndTime({ type: 'set' }, tempEndTime);
+                      }
+                      setIsModalVisible(false);
+                    }}
+                  />
+                </View>
+
+                <View style={styles.buttonContainer}>
+                  <Button
+                    title="Cancelar"
+                    color="#888"
+                    onPress={() => {
+                      setIsModalVisible(false);
+                    }}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+
+
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Sonido:</Text>
+          <Switch
+            value={isSoundEnabled}
+            onValueChange={setIsSoundEnabled}
+          />
+        </View>
+
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Vibración:</Text>
+          <Switch
+            value={isVibrationEnabled}
+            onValueChange={setIsVibrationEnabled}
+          />
+        </View>
+
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Activar Alarma:</Text>
+          <Switch
+            value={isAlarmActive}
+            onValueChange={toggleAlarmActive}
+          />
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <Button
+            title={editingAlarmIndex >= 0 ? "Actualizar Alarma" : "Guardar Alarma"}
+            onPress={saveAlarmSettings}
+            color="#4CAF50"
+          />
+
+          {editingAlarmIndex >= 0 && (
+            <Button
+              title="Cancelar Edición"
+              onPress={resetForm}
+              color="#FF9800"
             />
           )}
         </View>
-      </View>
 
-      <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>Sonido:</Text>
-        <Switch
-          value={isSoundEnabled}
-          onValueChange={setIsSoundEnabled}
-        />
-      </View>
+        {/* Panel de alarmas guardadas */}
+        <View style={styles.alarmsPanel}>
+          <Text style={styles.subtitle}>Mis Alarmas</Text>
 
-      <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>Vibración:</Text>
-        <Switch
-          value={isVibrationEnabled}
-          onValueChange={setIsVibrationEnabled}
-        />
-      </View>
+          {alarms.length === 0 ? (
+            <Text style={styles.noAlarmsText}>No hay alarmas configuradas</Text>
+          ) : (
+            alarms.map((alarm, index) => (
+              <View key={index} style={styles.alarmItem}>
+                <View style={styles.alarmInfo}>
+                  <Text style={styles.alarmTime}>
+                    {alarm.windowStartTime.substring(0, 5)} - {alarm.windowEndTime.substring(0, 5)}
+                  </Text>
+                  <Text style={styles.alarmDays}>
+                    Días: {parseDaysOfWeekString(alarm.daysOfWeek)
+                      .map((selected, i) => selected ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] : null)
+                      .filter(day => day !== null)
+                      .join(', ')}
+                  </Text>
+                  <Text style={[styles.alarmStatus, alarm.enabled ? styles.alarmEnabled : styles.alarmDisabled]}>
+                    {alarm.enabled ? 'Activa' : 'Inactiva'}
+                  </Text>
+                </View>
 
-      <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>Activar Alarma:</Text>
-        <Switch
-          value={isAlarmActive}
-          onValueChange={toggleAlarmActive}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title={editingAlarmIndex >= 0 ? "Actualizar Alarma" : "Guardar Alarma"}
-          onPress={saveAlarmSettings}
-          color="#4CAF50"
-        />
-        
-        {editingAlarmIndex >= 0 && (
-          <Button
-            title="Cancelar Edición"
-            onPress={resetForm}
-            color="#FF9800"
-          />
-        )}
-      </View>
-
-      {/* Panel de alarmas guardadas */}
-      <View style={styles.alarmsPanel}>
-        <Text style={styles.subtitle}>Mis Alarmas</Text>
-        
-        {alarms.length === 0 ? (
-          <Text style={styles.noAlarmsText}>No hay alarmas configuradas</Text>
-        ) : (
-          alarms.map((alarm, index) => (
-            <View key={index} style={styles.alarmItem}>
-              <View style={styles.alarmInfo}>
-                <Text style={styles.alarmTime}>
-                  {alarm.windowStartTime.substring(0, 5)} - {alarm.windowEndTime.substring(0, 5)}
-                </Text>
-                <Text style={styles.alarmDays}>
-                  Días: {parseDaysOfWeekString(alarm.daysOfWeek)
-                    .map((selected, i) => selected ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i] : null)
-                    .filter(day => day !== null)
-                    .join(', ')}
-                </Text>
-                <Text style={[styles.alarmStatus, alarm.enabled ? styles.alarmEnabled : styles.alarmDisabled]}>
-                  {alarm.enabled ? 'Activa' : 'Inactiva'}
-                </Text>
+                <View style={styles.alarmActions}>
+                  <TouchableOpacity onPress={() => editAlarm(index)} style={styles.actionButton}>
+                    <Ionicons name="pencil" size={24} color="#2196F3" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => confirmDeleteAlarm(alarm.alarmConfigId)} style={styles.actionButton}>
+                    <Ionicons name="trash" size={24} color="#F44336" />
+                  </TouchableOpacity>
+                </View>
               </View>
-              
-              <View style={styles.alarmActions}>
-                <TouchableOpacity onPress={() => editAlarm(index)} style={styles.actionButton}>
-                  <Ionicons name="pencil" size={24} color="#2196F3" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => confirmDeleteAlarm(alarm.alarmConfigId)} style={styles.actionButton}>
-                  <Ionicons name="trash" size={24} color="#F44336" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))
-        )}
-      </View>
+            ))
+          )}
+        </View>
       </ScrollView>
 
       <Text style={styles.infoText}>
@@ -551,6 +643,45 @@ const styles = StyleSheet.create({
     color: '#6c757d',
     textAlign: 'center',
   },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    width: '50%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '50%',
+    marginTop: 20,
+  },
+  buttonContainer: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  webTimeInput: {
+    padding: 8,
+    fontSize: 16,
+    borderRadius: 8,
+    border: '1px solid #ccc',
+    marginBottom: 10,
+    width: '25%',
+  },
+
 });
 
 export default AlarmScreen;

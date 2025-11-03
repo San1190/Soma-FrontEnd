@@ -3,8 +3,9 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Scr
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.0.227:8080/api/hydration'; // Asegúrate de que esta URL sea correcta
+const API_BASE_URL = '192.168.1.141:8080/api/hydration'; // Asegúrate de que esta URL sea correcta
 const ML_PER_CUP = 250; // Cantidad de ml por vaso
+
 
 const HydrationScreen = () => {
     const [hydrationStatus, setHydrationStatus] = useState('Cargando estado...');

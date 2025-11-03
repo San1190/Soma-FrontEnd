@@ -4,9 +4,11 @@ import { getUserById, updateUser } from '../services/users';
 import { useAuth } from '../context/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {
   const { user, logout } = useAuth();
+  const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -110,6 +112,10 @@ const ProfileScreen = () => {
       </View>
 
       <Button title="Cerrar Sesión" onPress={logout} color="#FF6347" />
+
+      <TouchableOpacity style={styles.notificationButton} onPress={() => navigation.navigate('NotificationSettings')}>
+        <Text style={styles.notificationButtonText}>Configuración de Notificaciones</Text>
+      </TouchableOpacity>
 
       <Text style={styles.sectionTitle}>Información de Login</Text>
       <View style={styles.infoContainer}>
@@ -366,6 +372,18 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: '100%',
+  },
+  notificationButton: {
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  notificationButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

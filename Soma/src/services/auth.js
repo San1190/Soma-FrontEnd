@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Cambia 'localhost' a '10.0.2.2' si pruebas en emulador Android
-const API_URL = '192.168.1.141:8080/api/users';
+const API_URL = 'http://192.168.1.141:8080/api/users';
 
 export async function register(userData) {
   // Enviar todos los campos del usuario (deja undefined los opcionales no completados)

@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Vibration } from 'react-native';
-import { Audio } from 'expo-av'; // Importa Audio para la reproducción de sonido
+import { View, Text, TouchableOpacity, Animated, Easing, Vibration } from 'react-native';
+import { Audio } from 'expo-av';
 import useStressDetection from '../hooks/useStressDetection';
+import { styles } from './GuidedBreathingStyles'; // Importar los estilos desde el nuevo archivo
+import axios from 'axios';
+
+const API_BASE_URL = 'http://192.168.1.141:8080/api/stress';
+const TEST_USER_ID = 1; // Hardcoded for testing, replace with dynamic user ID
 
 // Componente principal de la pantalla de respiración guiada
 const GuidedBreathingScreen = ({ navigation }) => {
@@ -59,18 +64,20 @@ const GuidedBreathingScreen = ({ navigation }) => {
     }
   }, [user]);
 
-  const [breathingState, setBreathingState] = useState('idle'); // Estado actual del ciclo de respiración ('idle', 'inhale', 'exhale', 'hold')
-  const [countdown, setCountdown] = useState(0); // Contador regresivo (no utilizado actualmente, pero puede ser útil para futuras implementaciones)
-  const animation = useState(new Animated.Value(0))[0]; // Valor animado para controlar la escala del círculo de respiración
-  const [sessionStartTime, setSessionStartTime] = useState(null); // Marca de tiempo cuando la sesión de respiración comienza
-  const [cycleCount, setCycleCount] = useState(0); // Número de ciclos de respiración completados en la sesión actual
-  const [sound, setSound] = useState(); // Objeto de sonido para la guía auditiva durante la respiración
-  const [initialHeartRate, setInitialHeartRate] = useState(null); // Frecuencia cardíaca registrada al inicio de la sesión
-  const [initialStressLevel, setInitialStressLevel] = useState(null); // Nivel de estrés registrado al inicio de la sesión
+  const [breathingState, setBreathingState] = useState('idle');
+  const [countdown, setCountdown] = useState(0);
+  const animation = useState(new Animated.Value(0))[0];
+  const [sessionStartTime, setSessionStartTime] = useState(null);
+  const [cycleCount, setCycleCount] = useState(0);
+  const [sound, setSound] = useState();
+  const [initialHeartRate, setInitialHeartRate] = useState(null);
+  const [initialStressLevel, setInitialStressLevel] = useState(null);
+  const [timer, setTimer] = useState(0); // Nuevo estado para el temporizador de fase
+  const timerRef = useRef(null); // Ref para el temporizador de intervalo
 
-  const inhaleDuration = 4000; // Duración de la fase de inhalación en milisegundos (4 segundos)
-  const holdDuration = 2000; // Duración de la fase de retención en milisegundos (2 segundos)
-  const exhaleDuration = 6000; // Duración de la fase de exhalación en milisegundos (6 segundos)
+  const inhaleDuration = 4000;
+  const holdDuration = 2000;
+  const exhaleDuration = 6000;
 
   // Hook personalizado para la detección de estrés y manejo de intervenciones
   const { stressNotificationType, recordIntervention, declineBreathingSuggestion } = useStressDetection(data);
@@ -104,31 +111,59 @@ const GuidedBreathingScreen = ({ navigation }) => {
 
   // Efecto para controlar la animación del círculo de respiración y el estado del ciclo
   useEffect(() => {
+    let duration = 0;
+    let nextState = '';
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      setTimer(0);
+    }
+
     if (breathingState === 'inhale') {
+      duration = inhaleDuration;
+      nextState = 'hold';
       Animated.timing(animation, {
         toValue: 1,
         duration: inhaleDuration,
         easing: Easing.linear,
         useNativeDriver: true,
       }).start(() => {
-        setBreathingState('hold');
+        setBreathingState(nextState);
       });
     } else if (breathingState === 'exhale') {
+      duration = exhaleDuration;
+      nextState = 'inhale';
       Animated.timing(animation, {
         toValue: 0,
         duration: exhaleDuration,
         easing: Easing.linear,
         useNativeDriver: true,
       }).start(() => {
-        setBreathingState('inhale');
-        setCycleCount(prevCount => prevCount + 1); // Incrementar el contador de ciclos al finalizar la exhalación
+        setBreathingState(nextState);
+        setCycleCount(prevCount => prevCount + 1);
       });
     } else if (breathingState === 'hold') {
-      const timer = setTimeout(() => {
-        setBreathingState('exhale');
+      duration = holdDuration;
+      nextState = 'exhale';
+      const timerId = setTimeout(() => {
+        setBreathingState(nextState);
       }, holdDuration);
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timerId);
     }
+
+    if (duration > 0) {
+      let startTime = Date.now();
+      timerRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        setTimer(Math.max(0, Math.ceil((duration - elapsed) / 1000)));
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, [breathingState]);
 
   // Efecto para la guía sensorial de vibración durante las fases de inhalación y exhalación
@@ -196,6 +231,21 @@ const GuidedBreathingScreen = ({ navigation }) => {
         console.log(`Nivel de estrés inicial: ${initialStressLevel}, Nivel de estrés final: ${finalStressLevel}`);
       }
 
+      // Enviar datos biométricos al backend
+      if (user && user.userId && finalHeartRate) {
+        try {
+          await axios.post(`http://192.168.1.141:8080/api/data/ingest`, {
+            userId: user.userId,
+            heart_rate_bpm: finalHeartRate,
+            // hrv_ms: ... (si tienes datos de HRV reales)
+            // stress_level: ... (si quieres enviar el nivel de estrés calculado en el frontend)
+          });
+          console.log('Datos biométricos enviados con éxito.');
+        } catch (error) {
+          console.error('Error al enviar datos biométricos:', error);
+        }
+      }
+
       // Reiniciar estados de la sesión
       setSessionStartTime(null);
       setCycleCount(0);
@@ -207,16 +257,50 @@ const GuidedBreathingScreen = ({ navigation }) => {
   // Interpolación para la escala del círculo de respiración
   const circleScale = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.5, 1.2],
+    outputRange: [0.5, 1],
   });
 
   // Interpolación para la opacidad del círculo de respiración
   const circleOpacity = animation.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.6, 1, 0.6],
+    outputRange: [0.7, 1, 0.7],
   });
 
-  // Explicación sobre cómo cargar datos reales:
+  const animatedCircleStyle = {
+    transform: [{ scale: circleScale }],
+    opacity: circleOpacity,
+  };
+
+
+  const [progressBarAnimatedValue] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    let totalDuration = 0;
+    if (breathingState === 'inhale') {
+      totalDuration = inhaleDuration;
+    } else if (breathingState === 'exhale') {
+      totalDuration = exhaleDuration;
+    } else if (breathingState === 'hold') {
+      totalDuration = holdDuration;
+    }
+
+    if (totalDuration > 0) {
+      progressBarAnimatedValue.setValue(0);
+      Animated.timing(progressBarAnimatedValue, {
+        toValue: 1,
+        duration: totalDuration,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [breathingState]);
+
+  const progressBarWidth = progressBarAnimatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
+
   // Actualmente, los datos de frecuencia cardíaca y nivel de estrés se simulan o se obtienen de un hook de ejemplo.
   // Para integrar datos reales, se deben seguir los siguientes pasos:
 
@@ -327,22 +411,20 @@ const GuidedBreathingScreen = ({ navigation }) => {
       )}
 
       <View style={styles.breathingContainer}>
-        <Animated.View
-          style={[
-            styles.breathingCircle,
-            {
-              transform: [{ scale: circleScale }],
-              opacity: circleOpacity,
-            },
-          ]}
-        />
+        <Animated.View style={[styles.breathingCircle, animatedCircleStyle]} />
         <Text style={styles.instructionText}>
-          {breathingState === 'inhale' && 'Inhala'}
-          {breathingState === 'exhale' && 'Exhala'}
-          {breathingState === 'hold' && 'Sostén'}
+          {breathingState === 'inhale' && `Inhala (${timer}s)`}
+          {breathingState === 'exhale' && `Exhala (${timer}s)`}
+          {breathingState === 'hold' && `Sostén (${timer}s)`}
           {breathingState === 'idle' && 'Presiona Iniciar'}
         </Text>
       </View>
+
+      {breathingState !== 'idle' && (
+        <View style={styles.progressBarContainer}>
+          <Animated.View style={[styles.progressBar, { width: progressBarWidth }]} />
+        </View>
+      )}
 
       <View style={styles.controls}>
         {breathingState === 'idle' ? (
@@ -358,94 +440,5 @@ const GuidedBreathingScreen = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  stressNotification: {
-    backgroundColor: '#ff6347',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  stressNotificationText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  userDataContainer: {
-    marginBottom: 30,
-    alignItems: 'center',
-  },
-  userDataText: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 5,
-  },
-  breathingContainer: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: '#a0d9e0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 50,
-  },
-  breathingCircle: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 100,
-    backgroundColor: '#66b3ba',
-    position: 'absolute',
-  },
-  instructionText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  controls: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    marginHorizontal: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  suggestionButtonsContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  acceptButton: {
-    backgroundColor: '#28a745',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    marginHorizontal: 5,
-  },
-  declineButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    marginHorizontal: 5,
-  },
-});
 
 export default GuidedBreathingScreen;

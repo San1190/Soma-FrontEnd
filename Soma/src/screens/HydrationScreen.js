@@ -3,7 +3,8 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Scr
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
 
-const API_BASE_URL = '192.168.1.141:8080/api/hydration'; // Asegúrate de que esta URL sea correcta
+// Debe incluir el protocolo; sin él, el fetch puede devolver el index.html del dev server
+const API_BASE_URL = 'http://192.168.1.141:8080/api/hydration'; // Asegúrate de que esta URL sea correcta
 const ML_PER_CUP = 250; // Cantidad de ml por vaso
 
 
@@ -25,7 +26,12 @@ const HydrationScreen = () => {
             const response = await axios.get(`${API_BASE_URL}/status`, {
                 params: { userId: userId }
             });
-            setHydrationStatus(translateHydrationStatus(response.data));
+            const payload = response.data;
+            // Si por alguna razón llega el index.html del dev server, considerarlo error
+            if (typeof payload === 'string' && /<!DOCTYPE html|<html/i.test(payload)) {
+                throw new Error('Respuesta HTML inesperada desde la API de hidratación');
+            }
+            setHydrationStatus(translateHydrationStatus(payload));
 
             // Intentar obtener las necesidades diarias para calcular la meta
             try {

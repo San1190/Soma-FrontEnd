@@ -14,7 +14,7 @@ import axios from 'axios';
 import * as Notifications from 'expo-notifications';
 import { useRef } from 'react';
 
-const API_BASE_URL = 'http://192.168.1.10:8080/api'; // Replace with your backend API base URL
+const API_BASE_URL = 'http://localhost:8080/api';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

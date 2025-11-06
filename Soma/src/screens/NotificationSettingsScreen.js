@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, Switch, TouchableOpacity, Alert } from 'react-n
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import API_BASE_URL from '../constants/api'; // Importamos la URL central
 
-const API_URL = 'http://localhost:8080/api/notification-settings'; // Replace with your backend API URL
+const API_URL = `${API_BASE_URL}/notification-settings`; // Corregido: usa la IP
 
 const NotificationSettingsScreen = () => {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ const NotificationSettingsScreen = () => {
   const fetchNotificationSettings = async () => {
     try {
       setLoading(true);
+      // Usamos user.id (asumiendo que viene de AuthContext)
       const response = await axios.get(`${API_URL}/user/${user.id}`);
       setNotificationSettings(response.data);
     } catch (error) {

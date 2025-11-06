@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, Button, Platform, Switch, TouchableOpacity, Scr
 import DateTimePicker from '@react-native-community/datetimepicker'; // Asumiendo que esta librería está instalada
 import SmartClock from '../components/Clock';
 import { Ionicons } from '@expo/vector-icons'; // Asumiendo que expo/vector-icons está instalado
+import API_BASE_URL from '../constants/api'; // Importamos la URL central
+
+const ALARM_API_URL = `${API_BASE_URL}/alarm-config`; // URL completa
 
 const AlarmScreen = () => {
   // Estado para la alarma actual que se está editando
@@ -38,7 +41,7 @@ const AlarmScreen = () => {
   const fetchAlarms = async () => {
     try {
       const userId = 1; // Reemplazar con el ID real del usuario logueado
-      const response = await fetch(`http://localhost:8080/api/alarm-config/user/${userId}`);
+      const response = await fetch(`${ALARM_API_URL}/user/${userId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -143,7 +146,7 @@ const AlarmScreen = () => {
   // Función para eliminar una alarma
   const deleteAlarm = async (alarmId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/alarm-config/${alarmId}`, {
+      const response = await fetch(`${ALARM_API_URL}/${alarmId}`, {
         method: 'DELETE',
       });
 
@@ -201,7 +204,7 @@ const AlarmScreen = () => {
       console.log('Enviando configuración de alarma:', alarmConfigData);
 
       // Enviar datos al backend
-      const response = await fetch('http://localhost:8080/api/alarm-config', {
+      const response = await fetch(ALARM_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

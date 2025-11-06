@@ -1,10 +1,12 @@
+// Archivo: san1190/soma-frontend/San1190-Soma-FrontEnd-12276c962af8134a3da9e0f3cfd941ba48025b46/Soma/src/screens/HydrationScreen.js
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
+import API_BASE_URL from '../constants/api'; // Importamos la URL central
 
-// Debe incluir el protocolo; sin él, el fetch puede devolver el index.html del dev server
-const API_BASE_URL = 'http://192.168.1.141:8080/api/hydration'; // Asegúrate de que esta URL sea correcta
+const HYDRATION_API_URL = `${API_BASE_URL}/hydration`; // URL completa
 const ML_PER_CUP = 250; // Cantidad de ml por vaso
 
 
@@ -23,7 +25,7 @@ const HydrationScreen = () => {
 
     const fetchHydrationStatus = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/status`, {
+            const response = await axios.get(`${HYDRATION_API_URL}/status`, {
                 params: { userId: userId }
             });
             const payload = response.data;
@@ -35,7 +37,7 @@ const HydrationScreen = () => {
 
             // Intentar obtener las necesidades diarias para calcular la meta
             try {
-                const needsResponse = await axios.get(`${API_BASE_URL}/needs`, {
+                const needsResponse = await axios.get(`${HYDRATION_API_URL}/needs`, {
                     params: { userId: userId }
                 });
                 const dailyNeedsMl = needsResponse.data.dailyNeedsMl || 2000;
@@ -58,7 +60,7 @@ const HydrationScreen = () => {
 
             // Registrar en la API automáticamente
             try {
-                await axios.post(`${API_BASE_URL}/log`, {
+                await axios.post(`${HYDRATION_API_URL}/log`, {
                     userId: userId,
                     amountMl: ML_PER_CUP
                 });
@@ -87,7 +89,7 @@ const HydrationScreen = () => {
         }
 
         try {
-            await axios.post(`${API_BASE_URL}/log`, {
+            await axios.post(`${HYDRATION_API_URL}/log`, {
                 userId: userId,
                 amountMl: parseFloat(waterAmount)
             });
@@ -104,7 +106,7 @@ const HydrationScreen = () => {
         console.log('triggerHydrationReminder called');
         try {
             console.log('Attempting to send hydration reminder...');
-            const response = await axios.post(`${API_BASE_URL}/trigger-reminder`, { userId: userId });
+            const response = await axios.post(`${HYDRATION_API_URL}/trigger-reminder`, { userId: userId });
             console.log('Hydration reminder response:', response.data);
             console.log('Attempting to show Alert.alert for success.');
             Alert.alert('Recordatorio enviado', 'Se ha intentado enviar un recordatorio de hidratación.');

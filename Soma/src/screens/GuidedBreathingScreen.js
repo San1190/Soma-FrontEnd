@@ -6,7 +6,7 @@ import useStressDetection from '../hooks/useStressDetection';
 import { styles } from './GuidedBreathingStyles'; // Importar los estilos desde el nuevo archivo
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.1.141:8080/api/stress';
+const API_BASE_URL = 'http://192.168.1.31:8080/api/stress';
 const TEST_USER_ID = 1; // Hardcoded for testing, replace with dynamic user ID
 
 // Componente principal de la pantalla de respiración guiada
@@ -234,7 +234,7 @@ const GuidedBreathingScreen = ({ navigation }) => {
       // Enviar datos biométricos al backend
       if (user && user.userId && finalHeartRate) {
         try {
-          await axios.post(`http://192.168.1.141:8080/api/data/ingest`, {
+          await axios.post(`http://192.168.1.31:8080/api/data/ingest`, {
             userId: user.userId,
             heart_rate_bpm: finalHeartRate,
             // hrv_ms: ... (si tienes datos de HRV reales)

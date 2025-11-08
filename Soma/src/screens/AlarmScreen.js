@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'; // Asumiend
 import SmartClock from '../components/Clock';
 import { Ionicons } from '@expo/vector-icons'; // Asumiendo que expo/vector-icons está instalado
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
+import Swal from 'sweetalert2'
 
 const ALARM_API_URL = `${API_BASE_URL}/alarm-config`; // URL completa
 
@@ -147,7 +148,7 @@ const AlarmScreen = () => {
   const deleteAlarm = async (alarmId) => {
     try {
       console.log('Intentando eliminar alarma con ID:', alarmId);
-      
+
       const response = await fetch(`${ALARM_API_URL}/${alarmId}`, {
         method: 'DELETE',
         headers: {
@@ -175,26 +176,50 @@ const AlarmScreen = () => {
 
   // Función para confirmar eliminación
   const confirmDeleteAlarm = (alarmId) => {
-    Alert.alert(
-      '¿Eliminar alarma?',
-      '¿Estás seguro de que deseas eliminar esta alarma? Esta acción no se puede deshacer.',
-      [
-        { 
-          text: 'No, cancelar', 
-          style: 'cancel',
-          onPress: () => console.log('Eliminación cancelada')
+    if (Platform.OS === 'web') {
+      Swal.fire({
+        title: '¿Eliminar alarma?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        customClass: {
+          popup: 'rounded-xl shadow-lg',
+          confirmButton: 'px-4 py-2 rounded-md',
+          cancelButton: 'px-4 py-2 rounded-md',
         },
-        { 
-          text: 'Sí, eliminar', 
-          style: 'destructive', 
-          onPress: () => {
-            console.log('Usuario confirmó eliminación de alarma:', alarmId);
-            deleteAlarm(alarmId);
-          }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log("Confirmado: borrando alarma", alarmId);
+          deleteAlarm(alarmId);
+
+          Swal.fire({
+            title: 'Eliminada',
+            text: 'La alarma se ha eliminado correctamente.',
+            icon: 'success',
+            confirmButtonColor: '#3085d6',
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        } else {
+          console.log("Cancelado");
         }
-      ],
-      { cancelable: true }
-    );
+      });
+    } else {
+      Alert.alert(
+        '¿Eliminar alarma?',
+        '¿Estás seguro de que deseas eliminar esta alarma? Esta acción no se puede deshacer.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Eliminar', style: 'destructive', onPress: () => deleteAlarm(alarmId) },
+        ],
+        { cancelable: true }
+      );
+    }
   };
 
   const saveAlarmSettings = async () => {
@@ -489,15 +514,15 @@ const AlarmScreen = () => {
                 </View>
 
                 <View style={styles.alarmActions}>
-                  <TouchableOpacity 
-                    onPress={() => editAlarm(index)} 
+                  <TouchableOpacity
+                    onPress={() => editAlarm(index)}
                     style={styles.actionButton}
                     activeOpacity={0.7}
                   >
                     <Ionicons name="pencil" size={24} color="#2196F3" />
                   </TouchableOpacity>
-                  <TouchableOpacity 
-                    onPress={() => confirmDeleteAlarm(alarm.alarmConfigId)} 
+                  <TouchableOpacity
+                    onPress={() => confirmDeleteAlarm(alarm.alarmConfigId)}
                     style={styles.actionButton}
                     activeOpacity={0.7}
                   >

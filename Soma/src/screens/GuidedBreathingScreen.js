@@ -6,7 +6,7 @@ import useStressDetection from '../hooks/useStressDetection';
 import { styles } from './GuidedBreathingStyles'; // Importar los estilos desde el nuevo archivo
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.1.31:8080/api/stress';
+const API_BASE_URL = 'http://192.168.56.1:8080/api/stress';
 const TEST_USER_ID = 1; // Hardcoded for testing, replace with dynamic user ID
 
 // Componente principal de la pantalla de respiración guiada
@@ -44,18 +44,18 @@ const GuidedBreathingScreen = ({ navigation }) => {
 
   // Efecto para obtener el nivel de estrés del backend y cargar el historial de ejercicios del usuario
   useEffect(() => {
-      const fetchStressLevel = async () => {
-        if (user && user.userId) {
-          try {
-            const response = await fetch(`192.168.1.141:8080/api/stress/users/${user.userId}`);
-            const data = await response.json();
-            setStressLevel(data.stressLevel); // Asume que el backend devuelve { stressLevel: "Bajo" }
-          } catch (error) {
-            console.error('Error al obtener el nivel de estrés:', error);
-            setStressLevel('Desconocido');
-          }
+    const fetchStressLevel = async () => {
+      if (user && user.userId) {
+        try {
+          const response = await fetch(`192.168.1.141:8080/api/stress/users/${user.userId}`);
+          const data = await response.json();
+          setStressLevel(data.stressLevel); // Asume que el backend devuelve { stressLevel: "Bajo" }
+        } catch (error) {
+          console.error('Error al obtener el nivel de estrés:', error);
+          setStressLevel('Desconocido');
         }
-      };
+      }
+    };
 
     if (user) {
       fetchStressLevel();
@@ -234,7 +234,7 @@ const GuidedBreathingScreen = ({ navigation }) => {
       // Enviar datos biométricos al backend
       if (user && user.userId && finalHeartRate) {
         try {
-          await axios.post(`http://192.168.1.31:8080/api/data/ingest`, {
+          await axios.post(`http://192.168.56.1:8080/api/data/ingest`, {
             userId: user.userId,
             heart_rate_bpm: finalHeartRate,
             // hrv_ms: ... (si tienes datos de HRV reales)
@@ -394,8 +394,8 @@ const GuidedBreathingScreen = ({ navigation }) => {
             {stressNotificationType === 'alert'
               ? '¡Nivel de estrés alto detectado! Tómate un momento para respirar.'
               : stressNotificationType === 'preventive_alert'
-              ? 'Se ha detectado un patrón de estrés creciente. Considera tomar un descanso.'
-              : 'Intervención reciente registrada. Las notificaciones de estrés están en pausa.'}
+                ? 'Se ha detectado un patrón de estrés creciente. Considera tomar un descanso.'
+                : 'Intervención reciente registrada. Las notificaciones de estrés están en pausa.'}
           </Text>
           {showSuggestionButtons && (
             <View style={styles.suggestionButtonsContainer}>

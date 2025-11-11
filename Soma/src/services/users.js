@@ -2,7 +2,7 @@
 import axios from 'axios';
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
 
-const USERS_API_URL = `${API_BASE_URL}/users`; // URL completa: http://192.168.1.141:8080/api/users
+const USERS_API_URL = `${API_BASE_URL}/users`; // URL completa: http://192.168.1.31:8080/api/users
 
 export async function getAllUsers() {
   // Corregido: 'res.ok' no existe en axios, axios lanza error si no es 2xx

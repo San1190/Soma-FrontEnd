@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'; // Asumiend
 import SmartClock from '../components/Clock';
 import { Ionicons } from '@expo/vector-icons'; // Asumiendo que expo/vector-icons está instalado
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
+import Swal from 'sweetalert2'
 
 const ALARM_API_URL = `${API_BASE_URL}/alarm-config`; // URL completa
 
@@ -146,16 +147,26 @@ const AlarmScreen = () => {
   // Función para eliminar una alarma
   const deleteAlarm = async (alarmId) => {
     try {
+      console.log('Intentando eliminar alarma con ID:', alarmId);
+
       const response = await fetch(`${ALARM_API_URL}/${alarmId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
+      console.log('Respuesta del servidor:', response.status, response.statusText);
+
       if (response.ok) {
-        // Actualizar la lista de alarmas
-        fetchAlarms();
+        // Actualizar la lista de alarmas inmediatamente
+        const updatedAlarms = alarms.filter(alarm => alarm.alarmConfigId !== alarmId);
+        setAlarms(updatedAlarms);
         Alert.alert('Éxito', 'Alarma eliminada correctamente');
       } else {
-        Alert.alert('Error', 'No se pudo eliminar la alarma');
+        const errorText = await response.text();
+        console.error('Error del servidor:', errorText);
+        Alert.alert('Error', `No se pudo eliminar la alarma: ${errorText}`);
       }
     } catch (error) {
       console.error('Error al eliminar alarma:', error);
@@ -165,14 +176,50 @@ const AlarmScreen = () => {
 
   // Función para confirmar eliminación
   const confirmDeleteAlarm = (alarmId) => {
-    Alert.alert(
-      'Confirmar eliminación',
-      '¿Estás seguro de que deseas eliminar esta alarma?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', style: 'destructive', onPress: () => deleteAlarm(alarmId) }
-      ]
-    );
+    if (Platform.OS === 'web') {
+      Swal.fire({
+        title: '¿Eliminar alarma?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        customClass: {
+          popup: 'rounded-xl shadow-lg',
+          confirmButton: 'px-4 py-2 rounded-md',
+          cancelButton: 'px-4 py-2 rounded-md',
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log("Confirmado: borrando alarma", alarmId);
+          deleteAlarm(alarmId);
+
+          Swal.fire({
+            title: 'Eliminada',
+            text: 'La alarma se ha eliminado correctamente.',
+            icon: 'success',
+            confirmButtonColor: '#3085d6',
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        } else {
+          console.log("Cancelado");
+        }
+      });
+    } else {
+      Alert.alert(
+        '¿Eliminar alarma?',
+        '¿Estás seguro de que deseas eliminar esta alarma? Esta acción no se puede deshacer.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Eliminar', style: 'destructive', onPress: () => deleteAlarm(alarmId) },
+        ],
+        { cancelable: true }
+      );
+    }
   };
 
   const saveAlarmSettings = async () => {
@@ -190,9 +237,9 @@ const AlarmScreen = () => {
       const alarmConfigData = {
         user: { user_id: userId },
         enabled: isAlarmActive,
-        targetTime: alarmEndTime.toISOString().substr(11, 8), // HH:MM:SS
-        windowStartTime: alarmStartTime.toISOString().substr(11, 8), // HH:MM:SS
-        windowEndTime: alarmEndTime.toISOString().substr(11, 8), // HH:MM:SS
+        targetTime: formatLocalTime(alarmEndTime), // HH:MM:SS en hora local
+        windowStartTime: formatLocalTime(alarmStartTime), // HH:MM:SS en hora local
+        windowEndTime: formatLocalTime(alarmEndTime), // HH:MM:SS en hora local
         daysOfWeek: getDaysOfWeekString()
       };
 
@@ -232,6 +279,14 @@ const AlarmScreen = () => {
     }
   };
 
+  // Función para formatear hora local en formato HH:MM:SS
+  const formatLocalTime = (date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = '00';
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
   // Función para resetear el formulario
   const resetForm = () => {
     setEditingAlarmIndex(-1);
@@ -247,10 +302,28 @@ const AlarmScreen = () => {
   // Función para abrir el modal
   const openPicker = (mode) => {
     setPickerMode(mode);
+    // Establecer los tiempos temporales con los valores actuales de la alarma
+    if (mode === 'start') {
+      setTempStartTime(new Date(alarmStartTime));
+    } else {
+      setTempEndTime(new Date(alarmEndTime));
+    }
     setIsModalVisible(true);
   };
 
-  // Función al cambiar la hora
+  // Función para actualizar la hora desde el modal (sin validaciones)
+  const updateTimeFromModal = (selectedDate) => {
+    if (selectedDate) {
+      if (pickerMode === 'start') {
+        setAlarmStartTime(selectedDate);
+      } else {
+        setAlarmEndTime(selectedDate);
+      }
+    }
+    setIsModalVisible(false);
+  };
+
+  // Función al cambiar la hora en el modal
   const handleTimeChange = (event, selectedDate) => {
     if (event?.type === 'dismissed') {
       setIsModalVisible(false);
@@ -258,13 +331,11 @@ const AlarmScreen = () => {
     }
     if (selectedDate) {
       if (pickerMode === 'start') {
-        onChangeStartTime(event, selectedDate);
+        setTempStartTime(selectedDate);
       } else {
-        onChangeEndTime(event, selectedDate);
+        setTempEndTime(selectedDate);
       }
     }
-
-    setIsModalVisible(false);
   };
 
 
@@ -328,14 +399,13 @@ const AlarmScreen = () => {
                   type="time"
                   value={
                     pickerMode === 'start'
-                      ? tempStartTime.toISOString().substring(11, 16)
-                      : tempEndTime.toISOString().substring(11, 16)
+                      ? `${tempStartTime.getHours().toString().padStart(2, '0')}:${tempStartTime.getMinutes().toString().padStart(2, '0')}`
+                      : `${tempEndTime.getHours().toString().padStart(2, '0')}:${tempEndTime.getMinutes().toString().padStart(2, '0')}`
                   }
                   onChange={(e) => {
                     const [hours, minutes] = e.target.value.split(":");
                     const newDate = new Date();
-                    newDate.setHours(parseInt(hours));
-                    newDate.setMinutes(parseInt(minutes));
+                    newDate.setHours(parseInt(hours), parseInt(minutes));
                     if (pickerMode === 'start') setTempStartTime(newDate);
                     else setTempEndTime(newDate);
                   }}
@@ -348,12 +418,7 @@ const AlarmScreen = () => {
                   mode="time"
                   is24Hour={true}
                   display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={(event, selectedDate) => {
-                    if (selectedDate) {
-                      if (pickerMode === 'start') setTempStartTime(selectedDate);
-                      else setTempEndTime(selectedDate);
-                    }
-                  }}
+                  onChange={handleTimeChange}
                 />
               )}
 
@@ -363,12 +428,7 @@ const AlarmScreen = () => {
                     title="Cambiar hora"
                     color="#2196F3"
                     onPress={() => {
-                      if (pickerMode === 'start') {
-                        onChangeStartTime({ type: 'set' }, tempStartTime);
-                      } else {
-                        onChangeEndTime({ type: 'set' }, tempEndTime);
-                      }
-                      setIsModalVisible(false);
+                      updateTimeFromModal(pickerMode === 'start' ? tempStartTime : tempEndTime);
                     }}
                   />
                 </View>
@@ -454,10 +514,18 @@ const AlarmScreen = () => {
                 </View>
 
                 <View style={styles.alarmActions}>
-                  <TouchableOpacity onPress={() => editAlarm(index)} style={styles.actionButton}>
+                  <TouchableOpacity
+                    onPress={() => editAlarm(index)}
+                    style={styles.actionButton}
+                    activeOpacity={0.7}
+                  >
                     <Ionicons name="pencil" size={24} color="#2196F3" />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => confirmDeleteAlarm(alarm.alarmConfigId)} style={styles.actionButton}>
+                  <TouchableOpacity
+                    onPress={() => confirmDeleteAlarm(alarm.alarmConfigId)}
+                    style={styles.actionButton}
+                    activeOpacity={0.7}
+                  >
                     <Ionicons name="trash" size={24} color="#F44336" />
                   </TouchableOpacity>
                 </View>

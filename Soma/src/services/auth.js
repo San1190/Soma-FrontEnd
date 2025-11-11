@@ -1,7 +1,7 @@
 import axios from 'axios';
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
 
-// La URL base ahora es http://192.168.1.141:8080/api
+// La URL base ahora es http://192.168.1.31:8080/api
 const API_URL = `${API_BASE_URL}/users`;
 
 export async function register(userData) {

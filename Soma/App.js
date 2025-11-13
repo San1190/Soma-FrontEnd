@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator, Text, Alert } from 'react-native'; // Importar Alert
 import AuthNavigator from './src/navigation/AuthNavigator';
@@ -32,7 +32,7 @@ Notifications.setNotificationHandler({
 
 function AppContent() {
   const { user, isLoading, login } = useAuth();
-  const { theme } = useTheme();
+  const { currentTheme } = useTheme();
   const { isAntiStressModeActive, activateMode, deactivateMode } = useAntiStress(); // 2. Obtener estado y acciones
   
   const notificationListener = useRef();
@@ -121,7 +121,7 @@ function AppContent() {
         try {
           const response = await axios.get(STRESS_API_URL);
           // Asumimos que la API devuelve { stressLevel: "Bajo" | "Moderado" | "Alto" }
-          const stressCategory = response.data.stressCategory; 
+          const stressCategory = response.data.stressLevel; 
           
           console.log(`Sondeo de estrés: ${stressCategory}`);
 
@@ -153,15 +153,17 @@ function AppContent() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: currentTheme.background }}>
         <ActivityIndicator size="large" color="#00BCD4" />
         <Text>Verificando usuario...</Text>
       </View>
     );
   }
 
+  const mergedTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: currentTheme.background } };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={mergedTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Group>
           {user ? (

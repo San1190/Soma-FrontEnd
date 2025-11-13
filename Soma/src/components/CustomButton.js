@@ -1,18 +1,22 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
-const CustomButton = ({ title, onPress }) => {
+const CustomButton = ({ title, onPress, disabled, style, textStyle }) => {
+  const { currentTheme } = useTheme();
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{title}</Text>
+    <TouchableOpacity
+      style={[styles.button, { backgroundColor: currentTheme.primary, opacity: disabled ? 0.6 : 1 }, style]}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Text style={[styles.text, { color: '#071220' }, textStyle]}>{title}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.accent1, // El color lila como principal
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -20,7 +24,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   text: {
-    color: colors.accent2, // El texto en el color morado oscuro
     fontSize: 18,
     fontWeight: 'bold',
   },

@@ -5,6 +5,7 @@ import { Audio } from 'expo-av';
 import useStressDetection from '../hooks/useStressDetection';
 import { styles } from './GuidedBreathingStyles'; // Importar los estilos desde el nuevo archivo
 import axios from 'axios';
+import { useTheme } from '../context/ThemeContext';
 
 const API_BASE_URL = 'http://192.168.56.1:8080/api/stress';
 const TEST_USER_ID = 1; // Hardcoded for testing, replace with dynamic user ID
@@ -12,6 +13,7 @@ const TEST_USER_ID = 1; // Hardcoded for testing, replace with dynamic user ID
 // Componente principal de la pantalla de respiración guiada
 const GuidedBreathingScreen = ({ navigation }) => {
   const { user } = useAuth();
+  const { currentTheme } = useTheme();
   const [stressLevel, setStressLevel] = useState('Desconocido'); // Estado para el nivel de estrés actual del usuario
   const [exerciseHistory, setExerciseHistory] = useState([]); // Historial de ejercicios de respiración completados por el usuario
 
@@ -387,9 +389,9 @@ const GuidedBreathingScreen = ({ navigation }) => {
 
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: currentTheme.background }}>
       <View style={styles.container}>
-        <Text style={styles.title}>Ejercicio de Respiración Guiada</Text>
+        <Text style={[styles.title,{color: currentTheme.textPrimary}]}>Ejercicio de Respiración Guiada</Text>
         {!isSimplifiedMode && (
           <View style={styles.userDataContainer}>
             <Text style={styles.userDataText}>Usuario: {user?.name || 'Cargando...'}</Text>

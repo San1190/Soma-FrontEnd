@@ -4,6 +4,10 @@ import { Platform } from 'react-native';
 export async function registerForPushNotificationsAsync() {
   let token;
 
+  if (Platform.OS === 'web') {
+    return null;
+  }
+
   if (Platform.OS === 'android') {
     Notifications.setNotificationChannelAsync('default', {
       name: 'default',

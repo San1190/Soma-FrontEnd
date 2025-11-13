@@ -4,11 +4,12 @@ import DateTimePicker from '@react-native-community/datetimepicker'; // Asumiend
 import SmartClock from '../components/Clock';
 import { Ionicons } from '@expo/vector-icons'; // Asumiendo que expo/vector-icons está instalado
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
-import Swal from 'sweetalert2'
+import { useTheme } from '../context/ThemeContext';
 
 const ALARM_API_URL = `${API_BASE_URL}/alarm-config`; // URL completa
 
 const AlarmScreen = () => {
+  const { currentTheme } = useTheme();
   // Estado para la alarma actual que se está editando
   const [alarmStartTime, setAlarmStartTime] = useState(new Date());
   const [alarmEndTime, setAlarmEndTime] = useState(new Date());
@@ -177,38 +178,8 @@ const AlarmScreen = () => {
   // Función para confirmar eliminación
   const confirmDeleteAlarm = (alarmId) => {
     if (Platform.OS === 'web') {
-      Swal.fire({
-        title: '¿Eliminar alarma?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar',
-        reverseButtons: true,
-        customClass: {
-          popup: 'rounded-xl shadow-lg',
-          confirmButton: 'px-4 py-2 rounded-md',
-          cancelButton: 'px-4 py-2 rounded-md',
-        },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          console.log("Confirmado: borrando alarma", alarmId);
-          deleteAlarm(alarmId);
-
-          Swal.fire({
-            title: 'Eliminada',
-            text: 'La alarma se ha eliminado correctamente.',
-            icon: 'success',
-            confirmButtonColor: '#3085d6',
-            timer: 1500,
-            showConfirmButton: false,
-          });
-        } else {
-          console.log("Cancelado");
-        }
-      });
+      const ok = typeof window !== 'undefined' && window.confirm('¿Eliminar alarma? Esta acción no se puede deshacer.');
+      if (ok) deleteAlarm(alarmId);
     } else {
       Alert.alert(
         '¿Eliminar alarma?',
@@ -340,12 +311,12 @@ const AlarmScreen = () => {
 
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: currentTheme.background }] }>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Reloj</Text>
+        <Text style={[styles.title,{color: currentTheme.textPrimary}]}>Reloj</Text>
         <SmartClock size={200} style={{ marginBottom: 16 }} />
 
-        <Text style={styles.title}>Configurar Alarma Inteligente</Text>
+        <Text style={[styles.title,{color: currentTheme.textPrimary}]}>Configurar Alarma Inteligente</Text>
 
         {/* Panel de días de la semana */}
         <View style={styles.daysContainer}>

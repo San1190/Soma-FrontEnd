@@ -42,6 +42,16 @@ const stressThemes = {
     cardBackground: '#F4F8F9',
     borderColor: '#D8E0E3',
   },
+  sleep: {
+    background: '#FFF3E0',
+    primary: '#FFB74D',
+    accent1: '#FFE0B2',
+    accent2: '#FFECB3',
+    textPrimary: '#3A2E20',
+    textSecondary: '#7A6A57',
+    cardBackground: '#FFF7E6',
+    borderColor: '#FFE6C7',
+  },
 };
 
 export default stressThemes;

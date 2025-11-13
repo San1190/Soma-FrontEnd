@@ -40,8 +40,28 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
-    if (!firstName || !email || !password || !gender || !dateOfBirth) {
+    if (!firstName || !email || !password || !gender || !dateOfBirth || !weight) {
       Alert.alert('Error', 'Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailOk) {
+      Alert.alert('Correo inválido', 'Ingresa un correo con formato válido.');
+      return;
+    }
+    const passwordOk = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+    if (!passwordOk) {
+      Alert.alert('Contraseña insegura', 'Usa mínimo 8 caracteres, con mayúscula, minúscula y número.');
+      return;
+    }
+    const weightVal = parseFloat(weight);
+    if (isNaN(weightVal) || weightVal <= 0) {
+      Alert.alert('Peso inválido', 'Ingresa tu peso en kilogramos (valor positivo).');
+      return;
+    }
+    const heightVal = height ? parseFloat(height) : undefined;
+    if (height && (isNaN(heightVal) || heightVal <= 0)) {
+      Alert.alert('Altura inválida', 'Ingresa tu altura en centímetros (valor positivo).');
       return;
     }
     const userData = {
@@ -49,8 +69,8 @@ const RegisterScreen = ({ navigation }) => {
       last_name: lastName || undefined,
       date_of_birth: dateOfBirth,
       gender,
-      weight_kg: weight ? parseFloat(weight) : undefined,
-      height_cm: height ? parseFloat(height) : undefined,
+      weight_kg: weightVal,
+      height_cm: heightVal,
       email,
       password_hash: password,
     };

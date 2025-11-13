@@ -3,17 +3,20 @@ import { useAuth } from '../context/AuthContext';
 import { ScrollView, View, Text, TouchableOpacity, Animated, Easing, Vibration } from 'react-native';
 import { Audio } from 'expo-av';
 import useStressDetection from '../hooks/useStressDetection';
-import { styles } from './GuidedBreathingStyles'; // Importar los estilos desde el nuevo archivo
+import { makeStyles } from './GuidedBreathingStyles';
 import axios from 'axios';
 import { useTheme } from '../context/ThemeContext';
-
-const API_BASE_URL = 'http://192.168.56.1:8080/api/stress';
-const TEST_USER_ID = 1; // Hardcoded for testing, replace with dynamic user ID
+import API_BASE_URL from '../constants/api';
+import { Platform } from 'react-native';
+import { getUserById } from '../services/users';
+const STRESS_API_URL = `${API_BASE_URL}/stress`;
+const TEST_USER_ID = 1;
 
 // Componente principal de la pantalla de respiración guiada
 const GuidedBreathingScreen = ({ navigation }) => {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const styles = makeStyles(currentTheme);
   const [stressLevel, setStressLevel] = useState('Desconocido'); // Estado para el nivel de estrés actual del usuario
   const [exerciseHistory, setExerciseHistory] = useState([]); // Historial de ejercicios de respiración completados por el usuario
 
@@ -44,27 +47,27 @@ const GuidedBreathingScreen = ({ navigation }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Efecto para obtener el nivel de estrés del backend y cargar el historial de ejercicios del usuario
+  // Efecto para obtener el nivel de estrés y el perfil del usuario
   useEffect(() => {
+    const uid = user?.id || TEST_USER_ID;
     const fetchStressLevel = async () => {
-      if (user && user.userId) {
-        try {
-          const response = await fetch(`192.168.1.141:8080/api/stress/users/${user.userId}`);
-          const data = await response.json();
-          setStressLevel(data.stressLevel); // Asume que el backend devuelve { stressLevel: "Bajo" }
-        } catch (error) {
-          console.error('Error al obtener el nivel de estrés:', error);
-          setStressLevel('Desconocido');
-        }
+      try {
+        const response = await axios.get(`${STRESS_API_URL}/users/${uid}`);
+        setStressLevel(response.data?.stressLevel || 'Desconocido');
+      } catch {
+        setStressLevel('Desconocido');
       }
     };
-
-    if (user) {
-      fetchStressLevel();
-      // Cargar historial de ejercicios (si existe en el objeto de usuario)
-      setExerciseHistory(user.breathingExercises || []);
-    }
-  }, [user]);
+    const fetchUser = async () => {
+      try {
+        const data = await getUserById(uid);
+        setUserProfile(data);
+      } catch {}
+    };
+    fetchStressLevel();
+    fetchUser();
+    setExerciseHistory(user?.breathingExercises || []);
+  }, [user?.id]);
 
   const [breathingState, setBreathingState] = useState('idle');
   const [countdown, setCountdown] = useState(0);
@@ -77,9 +80,10 @@ const GuidedBreathingScreen = ({ navigation }) => {
   const [timer, setTimer] = useState(0); // Nuevo estado para el temporizador de fase
   const timerRef = useRef(null); // Ref para el temporizador de intervalo
 
-  const inhaleDuration = 4000;
-  const holdDuration = 2000;
-  const exhaleDuration = 6000;
+  const [inhaleDuration, setInhaleDuration] = useState(5000);
+  const [holdDuration, setHoldDuration] = useState(5000);
+  const [exhaleDuration, setExhaleDuration] = useState(5000);
+  const [userProfile, setUserProfile] = useState(null);
 
   // Hook personalizado para la detección de estrés y manejo de intervenciones
   const { stressNotificationType, recordIntervention, declineBreathingSuggestion } = useStressDetection(data);
@@ -184,17 +188,12 @@ const GuidedBreathingScreen = ({ navigation }) => {
   // Efecto para cargar y descargar el archivo de sonido de respiración
   useEffect(() => {
     async function loadSound() {
+      if (Platform.OS === 'web') return;
       const { sound } = await Audio.Sound.createAsync(require('../../assets/breathing_sound.mp3'));
       setSound(sound);
     }
-
     loadSound();
-
-    return () => {
-      if (sound) {
-        sound.unloadAsync(); // Descargar el sonido al desmontar el componente
-      }
-    };
+    return () => { if (sound) { sound.unloadAsync(); } };
   }, []);
 
   // Función para iniciar la sesión de respiración guiada
@@ -394,11 +393,31 @@ const GuidedBreathingScreen = ({ navigation }) => {
         <Text style={[styles.title,{color: currentTheme.textPrimary}]}>Ejercicio de Respiración Guiada</Text>
         {!isSimplifiedMode && (
           <View style={styles.userDataContainer}>
-            <Text style={styles.userDataText}>Usuario: {user?.name || 'Cargando...'}</Text>
+            <Text style={styles.userDataText}>Usuario: {(userProfile?.first_name && userProfile?.last_name) ? `${userProfile.first_name} ${userProfile.last_name}` : (userProfile?.first_name || userProfile?.email || user?.email || 'Cargando...')}</Text>
             <Text style={styles.userDataText}>Nivel de estrés actual: {stressLevel}</Text>
+            <View style={styles.chipRow}>
+              <View style={[styles.chip,{backgroundColor: (stressLevel==='Bajo')?'#2ecc71':(stressLevel==='Moderado')?'#f39c12':'#e74c3c'}]}>
+                <Text style={{color:'#fff',fontWeight:'600'}}>Estrés: {stressLevel}</Text>
+              </View>
+              <View style={[styles.chip,{backgroundColor:'#3498db'}]}>
+                <Text style={{color:'#fff',fontWeight:'600'}}>FC: {data[data.length-1]?.heartRate ?? '—'} bpm</Text>
+              </View>
+            </View>
             <Text style={styles.userDataText}>Ejercicios completados: {exerciseHistory.length}</Text>
           </View>
         )}
+
+        <View style={styles.suggestionButtonsContainer}>
+          <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(5000); setHoldDuration(5000); setExhaleDuration(5000); }}>
+            <Text style={styles.buttonText}>Coherencia 5-5-5</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(4000); setHoldDuration(4000); setExhaleDuration(4000); }}>
+            <Text style={styles.buttonText}>Box 4-4-4</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(4000); setHoldDuration(7000); setExhaleDuration(8000); }}>
+            <Text style={styles.buttonText}>4-7-8</Text>
+          </TouchableOpacity>
+        </View>
 
         {stressNotificationType !== 'none' && (
           <View style={styles.stressNotification}>

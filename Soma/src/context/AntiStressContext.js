@@ -8,6 +8,7 @@ const AntiStressContext = createContext();
 export const AntiStressProvider = ({ children }) => {
   const [isAntiStressModeActive, setIsAntiStressModeActive] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState(null);
+  const [isSleepModeActive, setIsSleepModeActive] = useState(false);
   const { user } = useAuth();
 
   const api = axios.create({ baseURL: API_BASE_URL });
@@ -47,8 +48,22 @@ export const AntiStressProvider = ({ children }) => {
     }
   }, [user, isAntiStressModeActive, currentSessionId, api]);
 
+  useEffect(() => {
+    let interval;
+    const pollSleepActive = async () => {
+      if (!user || !user.id) return;
+      try {
+        const res = await api.get(`/anti-stress/sleep/active/${user.id}`);
+        setIsSleepModeActive(Boolean(res.data?.active));
+      } catch {}
+    };
+    pollSleepActive();
+    interval = setInterval(pollSleepActive, 30000);
+    return () => interval && clearInterval(interval);
+  }, [user?.id]);
+
   return (
-    <AntiStressContext.Provider value={{ isAntiStressModeActive, activateMode, deactivateMode }}>
+    <AntiStressContext.Provider value={{ isAntiStressModeActive, activateMode, deactivateMode, isSleepModeActive }}>
       {children}
     </AntiStressContext.Provider>
   );

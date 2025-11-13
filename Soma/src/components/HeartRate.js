@@ -1,57 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import API_BASE_URL from '../constants/api';
 
-const API_BASE_URL = 'http://localhost:8080/api/data'; // Asegúrate de que esta URL sea correcta
-const TEST_USER_ID = 1; // ID del usuario de prueba
+const TEST_USER_ID = 1; // Fallback para demo
 
 const HeartRate = () => {
   const [heartRate, setHeartRate] = useState('--');
   const [lastUpdate, setLastUpdate] = useState('--');
+  const { user } = useAuth();
+  const { currentTheme } = useTheme();
 
   useEffect(() => {
+    let intervalId;
     const fetchHeartRate = async () => {
+      const userId = user?.id || TEST_USER_ID;
       try {
-        const response = await fetch(`${API_BASE_URL}/latest/${TEST_USER_ID}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const res = await fetch(`${API_BASE_URL}/data/latest/${userId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data && data.heart_rate_bpm != null) {
+          setHeartRate(data.heart_rate_bpm);
+          setLastUpdate(new Date(data.timestamp).toLocaleString());
+          return;
         }
-        const data = await response.json();
-        setHeartRate(data.heart_rate_bpm);
-        setLastUpdate(new Date(data.timestamp).toLocaleString());
+        // Fallback a usuario de prueba si no hay datos para el usuario actual
+        if (user?.id && user.id !== TEST_USER_ID) {
+          const r2 = await fetch(`${API_BASE_URL}/data/latest/${TEST_USER_ID}`);
+          if (r2.ok) {
+            const d2 = await r2.json();
+            setHeartRate(d2.heart_rate_bpm ?? '--');
+            setLastUpdate(d2.timestamp ? new Date(d2.timestamp).toLocaleString() : '--');
+          }
+        }
       } catch (error) {
-        console.error("Error fetching heart rate data:", error);
+        console.log('HR fetch error:', error.message);
         setHeartRate('--');
         setLastUpdate('--');
       }
     };
 
-    // Fetch initial data
     fetchHeartRate();
-
-    // Fetch data every 10 seconds (or match your backend simulation rate)
-    const intervalId = setInterval(fetchHeartRate, 10000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
-  }, []);
+    intervalId = setInterval(fetchHeartRate, 10000);
+    return () => intervalId && clearInterval(intervalId);
+  }, [user?.id]);
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>Frecuencia Cardíaca</Text>
+    <View style={[styles.card, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }]}>
+      <Text style={[styles.title,{color: currentTheme.textPrimary}]}>Frecuencia Cardíaca</Text>
       <Text style={styles.value}>{heartRate} bpm</Text>
-      <Text style={styles.subtitle}>Última actualización: {lastUpdate}</Text>
+      <Text style={[styles.subtitle,{color: currentTheme.textSecondary}]}>Última actualización: {lastUpdate}</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    borderWidth: 1,
     borderRadius: 8,
     padding: 16,
     marginVertical: 8,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-    elevation: 3,
   },
   title: {
     fontSize: 18,
@@ -61,12 +70,11 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#e74c3c', // Red color for heart rate
+    color: '#e74c3c',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 12,
-    color: '#7f8c8d',
   },
 });
 

@@ -6,7 +6,6 @@ import HydrationScreen from '../screens/HydrationScreen';
 import GuidedBreathingScreen from '../screens/GuidedBreathingScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import AlarmScreen from '../screens/AlarmScreen';
-import ActivityReportScreen from '../screens/ActivityReportScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
 
@@ -32,7 +31,7 @@ const AppNavigator = () => (
     <Tab.Screen name="Hydration" component={HydrationScreen} />
     <Tab.Screen name="Dashboard" component={DashboardScreen}/>
     <Tab.Screen name="Alarm" component={AlarmScreen}/>
-    <Tab.Screen name="ActivityReport" component={ActivityReportScreen}/>
+    
 
   </Tab.Navigator>
 );

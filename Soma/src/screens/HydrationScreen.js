@@ -5,6 +5,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Scr
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
+import { useAuth } from '../context/AuthContext';
 
 const HYDRATION_API_URL = `${API_BASE_URL}/hydration`; // URL completa
 const ML_PER_CUP = 250; // Cantidad de ml por vaso
@@ -15,7 +16,8 @@ const HydrationScreen = () => {
     const [waterAmount, setWaterAmount] = useState('');
     const [cups, setCups] = useState(0);
     const [goal, setGoal] = useState(8); // Meta de vasos (por defecto 8 = 2000ml)
-    const userId = 1; // Placeholder: En una aplicación real, obtendrías el ID del usuario autenticado
+    const { user } = useAuth();
+    const userId = user?.id || 1;
 
     useEffect(() => {
         fetchHydrationStatus();
@@ -25,21 +27,18 @@ const HydrationScreen = () => {
 
     const fetchHydrationStatus = async () => {
         try {
-            const response = await axios.get(`${HYDRATION_API_URL}/status`, {
-                params: { userId: userId }
-            });
+            const response = await axios.get(`${HYDRATION_API_URL}/status`, { params: { userId } });
             const payload = response.data;
             // Si por alguna razón llega el index.html del dev server, considerarlo error
             if (typeof payload === 'string' && /<!DOCTYPE html|<html/i.test(payload)) {
                 throw new Error('Respuesta HTML inesperada desde la API de hidratación');
             }
-            setHydrationStatus(translateHydrationStatus(payload));
+            const statusStr = typeof payload === 'string' ? payload : (payload && payload.status ? payload.status : '');
+            setHydrationStatus(translateHydrationStatus(statusStr));
 
             // Intentar obtener las necesidades diarias para calcular la meta
             try {
-                const needsResponse = await axios.get(`${HYDRATION_API_URL}/needs`, {
-                    params: { userId: userId }
-                });
+                const needsResponse = await axios.get(`${HYDRATION_API_URL}/needs`, { params: { userId } });
                 const dailyNeedsMl = needsResponse.data.dailyNeedsMl || 2000;
                 const calculatedGoal = Math.ceil(dailyNeedsMl / ML_PER_CUP);
                 setGoal(calculatedGoal);
@@ -60,10 +59,7 @@ const HydrationScreen = () => {
 
             // Registrar en la API automáticamente
             try {
-                await axios.post(`${HYDRATION_API_URL}/log`, {
-                    userId: userId,
-                    amountMl: ML_PER_CUP
-                });
+                await axios.post(`${HYDRATION_API_URL}/log`, null, { params: { userId, amountMl: ML_PER_CUP } });
                 fetchHydrationStatus(); // Actualizar el estado
             } catch (error) {
                 console.error('Error logging water intake:', error);
@@ -89,10 +85,7 @@ const HydrationScreen = () => {
         }
 
         try {
-            await axios.post(`${HYDRATION_API_URL}/log`, {
-                userId: userId,
-                amountMl: parseFloat(waterAmount)
-            });
+            await axios.post(`${HYDRATION_API_URL}/log`, null, { params: { userId, amountMl: parseFloat(waterAmount) } });
             Alert.alert('Éxito', 'Ingesta de agua registrada correctamente.');
             setWaterAmount('');
             fetchHydrationStatus(); // Actualizar el estado después de registrar
@@ -106,7 +99,7 @@ const HydrationScreen = () => {
         console.log('triggerHydrationReminder called');
         try {
             console.log('Attempting to send hydration reminder...');
-            const response = await axios.post(`${HYDRATION_API_URL}/trigger-reminder`, { userId: userId });
+            const response = await axios.post(`${HYDRATION_API_URL}/trigger-reminder`, null, { params: { userId } });
             console.log('Hydration reminder response:', response.data);
             console.log('Attempting to show Alert.alert for success.');
             Alert.alert('Recordatorio enviado', 'Se ha intentado enviar un recordatorio de hidratación.');
@@ -274,16 +267,17 @@ const styles = StyleSheet.create({
 });
 
 const translateHydrationStatus = (statusMessage) => {
-    const regex = /Current hydration status for user (\d+): ([\d,.]+) ml remaining to reach goal./;
+    if (typeof statusMessage !== 'string') {
+        return 'Estado de hidratación no disponible';
+    }
+    const regex = /Current hydration status for user (\d+): ([\d,.]+) ml remaining to reach goal\./;
     const match = statusMessage.match(regex);
-
     if (match) {
         const userId = match[1];
         const amount = match[2];
         return `Estado de hidratación actual para el usuario ${userId}: ${amount} ml restantes para alcanzar la meta.`;
-    } else {
-        return statusMessage; // Retorna el mensaje original si no coincide con el patrón
     }
+    return statusMessage;
 };
 
 export default HydrationScreen;

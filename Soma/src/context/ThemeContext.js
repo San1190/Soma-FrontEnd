@@ -15,7 +15,7 @@ export const ThemeProvider = ({ children }) => {
   const [stressCategory, setStressCategory] = useState(null);
   
   // 2. Obtener el estado de anti-estrés
-  const { isAntiStressModeActive } = useAntiStress();
+  const { isAntiStressModeActive, isSleepModeActive } = useAntiStress();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -42,7 +42,9 @@ export const ThemeProvider = ({ children }) => {
 
   // Selección del tema
   let currentTheme = themes[theme];
-  if (isAntiStressModeActive) {
+  if (isSleepModeActive) {
+    currentTheme = stressThemes.sleep;
+  } else if (isAntiStressModeActive) {
     currentTheme = stressThemes.calm;
   } else if (stressCategory) {
     const key = stressCategory === 'Bajo' ? 'low' : (stressCategory === 'Moderado' ? 'moderate' : 'high');

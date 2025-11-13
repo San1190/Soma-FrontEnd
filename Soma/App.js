@@ -6,7 +6,7 @@ import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
-import { AntiStressProvider, useAntiStress } from './src/context/AntiStressContext'; // 1. Importar AntiStress
+import { AntiStressProvider, useAntiStress } from './src/context/AntiStressContext';
 
 import { registerForPushNotificationsAsync } from './src/utils/notifications';
 import axios from 'axios';
@@ -33,7 +33,7 @@ Notifications.setNotificationHandler({
 function AppContent() {
   const { user, isLoading, login } = useAuth();
   const { currentTheme } = useTheme();
-  const { isAntiStressModeActive, activateMode, deactivateMode } = useAntiStress(); // 2. Obtener estado y acciones
+  const { isAntiStressModeActive, activateMode, deactivateMode, isSleepModeActive } = useAntiStress();
   
   const notificationListener = useRef();
   const responseListener = useRef();
@@ -175,6 +175,10 @@ function AppContent() {
           )}
         </Stack.Group>
       </Stack.Navigator>
+      {/* Overlay cálido para simular filtro de luz azul y brillo reducido */}
+      {isSleepModeActive && (
+        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(255, 180, 120, 0.15)' }} />
+      )}
     </NavigationContainer>
   );
 }

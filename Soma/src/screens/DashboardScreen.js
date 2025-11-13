@@ -8,13 +8,15 @@ import { useTheme } from '../context/ThemeContext';
 import Calories from '../components/Calories';
 import HeartRate from '../components/HeartRate';
 import SomaticMirror from '../components/SomaticMirror'; // Importar SomaticMirror
+import TimelineChart from '../components/TimelineChart';
 
 const DashboardScreen = () => {
   const { user } = useAuth();
-  const { isAntiStressModeActive, activateMode, deactivateMode } = useAntiStress();
+  const { isAntiStressModeActive, activateMode, deactivateMode, isSleepModeActive } = useAntiStress();
   const [heartRate, setHeartRate] = useState('-');
   const [hrv, setHrv] = useState('-');
   const { currentTheme, stressCategory } = useTheme();
+  const [wakeEvent, setWakeEvent] = useState(null);
 
   const loadStatus = async () => {
     if (!user?.id) return;
@@ -23,7 +25,10 @@ const DashboardScreen = () => {
       // El estado visual usa el contexto, pero también reflejamos backend
     } catch {}
     try {
-      const latest = await axios.get(`${API_BASE_URL}/data/latest/${user.id}`);
+      let latest = await axios.get(`${API_BASE_URL}/data/latest/${user.id}`);
+      if (!latest.data || latest.status !== 200 || latest.data.heart_rate_bpm == null) {
+        latest = await axios.get(`${API_BASE_URL}/data/latest/1`);
+      }
       setHeartRate(latest.data?.heart_rate_bpm ?? '-');
       setHrv(latest.data?.hrv_ms ?? '-');
     } catch {}
@@ -35,7 +40,10 @@ const DashboardScreen = () => {
     if (!user?.id) return;
     const interval = setInterval(async () => {
       try {
-        const latest = await axios.get(`${API_BASE_URL}/data/latest/${user.id}`);
+        let latest = await axios.get(`${API_BASE_URL}/data/latest/${user.id}`);
+        if (!latest.data || latest.status !== 200 || latest.data.heart_rate_bpm == null) {
+          latest = await axios.get(`${API_BASE_URL}/data/latest/1`);
+        }
         setHeartRate(latest.data?.heart_rate_bpm ?? '-');
         setHrv(latest.data?.hrv_ms ?? '-');
       } catch {}
@@ -49,24 +57,38 @@ const DashboardScreen = () => {
     catch (e) { Alert.alert('Error', 'No se pudo chequear el estrés'); }
   };
 
+  const loadLatestWake = async () => {
+    const userId = user?.id || 1;
+    try {
+      const res = await axios.get(`${API_BASE_URL}/wake-events/user/${userId}/latest`);
+      setWakeEvent(res.data);
+    } catch { setWakeEvent(null); }
+  };
+
+  useEffect(() => { loadLatestWake(); }, [user?.id]);
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: currentTheme.background }]} contentContainerStyle={styles.content}>
+      {/* Timeline interactiva */}
+      <TimelineChart />
+
       {/* Tarjeta del primer gráfico */}
+      {!isSleepModeActive && (
       <Calories
         // props opcionales; puedes eliminarlas si usas los defaults
         title="Calorías (semana)"
         style={{ marginTop: 8 }}
         chartProps={{}}
-      />
+      />)}
 
-      <HeartRate />
-      <SomaticMirror />
+      {!isSleepModeActive && <HeartRate />}
+      {!isSleepModeActive && <SomaticMirror />}
 
       <View style={[styles.card, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }] }>
-        <Text style={styles.cardTitle}>Estado Antiestrés</Text>
+        <Text style={styles.cardTitle}>Modos</Text>
         <View style={styles.row2}>
-          <View className={undefined} style={styles.metric}><Text style={[styles.label,{color: currentTheme.textSecondary}]}>Modo</Text><Text style={[styles.value,{color: currentTheme.textPrimary}]}>{!isAntiStressModeActive ? 'Activo' : 'Inactivo'}</Text></View>
-          <View style={styles.metric}><Text style={[styles.label,{color: currentTheme.textSecondary}]}>Estrés</Text><Text style={[styles.value,{color: currentTheme.textPrimary}]}>{stressCategory}</Text></View>
+          <View style={styles.metric}><Text style={[styles.label,{color: currentTheme.textSecondary}]}>Antiestrés</Text><Text style={[styles.value,{color: currentTheme.textPrimary}]}>{isAntiStressModeActive ? 'Activo' : 'Inactivo'}</Text></View>
+          <View style={styles.metric}><Text style={[styles.label,{color: currentTheme.textSecondary}]}>Antiinsomnio</Text><Text style={[styles.value,{color: currentTheme.textPrimary}]}>{isSleepModeActive ? 'Activo' : 'Inactivo'}</Text></View>
         </View>
         <View style={styles.row2}>
           <View style={styles.metric}><Text style={[styles.label,{color: currentTheme.textSecondary}]}>FC (bpm)</Text><Text style={[styles.value,{color: currentTheme.textPrimary}]}>{heartRate}</Text></View>
@@ -75,10 +97,23 @@ const DashboardScreen = () => {
         <View style={styles.actions}>
           <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: currentTheme.primary }]} onPress={checkStress}><Text style={styles.btnTextDark}>Chequear estrés</Text></TouchableOpacity>
           <TouchableOpacity
-            style={[styles.btn, { backgroundColor: isAntiStressModeActive ? currentTheme.accent1 : currentTheme.accent2 }]}
-            onPress={() => (isAntiStressModeActive ? activateMode('MANUAL_START') : deactivateMode())}
-          ><Text style={styles.btnText}>{isAntiStressModeActive ? 'Activar' : 'Finalizar'}</Text></TouchableOpacity>
+            style={[styles.btn, { backgroundColor: isAntiStressModeActive ? currentTheme.accent2 : currentTheme.accent1 }]}
+            onPress={() => (isAntiStressModeActive ? deactivateMode() : activateMode('MANUAL_START'))}
+          ><Text style={styles.btnText}>{isAntiStressModeActive ? 'Finalizar' : 'Activar'}</Text></TouchableOpacity>
         </View>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }] }>
+        <Text style={styles.cardTitle}>Último despertar</Text>
+        {wakeEvent ? (
+          <View style={styles.row2}>
+            <View style={styles.metric}><Text style={[styles.label,{color: currentTheme.textSecondary}]}>Hora</Text><Text style={[styles.value,{color: currentTheme.textPrimary}]}>{wakeEvent.timestamp}</Text></View>
+            <View style={styles.metric}><Text style={[styles.label,{color: currentTheme.textSecondary}]}>Fase</Text><Text style={[styles.value,{color: currentTheme.textPrimary}]}>{wakeEvent.sleepStage}</Text></View>
+          </View>
+        ) : (
+          <Text style={[styles.label,{color: currentTheme.textSecondary}]}>Sin registros</Text>
+        )}
+        <View style={styles.actions}><TouchableOpacity style={[styles.btnPrimary, { backgroundColor: currentTheme.primary }]} onPress={loadLatestWake}><Text style={styles.btnTextDark}>Actualizar</Text></TouchableOpacity></View>
       </View>
 
       {/* Aquí irán los demás componentes del dashboard */}

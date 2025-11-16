@@ -8,6 +8,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import AlarmScreen from '../screens/AlarmScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
+import AntiStressReportScreen from '../screens/AntiStressReportScreen';
 
 
 
@@ -31,7 +32,8 @@ const AppNavigator = () => (
     <Tab.Screen name="Hydration" component={HydrationScreen} />
     <Tab.Screen name="Dashboard" component={DashboardScreen}/>
     <Tab.Screen name="Alarm" component={AlarmScreen}/>
-    
+    <Tab.Screen name="Reports" component={AntiStressReportScreen}/>
+  
 
   </Tab.Navigator>
 );

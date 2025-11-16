@@ -175,9 +175,12 @@ function AppContent() {
           )}
         </Stack.Group>
       </Stack.Navigator>
-      {/* Overlay cálido para simular filtro de luz azul y brillo reducido */}
+      {/* Overlays para modos */}
       {isSleepModeActive && (
         <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(255, 180, 120, 0.15)' }} />
+      )}
+      {isAntiStressModeActive && (
+        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(120, 160, 180, 0.18)' }} />
       )}
     </NavigationContainer>
   );

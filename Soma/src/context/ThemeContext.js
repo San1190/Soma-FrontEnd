@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { useColorScheme } from 'react-native';
 import themes from '../constants/colors';
 import stressThemes from '../constants/stressThemes';
@@ -17,6 +17,9 @@ export const ThemeProvider = ({ children }) => {
   const colorScheme = useColorScheme(); // 'light' or 'dark'
   const [theme, setTheme] = useState(colorScheme || 'light');
   const [stressCategory, setStressCategory] = useState(null);
+  const [displayTheme, setDisplayTheme] = useState(themes[colorScheme || 'light']);
+  const rafRef = useRef(null);
+  const prevThemeRef = useRef(null);
   
   // 2. Obtener el estado de anti-estrés
   const { isAntiStressModeActive, isSleepModeActive } = useAntiStress();
@@ -45,18 +48,71 @@ export const ThemeProvider = ({ children }) => {
   };
 
   // Selección del tema
-  let currentTheme = themes[theme];
+  let selectedTheme = themes[theme];
   if (isSleepModeActive) {
-    currentTheme = stressThemes.sleep;
+    selectedTheme = stressThemes.sleep;
   } else if (isAntiStressModeActive) {
-    currentTheme = stressThemes.calm;
+    selectedTheme = stressThemes.calm;
   } else if (stressCategory) {
     const key = stressCategory === 'Bajo' ? 'low' : (stressCategory === 'Moderado' ? 'moderate' : 'high');
-    currentTheme = stressThemes[key];
+    selectedTheme = stressThemes[key];
   }
 
+  useEffect(() => {
+    const parseHex = (hex) => {
+      const h = hex.replace('#', '');
+      const r = parseInt(h.substring(0, 2), 16);
+      const g = parseInt(h.substring(2, 4), 16);
+      const b = parseInt(h.substring(4, 6), 16);
+      return [r, g, b];
+    };
+    const toHex = (r, g, b) => {
+      const c = (n) => {
+        const v = Math.max(0, Math.min(255, Math.round(n)));
+        const s = v.toString(16).padStart(2, '0');
+        return s;
+      };
+      return `#${c(r)}${c(g)}${c(b)}`;
+    };
+    const blend = (a, b, t) => {
+      const [ar, ag, ab] = parseHex(a);
+      const [br, bg, bb] = parseHex(b);
+      return toHex(ar + (br - ar) * t, ag + (bg - ag) * t, ab + (bb - ab) * t);
+    };
+    const from = prevThemeRef.current || selectedTheme;
+    const to = selectedTheme;
+    prevThemeRef.current = to;
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    const keys = Object.keys(to);
+    const start = Date.now();
+    const duration = 400;
+    const step = () => {
+      const t = Math.min(1, (Date.now() - start) / duration);
+      const blended = {};
+      for (const k of keys) {
+        blended[k] = blend(from[k], to[k], t);
+      }
+      setDisplayTheme(blended);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        rafRef.current = null;
+      }
+    };
+    step();
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [selectedTheme]);
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, currentTheme, stressCategory }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, currentTheme: displayTheme, stressCategory }}>
       {children}
     </ThemeContext.Provider>
   );

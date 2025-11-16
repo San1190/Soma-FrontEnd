@@ -38,24 +38,25 @@ const LoginScreen = ({ navigation }) => {
     container: {
       flex: 1,
       backgroundColor: currentTheme.background,
+      padding: 16,
     },
     innerContainer: {
       flex: 1,
       justifyContent: 'center',
-      paddingHorizontal: 30,
+      paddingHorizontal: 16,
     },
     logo: {
-      fontSize: 60,
+      fontSize: 32,
       fontWeight: 'bold',
-      color: currentTheme.primary,
+      color: currentTheme.textPrimary,
       textAlign: 'center',
-      marginBottom: 10,
+      marginBottom: 12,
     },
     subtitle: {
-      fontSize: 18,
-      color: currentTheme.accent1,
+      fontSize: 16,
+      color: currentTheme.textSecondary,
       textAlign: 'center',
-      marginBottom: 40,
+      marginBottom: 16,
     },
     registerContainer: {
       flexDirection: 'row',
@@ -63,7 +64,7 @@ const LoginScreen = ({ navigation }) => {
       marginTop: 20,
     },
     registerText: {
-      color: currentTheme.textPrimary,
+      color: currentTheme.textSecondary,
       fontSize: 16,
     },
     registerLink: {

@@ -1,28 +1,33 @@
 import React from 'react';
 import { TextInput, StyleSheet } from 'react-native';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const CustomInput = (props) => {
+  const { currentTheme } = useTheme();
   return (
     <TextInput
-      style={styles.input}
-      placeholderTextColor="#A9A9A9" // Un color gris claro para el placeholder
-      {...props} // Pasa todas las demás props (value, onChangeText, etc.)
+      style={[
+        styles.input,
+        {
+          backgroundColor: currentTheme.cardBackground,
+          color: currentTheme.textPrimary,
+          borderColor: currentTheme.borderColor,
+        },
+      ]}
+      placeholderTextColor={currentTheme.textSecondary}
+      {...props}
     />
   );
 };
 
 const styles = StyleSheet.create({
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Fondo blanco translúcido
-    color: colors.textPrimary,
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 10,
     fontSize: 16,
-    marginBottom: 15,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
 });
 

@@ -8,6 +8,10 @@ import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 
 const ThemeContext = createContext();
+/**
+ * Deriva el tema visual (colores, fondo, acentos) según esquema (light/dark),
+ * categoría de estrés y estado de modos (antiestrés/sueño).
+ */
 
 export const ThemeProvider = ({ children }) => {
   const colorScheme = useColorScheme(); // 'light' or 'dark'

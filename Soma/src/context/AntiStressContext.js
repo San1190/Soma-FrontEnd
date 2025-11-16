@@ -4,6 +4,10 @@ import API_BASE_URL from '../constants/api';
 import { useAuth } from './AuthContext';
 
 const AntiStressContext = createContext();
+/**
+ * Gestiona el modo antiestrés y el modo sueño: activación, fin de sesión,
+ * y sincronización con el backend para estados activos.
+ */
 
 export const AntiStressProvider = ({ children }) => {
   const [isAntiStressModeActive, setIsAntiStressModeActive] = useState(false);

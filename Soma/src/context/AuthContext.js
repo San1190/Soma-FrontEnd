@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as loginService, registerUser } from '../services/auth'; // Asume que tienes estas funciones
+import { login as loginService, registerUser } from '../services/auth';
 import { getItem, setItem, removeItem } from '../services/session'; // Para manejar el token en AsyncStorage
 
 const AuthContext = createContext(null);
@@ -28,8 +28,12 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
         const response = await loginService(email, password);
-        console.log('Backend login response:', response); // Added for debugging
-        const userData = { id: response.user_id, email: email, token: response.token }; // Ajusta según la respuesta de tu API
+        const userData = {
+          id: response.user_id,
+          email: response.email || email,
+          first_name: response.first_name,
+          last_name: response.last_name,
+        };
       setUser(userData);
       await setItem('user', JSON.stringify(userData));
       return true;

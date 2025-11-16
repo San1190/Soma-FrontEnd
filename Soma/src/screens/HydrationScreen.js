@@ -270,13 +270,6 @@ const translateHydrationStatus = (statusMessage) => {
     if (typeof statusMessage !== 'string') {
         return 'Estado de hidratación no disponible';
     }
-    const regex = /Current hydration status for user (\d+): ([\d,.]+) ml remaining to reach goal\./;
-    const match = statusMessage.match(regex);
-    if (match) {
-        const userId = match[1];
-        const amount = match[2];
-        return `Estado de hidratación actual para el usuario ${userId}: ${amount} ml restantes para alcanzar la meta.`;
-    }
     return statusMessage;
 };
 

@@ -1,7 +1,7 @@
 // Archivo: san1190/soma-frontend/San1190-Soma-FrontEnd-12276c962af8134a3da9e0f3cfd941ba48025b46/Soma/src/screens/HydrationScreen.js
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
@@ -131,7 +131,7 @@ const HydrationScreen = () => {
                             <MaterialCommunityIcons
                                 key={index}
                                 name={index < cups ? "cup-water" : "cup-outline"}
-                                size={40}
+                                size={Platform.OS === 'web' ? 40 : 35}
                                 color={index < cups ? "#007AFF" : "#CCCCCC"}
                                 style={styles.cupIcon}
                             />
@@ -223,26 +223,27 @@ const styles = StyleSheet.create({
     },
     cupsContainer: {
         flexDirection: 'row',
-        marginHorizontal: 10,
-        flexWrap: 'wrap',
+        marginHorizontal: Platform.OS === 'web' ? 20 : 10,
+        flexWrap: Platform.OS === 'web' ? 'nowrap' : 'wrap',
         justifyContent: 'center',
-        maxWidth: '100%',
+        maxWidth: Platform.OS === 'web' ? '70%' : '100%',
+        flexShrink: Platform.OS === 'web' ? 0 : 1,
     },
     cupIcon: {
-        marginHorizontal: 5,
+        marginHorizontal: Platform.OS === 'web' ? 3 : 5,
         marginVertical: 3,
     },
     cupButton: {
         backgroundColor: '#007AFF',
         borderRadius: 25,
-        width: 50,
-        height: 50,
+        width: Platform.OS === 'web' ? 50 : 45,
+        height: Platform.OS === 'web' ? 50 : 45,
         justifyContent: 'center',
         alignItems: 'center',
     },
     cupButtonText: {
         color: '#fff',
-        fontSize: 28,
+        fontSize: Platform.OS === 'web' ? 28 : 24,
         fontWeight: 'bold',
     },
     sectionTitle: {

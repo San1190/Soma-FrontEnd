@@ -9,6 +9,7 @@ import AlarmScreen from '../screens/AlarmScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
 import AntiStressReportScreen from '../screens/AntiStressReportScreen';
+import SleepSettingsScreen from '../screens/SleepSettingsScreen';
 
 
 
@@ -19,6 +20,7 @@ const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
     <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+    <Stack.Screen name="SleepSettings" component={SleepSettingsScreen} />
   </Stack.Navigator>
 );
 

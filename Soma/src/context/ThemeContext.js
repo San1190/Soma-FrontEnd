@@ -111,8 +111,9 @@ export const ThemeProvider = ({ children }) => {
     };
   }, [selectedTheme]);
 
+  const uiSimplified = Boolean(isSleepModeActive);
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, currentTheme: displayTheme, stressCategory }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, currentTheme: displayTheme, stressCategory, uiSimplified }}>
       {children}
     </ThemeContext.Provider>
   );

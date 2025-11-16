@@ -11,6 +11,7 @@ const AntiStressReportScreen = () => {
   const { currentTheme } = useTheme();
   const [stats, setStats] = useState(null);
   const [recs, setRecs] = useState([]);
+  const [sleepStats, setSleepStats] = useState(null);
 
   const load = async () => {
     const uid = user?.id || 1;
@@ -21,6 +22,9 @@ const AntiStressReportScreen = () => {
       const sRes = await fetch(`${API_BASE_URL}/anti-stress/stats/${uid}?${qs}`);
       const sJson = await sRes.json();
       setStats(sJson);
+      const ssRes = await fetch(`${API_BASE_URL}/anti-stress/sleep/stats/${uid}?${qs}`);
+      const ssJson = await ssRes.json();
+      setSleepStats(ssJson);
       const rRes = await fetch(`${API_BASE_URL}/anti-stress/recommendations/${uid}?${qs}`);
       const rJson = await rRes.json();
       setRecs(rJson.recommendations || []);
@@ -40,6 +44,13 @@ const AntiStressReportScreen = () => {
         <TouchableOpacity style={[styles.button, { backgroundColor: currentTheme.primary }]} onPress={load}>
           <Text style={styles.btnText}>Actualizar</Text>
         </TouchableOpacity>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }] }>
+        <Text style={[styles.cardTitle, { color: currentTheme.textPrimary }]}>Sueño (AUTO_SLEEP) 7 días</Text>
+        <Text style={[styles.row, { color: currentTheme.textSecondary }]}>Activaciones: {sleepStats?.activations ?? '—'}</Text>
+        <Text style={[styles.row, { color: currentTheme.textSecondary }]}>Duración total: {sleepStats?.totalDurationMinutes ?? '—'} min</Text>
+        <Text style={[styles.row, { color: currentTheme.textSecondary }]}>Duración promedio: {sleepStats?.averageDurationMinutes ?? '—'} min</Text>
       </View>
 
       <View style={[styles.card, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }]}>

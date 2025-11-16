@@ -5,11 +5,13 @@ import SmartClock from '../components/Clock';
 import { Ionicons } from '@expo/vector-icons'; // Asumiendo que expo/vector-icons está instalado
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
 import { useTheme } from '../context/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
 const ALARM_API_URL = `${API_BASE_URL}/alarm-config`; // URL completa
 
 const AlarmScreen = () => {
   const { currentTheme } = useTheme();
+  const navigation = useNavigation();
   // Estado para la alarma actual que se está editando
   const [alarmStartTime, setAlarmStartTime] = useState(new Date());
   const [alarmEndTime, setAlarmEndTime] = useState(new Date());
@@ -318,105 +320,16 @@ const AlarmScreen = () => {
 
         <Text style={[styles.title,{color: currentTheme.textPrimary}]}>Configurar Alarma Inteligente</Text>
 
-        {/* Panel de días de la semana */}
-        <View style={styles.daysContainer}>
-          {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.dayCircle,
-                selectedDays[index] && styles.dayCircleSelected
-              ]}
-              onPress={() => toggleDay(index)}
-            >
-              <Text style={[
-                styles.dayText,
-                selectedDays[index] && styles.dayTextSelected
-              ]}>
-                {day}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Formulario de configuración de alarma */}
+        {/* Ventana de despertar gestionada en Configuración de Sueño */}
         <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>Ventana de Despertar:</Text>
-
-          <View style={styles.timePickerContainer}>
-            <Button
-              title={alarmStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              onPress={() => openPicker('start')}
-            />
-            <Text style={styles.timeSeparator}> - </Text>
-            <Button
-              title={alarmEndTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              onPress={() => openPicker('end')}
-            />
+          <Text style={styles.settingLabel}>Ventana de Despertar</Text>
+          <Text style={{color: currentTheme.textSecondary}}>Se configura en “Configuración de Sueño”.</Text>
+          <View style={{ marginTop: 8 }}>
+            <Button title="Editar ventana" onPress={() => navigation.navigate('SleepSettings')} />
           </View>
         </View>
 
-        {/* Modal para el selector de hora */}
-        <Modal transparent animationType="fade" visible={isModalVisible}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
-                {pickerMode === 'start' ? 'Selecciona hora de inicio' : 'Selecciona hora de fin'}
-              </Text>
-
-              {Platform.OS === "web" ? (
-                //  input HTML para web
-                <input
-                  type="time"
-                  value={
-                    pickerMode === 'start'
-                      ? `${tempStartTime.getHours().toString().padStart(2, '0')}:${tempStartTime.getMinutes().toString().padStart(2, '0')}`
-                      : `${tempEndTime.getHours().toString().padStart(2, '0')}:${tempEndTime.getMinutes().toString().padStart(2, '0')}`
-                  }
-                  onChange={(e) => {
-                    const [hours, minutes] = e.target.value.split(":");
-                    const newDate = new Date();
-                    newDate.setHours(parseInt(hours), parseInt(minutes));
-                    if (pickerMode === 'start') setTempStartTime(newDate);
-                    else setTempEndTime(newDate);
-                  }}
-                  style={styles.webTimeInput}
-                />
-              ) : (
-                // picker para moviles (Android/iOS)
-                <DateTimePicker
-                  value={pickerMode === 'start' ? tempStartTime : tempEndTime}
-                  mode="time"
-                  is24Hour={true}
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={handleTimeChange}
-                />
-              )}
-
-              <View style={styles.modalButtons}>
-                <View style={styles.buttonContainer}>
-                  <Button
-                    title="Cambiar hora"
-                    color="#2196F3"
-                    onPress={() => {
-                      updateTimeFromModal(pickerMode === 'start' ? tempStartTime : tempEndTime);
-                    }}
-                  />
-                </View>
-
-                <View style={styles.buttonContainer}>
-                  <Button
-                    title="Cancelar"
-                    color="#888"
-                    onPress={() => {
-                      setIsModalVisible(false);
-                    }}
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        {/* La ventana de despertar se edita desde Configuración de Sueño */}
 
 
 

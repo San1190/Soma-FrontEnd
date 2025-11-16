@@ -18,7 +18,7 @@ const DashboardScreen = () => {
   const { isAntiStressModeActive, activateMode, deactivateMode, isSleepModeActive } = useAntiStress();
   const [heartRate, setHeartRate] = useState('-');
   const [hrv, setHrv] = useState('-');
-  const { currentTheme, stressCategory } = useTheme();
+  const { currentTheme, stressCategory, uiSimplified } = useTheme();
   const [wakeEvent, setWakeEvent] = useState(null);
 
   const loadStatus = async () => {
@@ -73,12 +73,12 @@ const DashboardScreen = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: currentTheme.background }]} contentContainerStyle={styles.content}>
       {/* Timeline interactiva */}
-      {Platform.OS === 'web' ? <TimelineChart /> : <MobileTimelineChart />}
+      {!uiSimplified && (Platform.OS === 'web' ? <TimelineChart /> : <MobileTimelineChart />)}
 
       <NotificationTester />
 
       {/* Tarjeta del primer gráfico */}
-      {!isSleepModeActive && (
+      {!uiSimplified && !isSleepModeActive && (
       <Calories
         // props opcionales; puedes eliminarlas si usas los defaults
         title="Calorías (semana)"
@@ -86,8 +86,8 @@ const DashboardScreen = () => {
         chartProps={{}}
       />)}
 
-      {!isSleepModeActive && <HeartRate />}
-      {!isSleepModeActive && <SomaticMirror />}
+      {!uiSimplified && !isSleepModeActive && <HeartRate />}
+      {!uiSimplified && !isSleepModeActive && <SomaticMirror />}
 
       <View style={[styles.card, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }] }>
         <Text style={styles.cardTitle}>Modos</Text>

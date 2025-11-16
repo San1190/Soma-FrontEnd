@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
 import { useAuth } from '../context/AuthContext';
+import { scheduleLocal } from '../utils/localNotify';
 
 const HYDRATION_API_URL = `${API_BASE_URL}/hydration`; // URL completa
 const ML_PER_CUP = 250; // Cantidad de ml por vaso
@@ -100,9 +101,8 @@ const HydrationScreen = () => {
         try {
             console.log('Attempting to send hydration reminder...');
             const response = await axios.post(`${HYDRATION_API_URL}/trigger-reminder`, null, { params: { userId } });
-            console.log('Hydration reminder response:', response.data);
-            console.log('Attempting to show Alert.alert for success.');
             Alert.alert('Recordatorio enviado', 'Se ha intentado enviar un recordatorio de hidratación.');
+            scheduleLocal('Hidratación', 'Bebe agua para tu meta diaria', { type: 'HYDRATION_REMINDER' }, 2);
         } catch (error) {
             console.error('Error triggering reminder:', error.response ? error.response.data : error.message);
             console.log('Attempting to show Alert.alert for error.');

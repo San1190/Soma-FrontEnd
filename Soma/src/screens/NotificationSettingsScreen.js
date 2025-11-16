@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
+import * as Notifications from 'expo-notifications';
+import { scheduleLocal } from '../utils/localNotify';
+import { apiClient } from '../constants/api';
 import { useAuth } from '../context/AuthContext';
 import API_BASE_URL from '../constants/api'; // Importamos la URL central
 import { useTheme } from '../context/ThemeContext';
@@ -31,7 +34,7 @@ const NotificationSettingsScreen = () => {
     try {
       setLoading(true);
       // Usamos user.id (asumiendo que viene de AuthContext)
-      const response = await axios.get(`${API_URL}/user/${user.id}`);
+      const response = await apiClient.get(`${API_URL}/user/${user.id}`);
       setNotificationSettings(response.data);
     } catch (error) {
       console.error('Error fetching notification settings:', error);
@@ -43,14 +46,14 @@ const NotificationSettingsScreen = () => {
 
   const loadPrefs = async () => {
     try {
-      const res = await axios.get(`${PREF_URL}/user/${user.id}`);
+      const res = await apiClient.get(`${PREF_URL}/user/${user.id}`);
       setPrefs(res.data);
     } catch (e) { console.log(e); }
   };
 
   const loadLogs = async () => {
     try {
-      const res = await axios.get(`${LOG_URL}/${user.id}`);
+      const res = await apiClient.get(`${LOG_URL}/${user.id}`);
       setLogs(res.data);
     } catch (e) { console.log(e); }
   };
@@ -61,7 +64,7 @@ const NotificationSettingsScreen = () => {
 
     const updatedSetting = { ...settingToUpdate, enabled: !currentValue };
     try {
-      await axios.put(`${API_URL}/${id}`, updatedSetting);
+      await apiClient.put(`${API_URL}/${id}`, updatedSetting);
       setNotificationSettings(prevSettings =>
         prevSettings.map(setting => (setting.id === id ? updatedSetting : setting))
       );
@@ -84,7 +87,7 @@ const NotificationSettingsScreen = () => {
         quietEndHour: prefForm.quietEndHour ? Number(prefForm.quietEndHour) : null,
         groupable: prefForm.groupable,
       };
-      await axios.post(PREF_URL, payload);
+      await apiClient.post(PREF_URL, payload);
       Alert.alert('Preferencia guardada');
       await loadPrefs();
     } catch (e) { Alert.alert('Error', 'No se pudo guardar la preferencia'); }
@@ -93,8 +96,11 @@ const NotificationSettingsScreen = () => {
   const simulateIntake = async () => {
     try {
       const payload = { userId: user.id, ...intakeForm };
-      const res = await axios.post(INTAKE_URL, payload);
+      const res = await apiClient.post(INTAKE_URL, payload);
       Alert.alert('Intake', `Decisión: ${res.data.decision}`);
+      if (res.data?.decision === 'IMMEDIATE') {
+        scheduleLocal('Notificación inmediata', `${intakeForm.appName}: ${intakeForm.title}`, { type:'IMMEDIATE', appName:intakeForm.appName }, 1);
+      }
       await loadLogs();
     } catch (e) { Alert.alert('Error', 'No se pudo simular'); }
   };
@@ -105,7 +111,7 @@ const NotificationSettingsScreen = () => {
 
     const updatedSetting = { ...settingToUpdate, frequency: newFrequency };
     try {
-      await axios.put(`${API_URL}/${id}`, updatedSetting);
+      await apiClient.put(`${API_URL}/${id}`, updatedSetting);
       setNotificationSettings(prevSettings =>
         prevSettings.map(setting => (setting.id === id ? updatedSetting : setting))
       );
@@ -128,7 +134,7 @@ const NotificationSettingsScreen = () => {
     }
 
     try {
-      await axios.put(`${API_URL}/${id}`, updatedSetting);
+      await apiClient.put(`${API_URL}/${id}`, updatedSetting);
       setNotificationSettings(prevSettings =>
         prevSettings.map(setting => (setting.id === id ? updatedSetting : setting))
       );
@@ -252,6 +258,21 @@ const NotificationSettingsScreen = () => {
           </Picker>
         </View>
         <TouchableOpacity style={[styles.saveBtn,{backgroundColor: currentTheme.primary}]} onPress={simulateIntake}><Text style={styles.saveText}>Enviar</Text></TouchableOpacity>
+      </View>
+
+      <View style={[styles.section,{backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor}] }>
+        <Text style={styles.subtitle}>Prueba local en Expo Go</Text>
+        <TouchableOpacity style={[styles.saveBtn,{backgroundColor: currentTheme.primary}]} onPress={async()=>{
+          try{
+            await Notifications.scheduleNotificationAsync({
+              content: { title: 'Prueba local', body: 'Notificación local programada', data: { type:'TEST_LOCAL' } },
+              trigger: { seconds: 2 }
+            });
+            Alert.alert('OK','Notificación local programada en 2s');
+          }catch(e){ Alert.alert('Error','No se pudo programar'); }
+        }}>
+          <Text style={styles.saveText}>Programar notificación local</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

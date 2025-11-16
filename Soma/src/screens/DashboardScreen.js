@@ -9,6 +9,9 @@ import Calories from '../components/Calories';
 import HeartRate from '../components/HeartRate';
 import SomaticMirror from '../components/SomaticMirror'; // Importar SomaticMirror
 import TimelineChart from '../components/TimelineChart';
+import MobileTimelineChart from '../components/MobileTimelineChart';
+import { Platform } from 'react-native';
+import NotificationTester from '../components/NotificationTester';
 
 const DashboardScreen = () => {
   const { user } = useAuth();
@@ -70,7 +73,9 @@ const DashboardScreen = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: currentTheme.background }]} contentContainerStyle={styles.content}>
       {/* Timeline interactiva */}
-      <TimelineChart />
+      {Platform.OS === 'web' ? <TimelineChart /> : <MobileTimelineChart />}
+
+      <NotificationTester />
 
       {/* Tarjeta del primer gráfico */}
       {!isSleepModeActive && (

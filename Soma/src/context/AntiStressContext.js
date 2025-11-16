@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 import { useAuth } from './AuthContext';
+import { scheduleLocal } from '../utils/localNotify';
 
 const AntiStressContext = createContext();
 /**
@@ -29,6 +30,7 @@ export const AntiStressProvider = ({ children }) => {
       });
       setCurrentSessionId(response.data.sessionId);
       setIsAntiStressModeActive(true);
+      scheduleLocal('Modo Antiestrés', 'Activado automáticamente', { type: 'ANTI_STRESS_ACTIVATE' }, 1);
       console.log('Modo Antiestrés ACTIVADO. Sesión:', response.data.sessionId);
     } catch (error) {
       console.error('Error al activar modo antiestrés:', error.response ? error.response.data : error.message);

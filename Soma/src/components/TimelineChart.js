@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import API_BASE_URL from '../constants/api';
@@ -41,6 +41,15 @@ const TimelineChart = () => {
     };
     load();
   }, [user?.id]);
+
+  if (Platform.OS !== 'web') {
+    return (
+      <View style={[styles.card, { borderColor: currentTheme.borderColor, backgroundColor: currentTheme.cardBackground }] }>
+        <Text style={[styles.title, { color: currentTheme.textPrimary }]}>Línea de tiempo</Text>
+        <Text style={{ color: currentTheme.textSecondary }}>Disponible solo en Web</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.card, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }] }>

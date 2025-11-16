@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import useStressDetection from '../hooks/useStressDetection';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
@@ -47,6 +47,15 @@ const SomaticMirror = () => {
 
   // Obtener solo los últimos 20 puntos de datos para una visualización más clara
   const recentData = data.slice(Math.max(0, data.length - 20));
+
+  if (Platform.OS !== 'web') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Espejo Somático</Text>
+        <Text style={{ color: '#64748b', textAlign:'center' }}>Disponible solo en Web</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

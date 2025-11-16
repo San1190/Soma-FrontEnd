@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Dimensions } from 'react-native';
 import useStressDetection from '../hooks/useStressDetection';
+import { LineChart as GiftedLineChart, BarChart as GiftedBarChart } from 'react-native-gifted-charts';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 const SomaticMirror = () => {
   const generateSimulatedData = (index) => {
@@ -31,7 +34,7 @@ const SomaticMirror = () => {
       setData(currentData => {
         const newDataPoint = generateSimulatedData(currentData.length);
         // Mantener todos los puntos de datos para mostrar el historial completo
-        const updatedData = [...currentData, newDataPoint]; 
+        const updatedData = [...currentData, newDataPoint];
         return updatedData;
       });
     }, 10000); // Actualizar cada 10 segundos
@@ -48,11 +51,121 @@ const SomaticMirror = () => {
   // Obtener solo los últimos 20 puntos de datos para una visualización más clara
   const recentData = data.slice(Math.max(0, data.length - 20));
 
+  // Versión móvil con react-native-gifted-charts
   if (Platform.OS !== 'web') {
+    const heartRateData = recentData.map((item, index) => ({
+      value: item.heartRate,
+    }));
+
+    const stressData = recentData.map((item, index) => ({
+      value: item.stressLevel * 20, // Escalar para mejor visualización
+    }));
+
+    // Etiquetas para el eje X (solo mostrar cada 5 puntos)
+    const xAxisLabels = recentData.map((item, index) =>
+      index % 5 === 0 ? String(index) : ''
+    );
+
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Espejo Somático</Text>
-        <Text style={{ color: '#64748b', textAlign:'center' }}>Disponible solo en Web</Text>
+        <Text style={styles.title}>Espejo Somático - Datos Biomédicos</Text>
+
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={toggleChartType}
+        >
+          <Text style={styles.toggleButtonText}>
+            Cambiar a Gráfica de {chartType === 'line' ? 'Barras' : 'Líneas'}
+          </Text>
+        </TouchableOpacity>
+
+        {showStressNotification && (
+          <View style={styles.notificationContainer}>
+            <Text style={styles.notificationText}>
+              ¡Nivel de estrés alto! Se recomienda un ejercicio de respiración.
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartTitle}>Frecuencia Cardíaca (BPM)</Text>
+          {chartType === 'line' ? (
+            <GiftedLineChart
+              data={heartRateData}
+              height={200}
+              thickness={2}
+              color="#e74c3c"
+              startOpacity={0.8}
+              endOpacity={0.1}
+              yAxisTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisLabelTexts={xAxisLabels}
+              xAxisLabelTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisColor="#e2e8f0"
+              yAxisColor="#e2e8f0"
+              backgroundColor="transparent"
+              hideRules={false}
+              spacing={Platform.OS === 'ios' ? 20 : 15}
+              adjustToWidth
+            />
+          ) : (
+            <GiftedBarChart
+              data={heartRateData.map(item => ({ ...item, frontColor: '#e74c3c' }))}
+              height={200}
+              width={screenWidth - 80}
+              barWidth={6}
+              spacing={6}
+              frontColor="#e74c3c"
+              yAxisTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisLabelTexts={xAxisLabels}
+              xAxisLabelTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisColor="#e2e8f0"
+              yAxisColor="#e2e8f0"
+              backgroundColor="transparent"
+              noOfSections={4}
+            />
+          )}
+        </View>
+
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartTitle}>Nivel de Estrés</Text>
+          {chartType === 'line' ? (
+            <GiftedLineChart
+              data={stressData}
+              height={200}
+              thickness={2}
+              color="#6cbf6c"
+              startOpacity={0.8}
+              endOpacity={0.1}
+              yAxisTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisLabelTexts={xAxisLabels}
+              xAxisLabelTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisColor="#e2e8f0"
+              yAxisColor="#e2e8f0"
+              backgroundColor="transparent"
+              hideRules={false}
+              spacing={Platform.OS === 'ios' ? 20 : 15}
+              maxValue={100}
+              adjustToWidth
+            />
+          ) : (
+            <GiftedBarChart
+              data={stressData.map(item => ({ ...item, frontColor: '#6cbf6c' }))}
+              height={200}
+              width={screenWidth - 80}
+              barWidth={6}
+              spacing={6}
+              frontColor="#6cbf6c"
+              yAxisTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisLabelTexts={xAxisLabels}
+              xAxisLabelTextStyle={{ color: '#64748b', fontSize: 10 }}
+              xAxisColor="#e2e8f0"
+              yAxisColor="#e2e8f0"
+              backgroundColor="transparent"
+              maxValue={100}
+              noOfSections={5}
+            />
+          )}
+        </View>
       </View>
     );
   }
@@ -60,9 +173,9 @@ const SomaticMirror = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Espejo Somático - Datos Biomédicos</Text>
-      
-      <TouchableOpacity 
-        style={styles.toggleButton} 
+
+      <TouchableOpacity
+        style={styles.toggleButton}
         onPress={toggleChartType}
       >
         <Text style={styles.toggleButtonText}>
@@ -82,79 +195,79 @@ const SomaticMirror = () => {
         <Text style={styles.chartTitle}>Frecuencia Cardíaca (BPM)</Text>
         <ResponsiveContainer width="100%" height={250}>
           {chartType === 'line' ? (
-            <LineChart 
-              data={recentData} 
+            <LineChart
+              data={recentData}
               margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
             >
               <defs>
                 <linearGradient id="heartRateGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#e74c3c" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#e74c3c" stopOpacity={0.2}/>
+                  <stop offset="5%" stopColor="#e74c3c" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#e74c3c" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="index" 
-                type="category" 
-                tickFormatter={(tick) => tick} 
+              <XAxis
+                dataKey="index"
+                type="category"
+                tickFormatter={(tick) => tick}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
               />
-              <YAxis 
-                domain={[40, 180]} 
+              <YAxis
+                domain={[40, 180]}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
               />
-              <Tooltip 
+              <Tooltip
                 formatter={(value) => [`${value} BPM`, 'Frecuencia Cardíaca']}
                 contentStyle={{ backgroundColor: '#fff', borderRadius: 8, borderColor: '#e2e8f0' }}
                 labelStyle={{ color: '#1f2937' }}
               />
               <Legend wrapperStyle={{ paddingTop: 10 }} />
-              <Line 
-                type="monotone" 
-                dataKey="heartRate" 
-                stroke="#e74c3c" 
+              <Line
+                type="monotone"
+                dataKey="heartRate"
+                stroke="#e74c3c"
                 strokeWidth={2}
-                activeDot={{ r: 8, fill: '#e74c3c', stroke: '#fff', strokeWidth: 2 }} 
+                activeDot={{ r: 8, fill: '#e74c3c', stroke: '#fff', strokeWidth: 2 }}
                 name="Frecuencia Cardíaca"
                 dot={{ r: 3, fill: '#e74c3c', stroke: '#fff', strokeWidth: 1 }}
                 fill="url(#heartRateGradient)"
               />
             </LineChart>
           ) : (
-            <BarChart 
-              data={recentData} 
+            <BarChart
+              data={recentData}
               margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
             >
               <defs>
                 <linearGradient id="heartRateBarGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#e74c3c" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#e74c3c" stopOpacity={0.4}/>
+                  <stop offset="5%" stopColor="#e74c3c" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#e74c3c" stopOpacity={0.4} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="index" 
-                type="category" 
-                tickFormatter={(tick) => tick} 
+              <XAxis
+                dataKey="index"
+                type="category"
+                tickFormatter={(tick) => tick}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
               />
-              <YAxis 
-                domain={[40, 180]} 
+              <YAxis
+                domain={[40, 180]}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
               />
-              <Tooltip 
+              <Tooltip
                 formatter={(value) => [`${value} BPM`, 'Frecuencia Cardíaca']}
                 contentStyle={{ backgroundColor: '#fff', borderRadius: 8, borderColor: '#e2e8f0' }}
                 labelStyle={{ color: '#1f2937' }}
               />
               <Legend wrapperStyle={{ paddingTop: 10 }} />
-              <Bar 
-                dataKey="heartRate" 
-                fill="url(#heartRateBarGradient)" 
+              <Bar
+                dataKey="heartRate"
+                fill="url(#heartRateBarGradient)"
                 name="Frecuencia Cardíaca"
                 radius={[4, 4, 0, 0]}
               />
@@ -167,81 +280,81 @@ const SomaticMirror = () => {
         <Text style={styles.chartTitle}>Nivel de Estrés</Text>
         <ResponsiveContainer width="100%" height={250}>
           {chartType === 'line' ? (
-            <LineChart 
-              data={recentData} 
+            <LineChart
+              data={recentData}
               margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
             >
               <defs>
                 <linearGradient id="stressGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6cbf6c" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#6cbf6c" stopOpacity={0.2}/>
+                  <stop offset="5%" stopColor="#6cbf6c" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#6cbf6c" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="index" 
-                type="category" 
-                tickFormatter={(tick) => tick} 
+              <XAxis
+                dataKey="index"
+                type="category"
+                tickFormatter={(tick) => tick}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
               />
-              <YAxis 
-                domain={[0, 5]} 
+              <YAxis
+                domain={[0, 5]}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
                 ticks={[0, 1, 2, 3, 4, 5]}
               />
-              <Tooltip 
+              <Tooltip
                 formatter={(value) => [`Nivel ${value}`, 'Nivel de Estrés']}
                 contentStyle={{ backgroundColor: '#fff', borderRadius: 8, borderColor: '#e2e8f0' }}
                 labelStyle={{ color: '#1f2937' }}
               />
               <Legend wrapperStyle={{ paddingTop: 10 }} />
-              <Line 
-                type="monotone" 
-                dataKey="stressLevel" 
-                stroke="#6cbf6c" 
+              <Line
+                type="monotone"
+                dataKey="stressLevel"
+                stroke="#6cbf6c"
                 strokeWidth={2}
-                activeDot={{ r: 8, fill: '#6cbf6c', stroke: '#fff', strokeWidth: 2 }} 
+                activeDot={{ r: 8, fill: '#6cbf6c', stroke: '#fff', strokeWidth: 2 }}
                 name="Nivel de Estrés"
                 dot={{ r: 3, fill: '#6cbf6c', stroke: '#fff', strokeWidth: 1 }}
                 fill="url(#stressGradient)"
               />
             </LineChart>
           ) : (
-            <BarChart 
-              data={recentData} 
+            <BarChart
+              data={recentData}
               margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
             >
               <defs>
                 <linearGradient id="stressBarGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6cbf6c" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#6cbf6c" stopOpacity={0.4}/>
+                  <stop offset="5%" stopColor="#6cbf6c" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#6cbf6c" stopOpacity={0.4} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="index" 
-                type="category" 
-                tickFormatter={(tick) => tick} 
+              <XAxis
+                dataKey="index"
+                type="category"
+                tickFormatter={(tick) => tick}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
               />
-              <YAxis 
-                domain={[0, 5]} 
+              <YAxis
+                domain={[0, 5]}
                 stroke="#64748b"
                 tick={{ fontSize: 12, fill: '#64748b' }}
                 ticks={[0, 1, 2, 3, 4, 5]}
               />
-              <Tooltip 
+              <Tooltip
                 formatter={(value) => [`Nivel ${value}`, 'Nivel de Estrés']}
                 contentStyle={{ backgroundColor: '#fff', borderRadius: 8, borderColor: '#e2e8f0' }}
                 labelStyle={{ color: '#1f2937' }}
               />
               <Legend wrapperStyle={{ paddingTop: 10 }} />
-              <Bar 
-                dataKey="stressLevel" 
-                fill="url(#stressBarGradient)" 
+              <Bar
+                dataKey="stressLevel"
+                fill="url(#stressBarGradient)"
                 name="Nivel de Estrés"
                 radius={[4, 4, 0, 0]}
               />
@@ -306,6 +419,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    width: '100%',
+    overflow: 'hidden',
   },
   chartTitle: {
     fontSize: 16,

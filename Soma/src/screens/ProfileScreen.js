@@ -113,13 +113,7 @@ const ProfileScreen = () => {
 
       <Button title="Cerrar Sesión" onPress={logout} color="#FF6347" />
 
-  <TouchableOpacity style={styles.notificationButton} onPress={() => navigation.navigate('NotificationSettings')}>
-    <Text style={styles.notificationButtonText}>Configuración de Notificaciones</Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity style={styles.notificationButton} onPress={() => navigation.navigate('SleepSettings')}>
-    <Text style={styles.notificationButtonText}>Configuración de Sueño</Text>
-  </TouchableOpacity>
+  
 
       <Text style={styles.sectionTitle}>Información de Login</Text>
       <View style={styles.infoContainer}>

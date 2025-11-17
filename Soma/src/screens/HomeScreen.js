@@ -11,7 +11,7 @@ export default function HomeScreen() {
   const { currentTheme } = useTheme();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('boton');
-  const [colorOn, setColorOn] = useState(false);
+  const [colorOn, setColorOn] = useState(true);
   const [waterCount, setWaterCount] = useState(0);
   const [waterGoal, setWaterGoal] = useState(8);
   const [activeMode, setActiveMode] = useState('stress');
@@ -21,6 +21,14 @@ export default function HomeScreen() {
   const [sleepDeltaText, setSleepDeltaText] = useState('16% mejor');
   const name = user?.first_name || 'Ana';
   const dateStr = new Date().toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+
+  const palette = {
+    off: { appBg: '#EFEFEF' },
+    stress: { appBg: '#EAE5FF' },
+    fatigue: { appBg: '#EAFBE8' },
+    insomnio: { appBg: '#DDEAF1' },
+  };
+  const appBg = !colorOn ? palette.off.appBg : palette[activeMode]?.appBg || palette.stress.appBg;
   
   React.useEffect(() => {
     const loadActivity = async () => {
@@ -69,7 +77,7 @@ export default function HomeScreen() {
   }, [activeTab, user?.id]);
   
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }] }>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: appBg }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         
         {/* --- Inicio del Contenido --- */}
@@ -92,8 +100,8 @@ export default function HomeScreen() {
             { key: 'hidratacion', label: 'Hidratación' },
             { key: 'actividad', label: 'Actividad' },
           ].map(p => (
-            <TouchableOpacity key={p.key} style={[styles.pill, activeTab === p.key && [styles.pillActive, { backgroundColor: currentTheme.primary }]]} onPress={() => setActiveTab(p.key)}>
-              <Text style={[styles.pillText, { color: activeTab === p.key ? '#071220' : currentTheme.textPrimary }]}>{p.label}</Text>
+            <TouchableOpacity key={p.key} style={[styles.pill, activeTab === p.key && [styles.pillActive, { backgroundColor: '#000' }]]} onPress={() => setActiveTab(p.key)}>
+              <Text style={[styles.pillText, { color: activeTab === p.key ? '#fff' : currentTheme.textPrimary }]}>{p.label}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

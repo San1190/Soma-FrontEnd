@@ -29,6 +29,14 @@ export default function HomeScreen() {
     insomnio: { appBg: '#DDEAF1' },
   };
   const appBg = !colorOn ? palette.off.appBg : palette[activeMode]?.appBg || palette.stress.appBg;
+
+  const cats = {
+    off: require('../../assets/gatos/GatoApagado.png'),
+    stress: require('../../assets/gatos/GatoMorado.png'),
+    fatigue: require('../../assets/gatos/GatoVerde.png'),
+    insomnio: require('../../assets/gatos/GatoAzul.png'),
+  };
+  const catImgSource = colorOn ? (cats[activeMode] || cats.stress) : cats.off;
   
   React.useEffect(() => {
     const loadActivity = async () => {
@@ -230,7 +238,7 @@ export default function HomeScreen() {
       {/* --- GATO (FIJO) --- */}
       <View style={styles.catArea}>
         <Text style={styles.zz}>Z Z</Text>
-        <Image source={require('../../assets/gatos/GatoApagado.png')} style={styles.catImg} resizeMode='contain' />
+        <Image source={catImgSource} style={styles.catImg} resizeMode='contain' />
       </View>
       
     </SafeAreaView>

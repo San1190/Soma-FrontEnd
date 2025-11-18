@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  ActivityIndicator, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
   Alert,
-  Platform 
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
@@ -36,7 +36,6 @@ const ProfileScreen = () => {
         setLoading(false);
       }
     };
-
     fetchUserData();
   }, [user]);
 
@@ -46,11 +45,11 @@ const ProfileScreen = () => {
       "¿Estás seguro de que quieres salir?",
       [
         { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Salir", 
-          style: "destructive", 
+        {
+          text: "Salir",
+          style: "destructive",
           onPress: async () => {
-            await logout(); // Esto limpiará el estado y te llevará al Login
+            await logout();
           }
         }
       ]
@@ -59,7 +58,6 @@ const ProfileScreen = () => {
 
   const fullName = `${userData?.first_name || user?.first_name || 'Usuario'} ${userData?.last_name || user?.last_name || ''}`.trim();
   const dob = userData?.date_of_birth || '';
-  // Cálculo simple de edad si hay fecha de nacimiento
   const age = dob ? Math.floor((new Date() - new Date(dob).getTime()) / 3.15576e+10) + ' años' : 'Edad sin definir';
   const gender = userData?.gender || 'Género sin definir';
 
@@ -72,13 +70,14 @@ const ProfileScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top','bottom']}>
-      <ScrollView 
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        {...(Platform.OS === 'web' ? { style: { height: '100vh', overflowY: 'auto' } } : {})}
       >
         {/* --- ENCABEZADO DEL PERFIL --- */}
         <View style={styles.headerRow}>
@@ -93,7 +92,6 @@ const ProfileScreen = () => {
               <Text style={styles.metaText}>{age}</Text>
             </View>
           </View>
-          {/* Icono decorativo de privacidad */}
           <View style={styles.lockTrack}>
             <View style={styles.lockKnob} />
             <Ionicons name="lock-closed" size={14} color="#fff" />
@@ -103,11 +101,8 @@ const ProfileScreen = () => {
         {/* --- SECCIÓN HÁBITOS --- */}
         <Text style={styles.sectionTitle}>Tus hábitos</Text>
         <View style={styles.habitsStack}>
-          {/* Tarjetas decorativas de fondo */}
           <View style={[styles.habitCard, styles.habitCardBg2]} />
           <View style={[styles.habitCard, styles.habitCardBg1]} />
-          
-          {/* Tarjeta Principal */}
           <View style={[styles.habitCard, styles.habitCardMain]}>
             <View style={styles.habitHeader}>
               <Text style={styles.habitTitle}>Revisión digital consciente</Text>
@@ -155,7 +150,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
-          <Ionicons name="log-out-outline" size={20} color="#ff4444" style={{marginLeft: 8}}/>
+          <Ionicons name="log-out-outline" size={20} color="#ff4444" style={{ marginLeft: 8 }} />
         </TouchableOpacity>
 
         <Text style={styles.versionText}>Versión 1.0.2 - SOMA</Text>
@@ -165,7 +160,6 @@ const ProfileScreen = () => {
   );
 };
 
-// Componente auxiliar para los items de la lista (para limpiar el código principal)
 const ListItem = ({ icon, text }) => (
   <TouchableOpacity style={styles.listItem}>
     <View style={styles.listIconBox}>
@@ -177,7 +171,6 @@ const ListItem = ({ icon, text }) => (
 );
 
 const styles = StyleSheet.create({
-  // Estilos base para Scroll y SafeArea
   safeArea: {
     flex: 1,
     backgroundColor: '#f8f9fa',
@@ -185,7 +178,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    ...(Platform.OS === 'web' ? { height: '100vh' } : {}),
   },
   scrollContent: {
     padding: 16,
@@ -197,8 +189,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // Header
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -214,28 +204,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 15,
   },
-  userInfo: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    marginBottom: 4,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  metaText: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
-  },
-  metaDot: {
-    marginHorizontal: 6,
-    color: '#ccc',
-  },
+  userInfo: { flex: 1 },
+  name: { fontSize: 20, fontWeight: '800', color: '#1a1a1a', marginBottom: 4 },
+  metaRow: { flexDirection: 'row', alignItems: 'center' },
+  metaText: { fontSize: 13, color: '#666', fontWeight: '500' },
+  metaDot: { marginHorizontal: 6, color: '#ccc' },
   lockTrack: {
     width: 50,
     height: 28,
@@ -246,47 +219,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     justifyContent: 'space-between',
   },
-  lockKnob: {
-    width: 20,
-    height: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-  },
-
-  // Títulos de Sección
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 15,
-    marginTop: 10,
-  },
-
-  // Stack de Hábitos (Efecto de tarjetas apiladas)
-  habitsStack: {
-    height: 180,
-    marginBottom: 20,
-    position: 'relative',
-  },
-  habitCard: {
-    position: 'absolute',
-    width: '100%',
-    borderRadius: 20,
-  },
-  habitCardBg2: {
-    height: 140,
-    top: 20,
-    backgroundColor: '#e8e8e8',
-    transform: [{ scale: 0.92 }],
-  },
-  habitCardBg1: {
-    height: 140,
-    top: 10,
-    backgroundColor: '#f0f0f0',
-    transform: [{ scale: 0.96 }],
-  },
+  lockKnob: { width: 20, height: 20, backgroundColor: '#fff', borderRadius: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 15, marginTop: 10 },
+  habitsStack: { height: 180, marginBottom: 20, position: 'relative' },
+  habitCard: { position: 'absolute', width: '100%', borderRadius: 20 },
+  habitCardBg2: { height: 140, top: 20, backgroundColor: '#e8e8e8', transform: [{ scale: 0.92 }] },
+  habitCardBg1: { height: 140, top: 10, backgroundColor: '#f0f0f0', transform: [{ scale: 0.96 }] },
   habitCardMain: {
-    backgroundColor: '#eafbe8', // Verde muy suave estilo imagen
+    backgroundColor: '#eafbe8',
     padding: 20,
     height: 160,
     top: 0,
@@ -297,110 +237,21 @@ const styles = StyleSheet.create({
     elevation: 3,
     justifyContent: 'space-between',
   },
-  habitHeader: {
-    marginBottom: 5,
-  },
-  habitTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#2f4f40',
-  },
-  habitSubtitle: {
-    fontSize: 12,
-    color: '#5a7a6a',
-    marginTop: 2,
-  },
-  habitBody: {
-    fontSize: 13,
-    color: '#4a6a5a',
-    lineHeight: 18,
-  },
-  habitActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconButton: {
-    width: 36,
-    height: 36,
-    backgroundColor: '#d0ebd6',
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Listas de Opciones
-  listGroup: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 5,
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  listIconBox: {
-    width: 32,
-    height: 32,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  listText: {
-    flex: 1,
-    fontSize: 15,
-    color: '#333',
-    fontWeight: '500',
-  },
-
-  // Botones Finales
-  premiumButton: {
-    backgroundColor: '#000',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderRadius: 25,
-    marginBottom: 15,
-  },
-  premiumButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 8,
-  },
-  logoutButton: {
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: '#ffebee',
-  },
-  logoutButtonText: {
-    color: '#ff4444',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  versionText: {
-    textAlign: 'center',
-    color: '#ccc',
-    fontSize: 12,
-    marginTop: 20,
-  }
+  habitHeader: { marginBottom: 5 },
+  habitTitle: { fontSize: 16, fontWeight: '700', color: '#2f4f40' },
+  habitSubtitle: { fontSize: 12, color: '#5a7a6a', marginTop: 2 },
+  habitBody: { fontSize: 13, color: '#4a6a5a', lineHeight: 18 },
+  habitActions: { flexDirection: 'row', alignItems: 'center' },
+  iconButton: { width: 36, height: 36, backgroundColor: '#d0ebd6', borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+  listGroup: { backgroundColor: '#fff', borderRadius: 16, padding: 5, marginBottom: 25, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 4, elevation: 2 },
+  listItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  listIconBox: { width: 32, height: 32, backgroundColor: '#f5f5f5', borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  listText: { flex: 1, fontSize: 15, color: '#333', fontWeight: '500' },
+  premiumButton: { backgroundColor: '#000', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 16, borderRadius: 25, marginBottom: 15 },
+  premiumButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', marginRight: 8 },
+  logoutButton: { backgroundColor: '#fff', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 16, borderRadius: 25, borderWidth: 1, borderColor: '#ffebee' },
+  logoutButtonText: { color: '#ff4444', fontSize: 16, fontWeight: '600' },
+  versionText: { textAlign: 'center', color: '#ccc', fontSize: 12, marginTop: 20 },
 });
 
 export default ProfileScreen;

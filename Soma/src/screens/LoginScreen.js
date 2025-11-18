@@ -1,112 +1,140 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
-import CustomInput from '../components/CustomInput';
-import CustomButton from '../components/CustomButton';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from 'react-native';
+import { useTheme } from '../context/ThemeContext'; // Para usar currentTheme
+import { Ionicons } from '@expo/vector-icons'; // Para los íconos de Google y Apple
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const { currentTheme } = useTheme();
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Por favor, ingresa tu correo y contraseña.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const success = await login(email, password);
-      if (success) {
-        Alert.alert('Éxito', 'Inicio de sesión exitoso.');
-      } else {
-        Alert.alert('Error', 'Credenciales inválidas. Inténtalo de nuevo.');
-      }
-    } catch (error) {
-      console.error('Error en el login:', error.response ? error.response.data : error.message);
-      Alert.alert('Error', 'Ocurrió un error durante el inicio de sesión.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const styles = StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: '#EFEFEF', // Fondo general fuera del contenido principal
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     container: {
       flex: 1,
-      backgroundColor: currentTheme.background,
-      padding: 16,
+      width: '100%',
+      maxWidth: 400, // Ajustar a un tamaño de móvil típico
+      borderRadius: 20, // Borde redondeado del "móvil" en la imagen
+      overflow: 'hidden', // Para que el gato no se salga del borde
+      backgroundColor: '#EFEFEF', // Fondo claro principal
     },
-    innerContainer: {
+    contentWrapper: {
       flex: 1,
+      backgroundColor: '#EFEFEF', // Fondo superior claro
+      alignItems: 'center',
+      paddingTop: 40, // Espacio superior
+    },
+    catContainer: {
+      width: '100%',
+      height: 280, // Altura del área del gato
+      backgroundColor: '#6B5A66', // Color de fondo del gato
       justifyContent: 'center',
-      paddingHorizontal: 16,
+      alignItems: 'center',
+      position: 'relative', // Para posicionar la imagen del gato
     },
-    logo: {
-      fontSize: 32,
-      fontWeight: 'bold',
-      color: currentTheme.textPrimary,
-      textAlign: 'center',
-      marginBottom: 12,
+    catImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'contain',
+      position: 'absolute',
+      top: 0,
+      left: 0,
     },
-    subtitle: {
-      fontSize: 16,
-      color: currentTheme.textSecondary,
-      textAlign: 'center',
-      marginBottom: 16,
+    bottomSection: {
+      backgroundColor: '#8E828A', // Fondo oscuro de la sección inferior
+      paddingHorizontal: 20,
+      paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Espacio para el notch inferior en iOS
+      paddingTop: 30, // Espacio entre los botones y el gato
+      alignItems: 'center',
+      width: '100%',
     },
-    registerContainer: {
+    button: {
       flexDirection: 'row',
+      alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 20,
+      backgroundColor: '#FFFFFF', // Fondo blanco de los botones
+      borderRadius: 30, // Botones redondeados
+      paddingVertical: 14,
+      width: '90%', // Ancho de los botones
+      marginBottom: 15,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    buttonText: {
+      color: '#333333',
+      fontSize: 16,
+      fontWeight: '600',
+      marginLeft: 10,
     },
     registerText: {
-      color: currentTheme.textSecondary,
-      fontSize: 16,
+      color: '#FFFFFF',
+      fontSize: 14,
+      marginTop: 20,
+      marginBottom: 15,
     },
     registerLink: {
-      color: currentTheme.primary,
-      fontSize: 16,
       fontWeight: 'bold',
+      textDecorationLine: 'underline',
+    },
+    termsText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    termsLink: {
+      fontWeight: 'bold',
+      textDecorationLine: 'underline',
     },
   });
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.innerContainer}>
-        <Text style={styles.logo}>SOMA</Text>
-        <Text style={styles.subtitle}>La pantalla que respira contigo</Text>
+    <View style={styles.safeArea}> {/* Usamos View como wrapper para simular el "dispositivo" */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <View style={styles.contentWrapper}>
+          {/* Sección del Gato */}
+          <View style={styles.catContainer}>
+            <Image 
+              source={require('../../assets/gatos/GatoLogin.png')} 
+              style={styles.catImage} 
+            />
+          </View>
+          
+          {/* Sección Inferior con Botones y Textos */}
+          <View style={styles.bottomSection}>
+            <TouchableOpacity style={styles.button}>
+              <Ionicons name="logo-google" size={24} color="#4285F4" />
+              <Text style={styles.buttonText}>Entrar con Google</Text>
+            </TouchableOpacity>
 
-        <CustomInput
-          placeholder="Correo electrónico"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <CustomInput
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+            <TouchableOpacity style={styles.button}>
+              <Ionicons name="logo-apple" size={24} color="#000000" />
+              <Text style={styles.buttonText}>Entrar con Apple</Text>
+            </TouchableOpacity>
 
-        <CustomButton title="Iniciar Sesión" onPress={handleLogin} disabled={loading} />
+            <Text style={styles.registerText}>
+              ¿No tienes cuenta? <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>Regístrate aquí</Text>
+            </Text>
 
-        <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.registerLink}>Regístrate</Text>
-          </TouchableOpacity>
+            <Text style={styles.termsText}>
+              Al continuar aceptas los <Text style={styles.termsLink}>Términos</Text>
+              {' y la '}
+              <Text style={styles.termsLink}>Política de privacidad</Text>
+            </Text>
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 

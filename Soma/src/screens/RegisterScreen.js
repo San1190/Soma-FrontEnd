@@ -1,240 +1,140 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Alert, ScrollView, TextInput } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import CustomInput from '../components/CustomInput';
-import CustomButton from '../components/CustomButton';
-import { register } from '../services/auth';
+import React from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image, TextInput } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-
-const GENDERS = [
-  { label: 'Hombre', value: 'Hombre' },
-  { label: 'Mujer', value: 'Mujer' },
-  
-  
-];
-
-const isWeb = Platform.OS === 'web';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; // Usamos estos iconos que se parecen más a la foto
 
 const RegisterScreen = ({ navigation }) => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [gender, setGender] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const { currentTheme } = useTheme();
 
-  const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      const yyyy = selectedDate.getFullYear();
-      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const dd = String(selectedDate.getDate()).padStart(2, '0');
-      setDateOfBirth(`${yyyy}-${mm}-${dd}`);
-    }
-  };
-
-  const handleRegister = async () => {
-    if (!firstName || !email || !password || !gender || !dateOfBirth || !weight) {
-      Alert.alert('Error', 'Por favor, completa todos los campos obligatorios.');
-      return;
-    }
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!emailOk) {
-      Alert.alert('Correo inválido', 'Ingresa un correo con formato válido.');
-      return;
-    }
-    const passwordOk = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
-    if (!passwordOk) {
-      Alert.alert('Contraseña insegura', 'Usa mínimo 8 caracteres, con mayúscula, minúscula y número.');
-      return;
-    }
-    const weightVal = parseFloat(weight);
-    if (isNaN(weightVal) || weightVal <= 0) {
-      Alert.alert('Peso inválido', 'Ingresa tu peso en kilogramos (valor positivo).');
-      return;
-    }
-    const heightVal = height ? parseFloat(height) : undefined;
-    if (height && (isNaN(heightVal) || heightVal <= 0)) {
-      Alert.alert('Altura inválida', 'Ingresa tu altura en centímetros (valor positivo).');
-      return;
-    }
-    const userData = {
-      first_name: firstName,
-      last_name: lastName || undefined,
-      date_of_birth: dateOfBirth,
-      gender,
-      weight_kg: weightVal,
-      height_cm: heightVal,
-      email,
-      password_hash: password,
-    };
-    setLoading(true);
-    try {
-      const user = await register(userData);
-      Alert.alert('¡Éxito!', 'Usuario registrado correctamente. Inicia sesión.');
-      navigation.navigate('Login');
-    } catch (error) {
-      Alert.alert('Error', 'Hubo un problema al registrar el usuario. Inténtalo de nuevo.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Selector de género visual tipo "pill"
-  const renderGenderPills = () => (
-    <View style={styles.genderPillContainer}>
-      {GENDERS.map(opt => (
-        <TouchableOpacity
-          key={opt.value}
-          style={[
-            styles.genderPill,
-            gender === opt.value && styles.selectedPill,
-          ]}
-          onPress={() => setGender(opt.value)}
-        >
-          <Text style={[styles.genderPillText, gender === opt.value && styles.selectedPillText]}>
-            {opt.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
+  // Definimos los estilos específicos para replicar la imagen
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: currentTheme.background },
-    innerContainer: { flexGrow: 1, justifyContent: 'center', padding: 20, paddingBottom: 30 },
-    title: { fontSize: 32, fontWeight: 'bold', color: currentTheme.textPrimary, textAlign: 'center', marginBottom: 10 },
-    subtitle: { fontSize: 17, color: currentTheme.accent1, textAlign: 'center', marginBottom: 40 },
-    input: { marginBottom: 18 },
-    dateInput: {
-      borderWidth: 1,
-      borderColor: currentTheme.borderColor,
-      borderRadius: 10,
-      padding: 12,
-      backgroundColor: currentTheme.cardBackground,
-      marginBottom: 14,
+    safeArea: {
+      flex: 1,
+      backgroundColor: '#EFEFEF', // Fondo claro superior
     },
-    label: { color: currentTheme.accent1, fontWeight: '600', marginBottom: 7, marginLeft: 4 },
-    genderPillContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
-    genderPill: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: currentTheme.borderColor,
-      backgroundColor: currentTheme.cardBackground,
-      marginHorizontal: 4,
+    container: {
+      flex: 1,
     },
-    genderPillText: { color: currentTheme.textPrimary, fontWeight: '500' },
-    selectedPill: { backgroundColor: currentTheme.primary },
-    selectedPillText: { color: currentTheme.textPrimary },
-    loginContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 22 },
-    loginText: { color: currentTheme.textPrimary, fontSize: 16 },
-    loginLink: { color: currentTheme.primary, fontSize: 16, fontWeight: 'bold' },
+    // Contenedor de la imagen del gato
+    catContainer: {
+      flex: 1,
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'flex-end', // Alineamos la imagen al fondo
+      marginTop: 40, // Espacio superior
+    },
+    catImage: {
+      width: '100%',
+      height: '100%', // Ocupa todo el espacio disponible
+      resizeMode: 'stretch', // O 'cover', ajustamos para que el cuerpo baje hasta el final
+    },
+    // Capa superpuesta para los controles (Formulario)
+    formOverlay: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: '55%', // Los controles ocupan la mitad inferior sobre el cuerpo oscuro
+      alignItems: 'center',
+      paddingHorizontal: 30,
+      justifyContent: 'center',
+    },
+    // Estilo de los Inputs (Píldoras blancas)
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#F0F0F0', // Fondo casi blanco/gris muy claro
+      borderRadius: 30,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      width: '100%',
+      marginBottom: 16,
+    },
+    icon: {
+      marginRight: 10,
+    },
+    inputText: {
+      flex: 1,
+      color: '#666',
+      fontSize: 15,
+    },
+    // Botón de Bienvenida (Lila claro)
+    welcomeButton: {
+      backgroundColor: '#E6E0F5', // Color lila claro de la imagen
+      borderRadius: 30,
+      paddingVertical: 14,
+      width: '100%',
+      alignItems: 'center',
+      marginBottom: 20,
+      marginTop: 10,
+    },
+    welcomeButtonText: {
+      color: '#5D4D60', // Texto oscuro suave
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    // Link inferior
+    forgotText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '500',
+    },
   });
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.innerContainer} keyboardShouldPersistTaps="handled">
-
-        <Text style={styles.title}>Crear Cuenta</Text>
-        <Text style={styles.subtitle}>Empieza a conectar con tu bienestar</Text>
-
-        <CustomInput
-          placeholder="Nombre (obligatorio)"
-          value={firstName}
-          onChangeText={setFirstName}
-          style={styles.input}
-        />
-        <CustomInput
-          placeholder="Apellido"
-          value={lastName}
-          onChangeText={setLastName}
-          style={styles.input}
-        />
-
-        {/* Fecha de nacimiento: calendario cross-platform */}
-        <TouchableOpacity onPress={() => isWeb ? null : setShowDatePicker(true)} style={styles.dateInput}>
-          {isWeb ? (
-            <TextInput
-              placeholder="Fecha de nacimiento (obligatorio)"
-              type="date"
-              style={{height: 40, fontSize: 16, color: dateOfBirth ? currentTheme.textPrimary : currentTheme.textSecondary}}
-              value={dateOfBirth}
-              onChangeText={setDateOfBirth}
-              onFocus={e => { e.target.type = 'date'; }}
-              onBlur={e => { if(!dateOfBirth) e.target.type = 'text'; }}
+    <View style={styles.safeArea}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        {/* Imagen del Gato de fondo (Cuerpo oscuro) */}
+        <View style={styles.catContainer}>
+            {/* Asegúrate de tener esta imagen o usa la del login temporalmente si no la tienes */}
+            <Image 
+              source={require('../../assets/gatos/GatoRegister.png')} 
+              style={styles.catImage} 
             />
-          ) : (
-            <Text style={{ color: dateOfBirth ? currentTheme.textPrimary : currentTheme.textSecondary, fontSize: 16 }}>
-              {dateOfBirth ? `Nacido el: ${dateOfBirth}` : 'Fecha de nacimiento (obligatorio)'}
-            </Text>
-          )}
-        </TouchableOpacity>
-        {!isWeb && showDatePicker && (
-          <DateTimePicker
-            value={dateOfBirth ? new Date(dateOfBirth) : new Date(2000, 0, 1)}
-            mode="date"
-            display="default"
-            maximumDate={new Date()}
-            onChange={handleDateChange}
-            locale="es-ES"
-          />
-        )}
-
-        {/* Selector visual de género */}
-        <Text style={styles.label}>Género (obligatorio):</Text>
-        {renderGenderPills()}
-
-        <CustomInput
-          placeholder="Peso (kg)"
-          value={weight}
-          onChangeText={setWeight}
-          keyboardType="decimal-pad"
-          style={styles.input}
-        />
-        <CustomInput
-          placeholder="Altura (cm)"
-          value={height}
-          onChangeText={setHeight}
-          keyboardType="decimal-pad"
-          style={styles.input}
-        />
-        <CustomInput
-          placeholder="Correo electrónico"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={styles.input}
-        />
-        <CustomInput
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
-
-        <CustomButton title={loading ? "Registrando..." : "Crear Cuenta"} onPress={handleRegister} disabled={loading} />
-
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>¿Ya tienes una cuenta? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginLink}>Inicia Sesión</Text>
-          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        {/* Formulario Superpuesto sobre el cuerpo del gato */}
+        <View style={styles.formOverlay}>
+          
+          {/* Input Email */}
+          <View style={styles.inputContainer}>
+            <MaterialCommunityIcons name="email-outline" size={20} color="#4b3340" style={styles.icon} />
+            <TextInput 
+              placeholder="Escribe aquí tu email" 
+              placeholderTextColor="#999"
+              style={styles.inputText}
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* Input Contraseña */}
+          <View style={styles.inputContainer}>
+            <MaterialCommunityIcons name="key-outline" size={20} color="#4b3340" style={styles.icon} />
+            <TextInput 
+              placeholder="Escribe aquí tu contraseña" 
+              placeholderTextColor="#999"
+              style={styles.inputText}
+              secureTextEntry
+            />
+          </View>
+
+          {/* Botón Principal */}
+          <TouchableOpacity style={styles.welcomeButton} onPress={() => {}}>
+            <Text style={styles.welcomeButtonText}>¡Bienvenid@ a Soma!</Text>
+          </TouchableOpacity>
+
+          {/* Texto inferior */}
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.forgotText}>¿Ya tienes cuenta? Inicia sesión :(</Text>
+          </TouchableOpacity>
+
+        </View>
+
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 

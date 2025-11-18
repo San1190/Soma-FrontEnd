@@ -6,7 +6,8 @@ import {
   TouchableOpacity, 
   ScrollView, 
   ActivityIndicator, 
-  Alert 
+  Alert,
+  Platform 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
@@ -179,14 +180,17 @@ const styles = StyleSheet.create({
   // Estilos base para Scroll y SafeArea
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa', // Color de fondo suave
+    backgroundColor: '#f8f9fa',
+    ...(Platform.OS === 'web' ? { minHeight: '100vh' } : {}),
   },
   scrollView: {
     flex: 1,
+    ...(Platform.OS === 'web' ? { height: '100vh' } : {}),
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 120,
+    padding: 16,
+    paddingBottom: 220,
+    flexGrow: 1,
   },
   centerContainer: {
     flex: 1,

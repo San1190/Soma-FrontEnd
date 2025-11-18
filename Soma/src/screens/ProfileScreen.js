@@ -6,9 +6,9 @@ import {
   TouchableOpacity, 
   ScrollView, 
   ActivityIndicator, 
-  SafeAreaView, 
   Alert 
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { getUserById } from '../services/users';
 import { Ionicons } from '@expo/vector-icons';
@@ -71,10 +71,12 @@ const ProfileScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top','bottom']}>
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* --- ENCABEZADO DEL PERFIL --- */}
@@ -184,8 +186,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 420,
-    flexGrow: 1,
+    paddingBottom: 120,
   },
   centerContainer: {
     flex: 1,

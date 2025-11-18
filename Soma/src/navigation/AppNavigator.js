@@ -18,7 +18,7 @@ const ProfileStack = () => (
 const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => (
-  <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }} tabBar={() => null}>
+  <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' }, unmountOnBlur: true }} tabBar={() => null}>
     <Tab.Screen name="Home" component={HomeScreen} />
     <Tab.Screen name="Profile" component={ProfileStack} />
   </Tab.Navigator>

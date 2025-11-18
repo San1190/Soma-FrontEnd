@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 import { useTheme } from '../context/ThemeContext';
@@ -12,6 +12,7 @@ export default function HomeScreen() {
   const { currentTheme } = useTheme();
   const { user } = useAuth();
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const [activeTab, setActiveTab] = useState('boton');
   const [colorOn, setColorOn] = useState(true);
   const [waterCount, setWaterCount] = useState(0);
@@ -93,10 +94,7 @@ export default function HomeScreen() {
         {/* --- Inicio del Contenido --- */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.avatar}><Ionicons name="person" size={20} color={currentTheme.textPrimary} /></TouchableOpacity>
-        <View style={{ flexDirection:'row', alignItems:'center', gap:8 }}>
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ width:32, height:32, borderRadius:16, alignItems:'center', justifyContent:'center', backgroundColor:'rgba(0,0,0,0.08)' }}>
-            <Ionicons name="settings-outline" size={18} color={currentTheme.textPrimary} />
-          </TouchableOpacity>
+        <View style={{ flexDirection:'row', alignItems:'center' }}>
           <TouchableOpacity style={[styles.toggleTrack, colorOn ? styles.toggleOn : styles.toggleOff]} onPress={() => setColorOn(v => !v)}>
             <View style={[styles.toggleKnob, colorOn ? styles.knobRight : styles.knobLeft]}>
               <Ionicons name="person" size={16} color={colorOn ? '#000' : '#000'} />
@@ -232,21 +230,25 @@ export default function HomeScreen() {
       {/* --- FIN DEL SCROLLVIEW --- */}
       
       {/* --- INICIO DEL FOOTER (FIJO) --- */}
-      <View style={styles.footerPlaceholder}>
-        <View style={styles.footerIcons}>
-          <TouchableOpacity onPress={() => setActiveTab('boton')}><Ionicons name="home" size={22} color="#fff" /></TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('hidratacion')}><Ionicons name="time" size={22} color="#fff" /></TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('actividad')}><Ionicons name="heart" size={22} color="#fff" /></TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('boton')}><Ionicons name="moon" size={22} color="#fff" /></TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('espejo')}><Ionicons name="eye" size={22} color="#fff" /></TouchableOpacity>
+      {isFocused && (
+        <View style={styles.footerPlaceholder}>
+          <View style={styles.footerIcons}>
+            <TouchableOpacity onPress={() => setActiveTab('boton')}><Ionicons name="home" size={22} color="#fff" /></TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab('hidratacion')}><Ionicons name="time" size={22} color="#fff" /></TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab('actividad')}><Ionicons name="heart" size={22} color="#fff" /></TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab('boton')}><Ionicons name="moon" size={22} color="#fff" /></TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab('espejo')}><Ionicons name="eye" size={22} color="#fff" /></TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
       
       {/* --- GATO (FIJO) --- */}
-      <View style={styles.catArea}>
-        <Text style={styles.zz}>Z Z</Text>
-        <Image source={catImgSource} style={styles.catImg} resizeMode='contain' />
-      </View>
+      {isFocused && (
+        <View style={styles.catArea}>
+          <Text style={styles.zz}>Z Z</Text>
+          <Image source={catImgSource} style={styles.catImg} resizeMode='contain' />
+        </View>
+      )}
       
     </SafeAreaView>
   );

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native'; // 1. Importar SafeAreaView
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  ScrollView, 
+  ActivityIndicator, 
+  SafeAreaView, 
+  Alert 
+} from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { getUserById } from '../services/users';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +22,6 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user || !user.id) {
-        // (Tu lógica original aquí...)
         setLoading(false);
         return;
       }
@@ -21,171 +29,373 @@ const ProfileScreen = () => {
         const data = await getUserById(user.id);
         setUserData(data);
       } catch (err) {
-        setError('Failed to fetch user data: ' + err.message);
+        setError('No se pudo cargar la información del usuario.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchUserData();
   }, [user]);
 
-  const fullName = `${userData?.first_name || user?.first_name || 'Ana'} ${userData?.last_name || user?.last_name || 'Martín'}`.trim();
+  const handleLogout = async () => {
+    Alert.alert(
+      "Cerrar Sesión",
+      "¿Estás seguro de que quieres salir?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Salir", 
+          style: "destructive", 
+          onPress: async () => {
+            await logout(); // Esto limpiará el estado y te llevará al Login
+          }
+        }
+      ]
+    );
+  };
+
+  const fullName = `${userData?.first_name || user?.first_name || 'Usuario'} ${userData?.last_name || user?.last_name || ''}`.trim();
   const dob = userData?.date_of_birth || '';
-  const age = dob ? Math.max(0, Math.floor((Date.now() - new Date(dob).getTime()) / (365.25*24*60*60*1000))) : '—';
-  const gender = userData?.gender || '—';
+  // Cálculo simple de edad si hay fecha de nacimiento
+  const age = dob ? Math.floor((new Date() - new Date(dob).getTime()) / 3.15576e+10) + ' años' : 'Edad sin definir';
+  const gender = userData?.gender || 'Género sin definir';
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error}</Text>
+        <ActivityIndicator size="large" color="#6c63ff" />
       </View>
     );
   }
 
   return (
-    // 2. Usar SafeAreaView como contenedor principal para asegurar límites de pantalla
     <SafeAreaView style={styles.safeArea}>
       <ScrollView 
-        style={styles.scrollView} 
-        contentContainerStyle={styles.scrollContent} // Aquí aplicaremos el padding interno
-        showsVerticalScrollIndicator={true} // Para ver que hay scroll
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        
-        {/* El Header y el contenido */}
+        {/* --- ENCABEZADO DEL PERFIL --- */}
         <View style={styles.headerRow}>
           <View style={styles.avatarBox}>
             <Ionicons name="person" size={30} color="#6c63ff" />
           </View>
-          <View style={{ flex: 1, marginLeft: 12 }}>
+          <View style={styles.userInfo}>
             <Text style={styles.name}>{fullName}</Text>
             <View style={styles.metaRow}>
               <Text style={styles.metaText}>{gender}</Text>
               <Text style={styles.metaDot}>•</Text>
-              <Text style={styles.metaText}>{age} edad</Text>
-              <Text style={styles.metaDot}>•</Text>
-              <Text style={styles.metaText}>{dob || '—'}</Text>
+              <Text style={styles.metaText}>{age}</Text>
             </View>
           </View>
-          <View style={styles.lockTrack}><View style={styles.lockKnob} /><Ionicons name="lock-closed" size={16} color="#fff" /></View>
+          {/* Icono decorativo de privacidad */}
+          <View style={styles.lockTrack}>
+            <View style={styles.lockKnob} />
+            <Ionicons name="lock-closed" size={14} color="#fff" />
+          </View>
         </View>
 
+        {/* --- SECCIÓN HÁBITOS --- */}
         <Text style={styles.sectionTitle}>Tus hábitos</Text>
         <View style={styles.habitsStack}>
-          <View style={[styles.habitCard, styles.habitCardMuted]} />
-          <View style={[styles.habitCard, styles.habitCardMuted2]} />
+          {/* Tarjetas decorativas de fondo */}
+          <View style={[styles.habitCard, styles.habitCardBg2]} />
+          <View style={[styles.habitCard, styles.habitCardBg1]} />
+          
+          {/* Tarjeta Principal */}
           <View style={[styles.habitCard, styles.habitCardMain]}>
-            <Text style={styles.habitTitle}>Revisión digital consciente</Text>
-            <Text style={styles.habitSubtitle}>60 días</Text>
-            <Text style={styles.habitBody}>Revisa tus mensajes y redes dos o tres veces al día, marcando horarios.</Text>
+            <View style={styles.habitHeader}>
+              <Text style={styles.habitTitle}>Revisión digital consciente</Text>
+              <Text style={styles.habitSubtitle}>Racha: 5 días</Text>
+            </View>
+            <Text style={styles.habitBody}>
+              Revisa tus mensajes y redes de forma consciente para reducir el estrés digital.
+            </Text>
             <View style={styles.habitActions}>
-              <TouchableOpacity style={styles.roundBtn}><Ionicons name="add" size={18} color="#2f4f40" /></TouchableOpacity>
+              <TouchableOpacity style={styles.iconButton}>
+                <Ionicons name="add" size={20} color="#2f4f40" />
+              </TouchableOpacity>
               <View style={{ flex: 1 }} />
-              <TouchableOpacity style={styles.arrowBtn}><Ionicons name="arrow-forward" size={18} color="#2f4f40" /></TouchableOpacity>
+              <TouchableOpacity style={styles.iconButton}>
+                <Ionicons name="arrow-forward" size={20} color="#2f4f40" />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
 
+        {/* --- SECCIÓN DATOS PERSONALES --- */}
         <Text style={styles.sectionTitle}>Datos personales</Text>
         <View style={styles.listGroup}>
-          {[
-            { label: 'Estadísticas generales actuales', icon: 'stats-chart' },
-            { label: 'Evolución total', icon: 'trending-up' },
-            { label: 'Historial de hábitos superados', icon: 'checkmark-done' },
-            { label: 'Características personales', icon: 'finger-print' },
-            { label: 'Documentos médicos', icon: 'document-text' },
-          ].map((item, i) => (
-            <View key={`pi-${i}`} style={styles.listItem}>
-              <View style={styles.listIcon}><Ionicons name={item.icon} size={18} color="#3a2a32" /></View>
-              <Text style={styles.listText}>{item.label}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#3a2a32" />
-            </View>
-          ))}
+          <ListItem icon="stats-chart" text="Estadísticas generales" />
+          <ListItem icon="trending-up" text="Evolución total" />
+          <ListItem icon="checkmark-done" text="Historial de hábitos" />
+          <ListItem icon="finger-print" text="Características personales" />
+          <ListItem icon="document-text" text="Documentos médicos" />
         </View>
 
+        {/* --- SECCIÓN AJUSTES --- */}
         <Text style={styles.sectionTitle}>Ajustes</Text>
         <View style={styles.listGroup}>
-          {[
-            { label: 'Idioma y fecha', icon: 'globe' },
-            { label: 'Suscripción a premium', icon: 'star' },
-            { label: 'Métodos de pago', icon: 'card' },
-            { label: 'Ayuda y contacto', icon: 'help-circle' },
-          ].map((item, i) => (
-            <View key={`ai-${i}`} style={styles.listItem}>
-              <View style={styles.listIcon}><Ionicons name={item.icon} size={18} color="#3a2a32" /></View>
-              <Text style={styles.listText}>{item.label}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#3a2a32" />
-            </View>
-          ))}
+          <ListItem icon="globe" text="Idioma y región" />
+          <ListItem icon="star" text="Suscripción Premium" />
+          <ListItem icon="card" text="Métodos de pago" />
+          <ListItem icon="help-circle" text="Ayuda y contacto" />
         </View>
 
-        <TouchableOpacity style={styles.premiumCTA}>
-          <Text style={styles.premiumText}>Suscribirme a premium</Text>
-          <Ionicons name="arrow-forward" size={18} color="#fff" />
+        {/* --- BOTONES DE ACCIÓN --- */}
+        <TouchableOpacity style={styles.premiumButton}>
+          <Text style={styles.premiumButtonText}>Pasar a Premium</Text>
+          <Ionicons name="diamond-outline" size={20} color="#fff" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+          <Ionicons name="log-out-outline" size={20} color="#ff4444" style={{marginLeft: 8}}/>
         </TouchableOpacity>
+
+        <Text style={styles.versionText}>Versión 1.0.2 - SOMA</Text>
+
       </ScrollView>
     </SafeAreaView>
   );
 };
 
+// Componente auxiliar para los items de la lista (para limpiar el código principal)
+const ListItem = ({ icon, text }) => (
+  <TouchableOpacity style={styles.listItem}>
+    <View style={styles.listIconBox}>
+      <Ionicons name={icon} size={20} color="#3a2a32" />
+    </View>
+    <Text style={styles.listText}>{text}</Text>
+    <Ionicons name="chevron-forward" size={20} color="#ccc" />
+  </TouchableOpacity>
+);
+
 const styles = StyleSheet.create({
-  // 3. Estilos ajustados para el scroll correcto
+  // Estilos base para Scroll y SafeArea
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f8f8', // El color de fondo va aquí ahora
+    backgroundColor: '#f8f9fa', // Color de fondo suave
   },
   scrollView: {
-    flex: 1, // Importante para que ocupe todo el espacio disponible
+    flex: 1,
   },
   scrollContent: {
-    padding: 16, // El padding visual va DENTRO del contenido, no en el contenedor
-    paddingBottom: 100, // Espacio extra al final para que no se corte
+    padding: 20,
+    paddingBottom: 420,
     flexGrow: 1,
   },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  
-  // ... El resto de tus estilos se mantienen igual ...
-  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
-  avatarBox: { width: 64, height: 64, borderRadius: 12, backgroundColor: '#EFEFEF', alignItems: 'center', justifyContent: 'center' },
-  name: { fontSize: 22, fontWeight: '800', color: '#111' },
-  metaRow: { flexDirection: 'row', alignItems: 'center' },
-  metaText: { fontSize: 12, color: '#666' },
-  metaDot: { marginHorizontal: 6, color: '#999' },
-  lockTrack: { width: 48, height: 28, borderRadius: 14, backgroundColor: '#000', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, flexDirection: 'row' },
-  lockKnob: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#fff' },
-  sectionTitle: { fontSize: 22, fontWeight: 'bold', color: '#555', marginTop: 20, marginBottom: 10 },
-  habitsStack: { position: 'relative', height: 160 },
-  habitCard: { position: 'absolute', left: 0, right: 0, borderRadius: 16, padding: 16 },
-  habitCardMuted: { top: 20, backgroundColor: '#e6e6e6' },
-  habitCardMuted2: { top: 10, backgroundColor: '#ededed' },
-  habitCardMain: { top: 0, backgroundColor: '#EAFBE8' },
-  habitTitle: { fontSize: 16, fontWeight: '800', color: '#2f4f40' },
-  habitSubtitle: { fontSize: 12, color: '#2f4f40', marginTop: 2 },
-  habitBody: { fontSize: 13, color: '#2f4f40', marginTop: 8 },
-  habitActions: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
-  roundBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#cfead1', alignItems: 'center', justifyContent: 'center' },
-  arrowBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#cfead1', alignItems: 'center', justifyContent: 'center' },
-  listGroup: { backgroundColor: '#f0f0f0', borderRadius: 12, padding: 8 },
-  listItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 8 },
-  listIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#EAE5FF', marginRight: 12 },
-  listText: { flex: 1, fontSize: 14, color: '#3a2a32', fontWeight: '600' },
-  errorText: { color: 'red', fontSize: 16, textAlign: 'center' },
-  premiumCTA: { marginTop: 16, paddingVertical: 14, borderRadius: 24, alignItems: 'center', backgroundColor: '#000', flexDirection: 'row', justifyContent: 'center' },
-  premiumText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  logoutButton: { marginTop: 28, paddingVertical: 14, borderRadius: 24, alignItems: 'center', backgroundColor: '#000' },
-  logoutText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Header
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 10,
+  },
+  avatarBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    backgroundColor: '#e0e0ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metaText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  metaDot: {
+    marginHorizontal: 6,
+    color: '#ccc',
+  },
+  lockTrack: {
+    width: 50,
+    height: 28,
+    backgroundColor: '#000',
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    justifyContent: 'space-between',
+  },
+  lockKnob: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+  },
+
+  // Títulos de Sección
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 15,
+    marginTop: 10,
+  },
+
+  // Stack de Hábitos (Efecto de tarjetas apiladas)
+  habitsStack: {
+    height: 180,
+    marginBottom: 20,
+    position: 'relative',
+  },
+  habitCard: {
+    position: 'absolute',
+    width: '100%',
+    borderRadius: 20,
+  },
+  habitCardBg2: {
+    height: 140,
+    top: 20,
+    backgroundColor: '#e8e8e8',
+    transform: [{ scale: 0.92 }],
+  },
+  habitCardBg1: {
+    height: 140,
+    top: 10,
+    backgroundColor: '#f0f0f0',
+    transform: [{ scale: 0.96 }],
+  },
+  habitCardMain: {
+    backgroundColor: '#eafbe8', // Verde muy suave estilo imagen
+    padding: 20,
+    height: 160,
+    top: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 3,
+    justifyContent: 'space-between',
+  },
+  habitHeader: {
+    marginBottom: 5,
+  },
+  habitTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2f4f40',
+  },
+  habitSubtitle: {
+    fontSize: 12,
+    color: '#5a7a6a',
+    marginTop: 2,
+  },
+  habitBody: {
+    fontSize: 13,
+    color: '#4a6a5a',
+    lineHeight: 18,
+  },
+  habitActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    backgroundColor: '#d0ebd6',
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Listas de Opciones
+  listGroup: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 5,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  listIconBox: {
+    width: 32,
+    height: 32,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  listText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#333',
+    fontWeight: '500',
+  },
+
+  // Botones Finales
+  premiumButton: {
+    backgroundColor: '#000',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderRadius: 25,
+    marginBottom: 15,
+  },
+  premiumButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  logoutButton: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#ffebee',
+  },
+  logoutButtonText: {
+    color: '#ff4444',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  versionText: {
+    textAlign: 'center',
+    color: '#ccc',
+    fontSize: 12,
+    marginTop: 20,
+  }
 });
 
 export default ProfileScreen;

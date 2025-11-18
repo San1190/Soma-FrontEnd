@@ -177,10 +177,10 @@ function AppContent() {
       </Stack.Navigator>
       {/* Overlays para modos */}
       {isSleepModeActive && (
-        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(221, 234, 241, 0.25)' }} />
+        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(221, 234, 241, 0.25)', pointerEvents: 'none' }} />
       )}
       {isAntiStressModeActive && (
-        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(234, 229, 255, 0.22)' }} />
+        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(234, 229, 255, 0.22)', pointerEvents: 'none' }} />
       )}
     </NavigationContainer>
   );

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { login as loginService, registerUser } from '../services/auth';
-import { getItem, setItem, removeItem } from '../services/session'; // Para manejar el token en AsyncStorage
+import { getItem, setItem, deleteItem } from '../services/session';
 
 const AuthContext = createContext(null);
 
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
-      await removeItem('user');
+      await deleteItem('user');
       setUser(null);
     } catch (e) {
       console.error('Logout failed', e);

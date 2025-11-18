@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 import { useTheme } from '../context/ThemeContext';
@@ -10,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 export default function HomeScreen() {
   const { currentTheme } = useTheme();
   const { user } = useAuth();
+  const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('boton');
   const [colorOn, setColorOn] = useState(true);
   const [waterCount, setWaterCount] = useState(0);
@@ -90,12 +92,17 @@ export default function HomeScreen() {
         
         {/* --- Inicio del Contenido --- */}
       <View style={styles.topBar}>
-        <View style={styles.avatar}><Ionicons name="person" size={20} color={currentTheme.textPrimary} /></View>
-        <TouchableOpacity style={[styles.toggleTrack, colorOn ? styles.toggleOn : styles.toggleOff]} onPress={() => setColorOn(v => !v)}>
-          <View style={[styles.toggleKnob, colorOn ? styles.knobRight : styles.knobLeft]}>
-            <Ionicons name="person" size={16} color={colorOn ? '#000' : '#000'} />
-          </View>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.avatar}><Ionicons name="person" size={20} color={currentTheme.textPrimary} /></TouchableOpacity>
+        <View style={{ flexDirection:'row', alignItems:'center', gap:8 }}>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ width:32, height:32, borderRadius:16, alignItems:'center', justifyContent:'center', backgroundColor:'rgba(0,0,0,0.08)' }}>
+            <Ionicons name="settings-outline" size={18} color={currentTheme.textPrimary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.toggleTrack, colorOn ? styles.toggleOn : styles.toggleOff]} onPress={() => setColorOn(v => !v)}>
+            <View style={[styles.toggleKnob, colorOn ? styles.knobRight : styles.knobLeft]}>
+              <Ionicons name="person" size={16} color={colorOn ? '#000' : '#000'} />
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
         <Text style={[styles.date, { color: currentTheme.textSecondary }]}>{dateStr}</Text>
         <Text style={[styles.title, { color: currentTheme.textPrimary }]}>¡Hola {name}! Veamos cómo va tu día</Text>
@@ -249,7 +256,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, ...(Platform.OS === 'web' ? { minHeight: '100vh' } : {}) },
   container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 160, paddingTop: Platform.OS === 'ios' ? 8 : 0 },
+  content: { padding: 16, paddingBottom: 420, paddingTop: Platform.OS === 'ios' ? 8 : 0 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
   avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.06)' },
   lock: { width: 48, height: 24, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
@@ -322,20 +329,11 @@ const styles = StyleSheet.create({
   bar: { width: 18, borderRadius: 10 },
   
   // Estilos del Footer Fijo
-  footerPlaceholder: { position: Platform.OS === 'web' ? 'fixed' : 'absolute', bottom: 0, left: 0, right: 0, height: 100, backgroundColor: '#000', borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 12, zIndex: 100, width: Platform.OS === 'web' ? '100%' : undefined },
+  footerPlaceholder: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, backgroundColor: '#000', borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 12, zIndex: 100 },
   footerIcons: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '86%', alignSelf: 'center', paddingBottom: Platform.OS === 'ios' ? 12 : 6 },
 
   // --- 👇 CAMBIOS EN LOS ESTILOS DEL GATO ---
-  catArea: { 
-    position: 'absolute', 
-    bottom: 88, // Ajustado para asomar sobre el footer
-    left: 0, 
-    right: 0, 
-    alignItems: 'flex-end', 
-    paddingRight: 12, 
-    pointerEvents: 'none',
-    zIndex: 101 // Ponerse DELANTE del footer
-  },
+  catArea: { position: 'absolute', bottom: 88, left: 0, right: 0, alignItems: 'center', pointerEvents: 'none', zIndex: 101 },
   zz: { 
     position: 'absolute', 
     right: 80, // Ajustado
@@ -346,11 +344,7 @@ const styles = StyleSheet.create({
     fontSize: 22, // Añadido
     transform: [{ rotate: '15deg' }] // Añadido
   },
-  catImg: { 
-    width: 320, 
-    height: 200, 
-    // Se ha quitado el transform: translateY
-  },
+  catImg: { width: 360, height: 220 },
   // --- 👆 FIN DE CAMBIOS DEL GATO ---
 
   badgeMuted: { opacity: 0.5 }, // Este estilo no se usa ahora, pero lo dejo por si acaso

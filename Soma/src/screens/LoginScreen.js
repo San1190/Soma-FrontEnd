@@ -105,8 +105,9 @@ const LoginScreen = ({ navigation }) => {
           {/* Sección del Gato */}
           <View style={styles.catContainer}>
             <Image 
-              source={require('../../assets/gatos/GatoLogin.png')} 
+              source={require('../../assets/gatos/gatoLogin.png')} 
               style={styles.catImage} 
+              resizeMode='cover'
             />
           </View>
           

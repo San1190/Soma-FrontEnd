@@ -1,388 +1,191 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator, Button, Platform } from 'react-native';
-import { getUserById, updateUser } from '../services/users';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native'; // 1. Importar SafeAreaView
 import { useAuth } from '../context/AuthContext';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
-import { useNavigation } from '@react-navigation/native';
+import { getUserById } from '../services/users';
+import { Ionicons } from '@expo/vector-icons';
 
 const ProfileScreen = () => {
   const { user, logout } = useAuth();
-  const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editableUserData, setEditableUserData] = useState({
-    first_name: '',
-    last_name: '',
-    date_of_birth: '',
-    gender: '',
-    weight_kg: '',
-    height_cm: '',
-    sleep_goal_hours: '',
-    water_goal_liters: '',
-    activity_goal_minutes: '',
-  });
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user || !user.id) {
-        setError('User not authenticated or user ID not available.');
+        // (Tu lógica original aquí...)
         setLoading(false);
         return;
       }
       try {
         const data = await getUserById(user.id);
         setUserData(data);
-        setEditableUserData({
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
-          date_of_birth: data.date_of_birth || '',
-          gender: data.gender || '',
-          weight_kg: String(data.weight_kg) || '',
-          height_cm: String(data.height_cm) || '',
-          sleep_goal_hours: String(data.sleep_goal_hours) || '',
-          water_goal_liters: String(data.water_goal_liters) || '',
-          activity_goal_minutes: String(data.activity_goal_minutes) || '',
-        });
       } catch (err) {
         setError('Failed to fetch user data: ' + err.message);
-        console.error('Error fetching user data:', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchUserData();
   }, [user]);
 
-  const handleSave = async () => {
-    try {
-      const dataToUpdate = {
-        ...editableUserData,
-        weight_kg: parseFloat(editableUserData.weight_kg),
-        height_cm: parseFloat(editableUserData.height_cm),
-        sleep_goal_hours: parseFloat(editableUserData.sleep_goal_hours),
-        water_goal_liters: parseFloat(editableUserData.water_goal_liters),
-        activity_goal_minutes: parseFloat(editableUserData.activity_goal_minutes),
-      };
-      await updateUser(user.id, dataToUpdate);
-      setUserData(dataToUpdate);
-      setIsEditing(false);
-      Alert.alert('Éxito', 'Datos actualizados correctamente.');
-    } catch (error) {
-      console.error('Error al guardar los datos:', error);
-      Alert.alert('Error', 'No se pudieron guardar los datos.');
-    }
-  };
-
-  const onDateChange = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().split('T')[0];
-      setEditableUserData({ ...editableUserData, date_of_birth: formattedDate });
-    }
-  };
+  const fullName = `${userData?.first_name || user?.first_name || 'Ana'} ${userData?.last_name || user?.last_name || 'Martín'}`.trim();
+  const dob = userData?.date_of_birth || '';
+  const age = dob ? Math.max(0, Math.floor((Date.now() - new Date(dob).getTime()) / (365.25*24*60*60*1000))) : '—';
+  const gender = userData?.gender || '—';
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#000" />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={styles.centerContainer}>
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mi Perfil</Text>
-        <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-          <Text style={styles.editButtonText}>{isEditing ? 'Cancelar' : 'Editar'}</Text>
+    // 2. Usar SafeAreaView como contenedor principal para asegurar límites de pantalla
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent} // Aquí aplicaremos el padding interno
+        showsVerticalScrollIndicator={true} // Para ver que hay scroll
+      >
+        
+        {/* El Header y el contenido */}
+        <View style={styles.headerRow}>
+          <View style={styles.avatarBox}>
+            <Ionicons name="person" size={30} color="#6c63ff" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.name}>{fullName}</Text>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaText}>{gender}</Text>
+              <Text style={styles.metaDot}>•</Text>
+              <Text style={styles.metaText}>{age} edad</Text>
+              <Text style={styles.metaDot}>•</Text>
+              <Text style={styles.metaText}>{dob || '—'}</Text>
+            </View>
+          </View>
+          <View style={styles.lockTrack}><View style={styles.lockKnob} /><Ionicons name="lock-closed" size={16} color="#fff" /></View>
+        </View>
+
+        <Text style={styles.sectionTitle}>Tus hábitos</Text>
+        <View style={styles.habitsStack}>
+          <View style={[styles.habitCard, styles.habitCardMuted]} />
+          <View style={[styles.habitCard, styles.habitCardMuted2]} />
+          <View style={[styles.habitCard, styles.habitCardMain]}>
+            <Text style={styles.habitTitle}>Revisión digital consciente</Text>
+            <Text style={styles.habitSubtitle}>60 días</Text>
+            <Text style={styles.habitBody}>Revisa tus mensajes y redes dos o tres veces al día, marcando horarios.</Text>
+            <View style={styles.habitActions}>
+              <TouchableOpacity style={styles.roundBtn}><Ionicons name="add" size={18} color="#2f4f40" /></TouchableOpacity>
+              <View style={{ flex: 1 }} />
+              <TouchableOpacity style={styles.arrowBtn}><Ionicons name="arrow-forward" size={18} color="#2f4f40" /></TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>Datos personales</Text>
+        <View style={styles.listGroup}>
+          {[
+            { label: 'Estadísticas generales actuales', icon: 'stats-chart' },
+            { label: 'Evolución total', icon: 'trending-up' },
+            { label: 'Historial de hábitos superados', icon: 'checkmark-done' },
+            { label: 'Características personales', icon: 'finger-print' },
+            { label: 'Documentos médicos', icon: 'document-text' },
+          ].map((item, i) => (
+            <View key={`pi-${i}`} style={styles.listItem}>
+              <View style={styles.listIcon}><Ionicons name={item.icon} size={18} color="#3a2a32" /></View>
+              <Text style={styles.listText}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={18} color="#3a2a32" />
+            </View>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Ajustes</Text>
+        <View style={styles.listGroup}>
+          {[
+            { label: 'Idioma y fecha', icon: 'globe' },
+            { label: 'Suscripción a premium', icon: 'star' },
+            { label: 'Métodos de pago', icon: 'card' },
+            { label: 'Ayuda y contacto', icon: 'help-circle' },
+          ].map((item, i) => (
+            <View key={`ai-${i}`} style={styles.listItem}>
+              <View style={styles.listIcon}><Ionicons name={item.icon} size={18} color="#3a2a32" /></View>
+              <Text style={styles.listText}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={18} color="#3a2a32" />
+            </View>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.premiumCTA}>
+          <Text style={styles.premiumText}>Suscribirme a premium</Text>
+          <Ionicons name="arrow-forward" size={18} color="#fff" />
         </TouchableOpacity>
-      </View>
 
-      <Button title="Cerrar Sesión" onPress={logout} color="#FF6347" />
-
-  
-
-      <Text style={styles.sectionTitle}>Información de Login</Text>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Correo de Login:</Text>
-        <TextInput
-          style={styles.value}
-          value={user?.email}
-          editable={false}
-        />
-      </View>
-
-      <Text style={styles.sectionTitle}>Información Personal</Text>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Nombre:</Text>
-        <TextInput
-          style={isEditing ? styles.editableValue : styles.value}
-          value={editableUserData?.first_name}
-          onChangeText={(text) => setEditableUserData({ ...editableUserData, first_name: text })}
-          editable={isEditing}
-        />
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Apellido:</Text>
-        <TextInput
-          style={isEditing ? styles.editableValue : styles.value}
-          value={editableUserData?.last_name}
-          onChangeText={(text) => setEditableUserData({ ...editableUserData, last_name: text })}
-          editable={isEditing}
-        />
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Fecha de Nacimiento:</Text>
-        {isEditing ? (
-          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.editableValue}>
-            <Text>{editableUserData.date_of_birth || 'Seleccionar Fecha'}</Text>
-          </TouchableOpacity>
-        ) : (
-          <TextInput
-            style={styles.value}
-            value={editableUserData?.date_of_birth}
-            editable={false}
-          />
-        )}
-        {showDatePicker && (
-          <DateTimePicker
-            value={editableUserData.date_of_birth ? new Date(editableUserData.date_of_birth) : new Date()}
-            mode="date"
-            display="default"
-            onChange={onDateChange}
-          />
-        )}
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Género:</Text>
-        {isEditing ? (
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={editableUserData.gender}
-              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, gender: itemValue })}
-              style={styles.picker}
-            >
-              <Picker.Item label="Seleccionar Género" value="" />
-              <Picker.Item label="Hombre" value="Hombre" />
-              <Picker.Item label="Mujer" value="Mujer" />
-              <Picker.Item label="Otro" value="Otro" />
-            </Picker>
-          </View>
-        ) : (
-          <TextInput
-            style={styles.value}
-            value={editableUserData?.gender}
-            editable={false}
-          />
-        )}
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Peso (kg):</Text>
-        <TextInput
-          style={isEditing ? styles.editableValue : styles.value}
-          value={editableUserData?.weight_kg?.toString()}
-          onChangeText={(text) => setEditableUserData({ ...editableUserData, weight_kg: parseFloat(text) })}
-          keyboardType="numeric"
-          editable={isEditing}
-        />
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Altura (cm):</Text>
-        <TextInput
-          style={isEditing ? styles.editableValue : styles.value}
-          value={editableUserData?.height_cm?.toString()}
-          onChangeText={(text) => setEditableUserData({ ...editableUserData, height_cm: parseFloat(text) })}
-          keyboardType="numeric"
-          editable={isEditing}
-        />
-      </View>
-
-      <Text style={styles.sectionTitle}>Mis Objetivos</Text>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Horas de Sueño (horas):</Text>
-        {isEditing ? (
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={editableUserData?.sleep_goal_hours?.toString()}
-              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, sleep_goal_hours: parseFloat(itemValue) })}
-              style={styles.picker}
-            >
-              {[...Array(17).keys()].map((i) => (
-                <Picker.Item key={i} label={(4 + i * 0.5).toFixed(1)} value={(4 + i * 0.5).toFixed(1)} />
-              ))}
-            </Picker>
-          </View>
-        ) : (
-          <TextInput
-            style={styles.value}
-            value={editableUserData?.sleep_goal_hours?.toString()}
-            editable={false}
-          />
-        )}
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Consumo de Agua (litros):</Text>
-        {isEditing ? (
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={editableUserData?.water_goal_liters?.toString()}
-              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, water_goal_liters: parseFloat(itemValue) })}
-              style={styles.picker}
-            >
-              {[...Array(9).keys()].map((i) => (
-                <Picker.Item key={i} label={(1 + i * 0.5).toFixed(1)} value={(1 + i * 0.5).toFixed(1)} />
-              ))}
-            </Picker>
-          </View>
-        ) : (
-          <TextInput
-            style={styles.value}
-            value={editableUserData?.water_goal_liters?.toString()}
-            editable={false}
-          />
-        )}
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Actividad Física (minutos):</Text>
-        {isEditing ? (
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={editableUserData?.activity_goal_minutes?.toString()}
-              onValueChange={(itemValue) => setEditableUserData({ ...editableUserData, activity_goal_minutes: parseFloat(itemValue) })}
-              style={styles.picker}
-            >
-              {[...Array(11).keys()].map((i) => (
-                <Picker.Item key={i} label={(30 + i * 15).toString()} value={(30 + i * 15).toString()} />
-              ))}
-            </Picker>
-          </View>
-        ) : (
-          <TextInput
-            style={styles.value}
-            value={editableUserData?.activity_goal_minutes?.toString()}
-            editable={false}
-          />
-        )}
-      </View>
-
-      {isEditing && (
-        <Button title="Guardar Cambios" onPress={handleSave} color="#007BFF" />
-      )}
-    </ScrollView>
+        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  // 3. Estilos ajustados para el scroll correcto
+  safeArea: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#f8f8f8', // El color de fondo va aquí ahora
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  scrollView: {
+    flex: 1, // Importante para que ocupe todo el espacio disponible
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+  scrollContent: {
+    padding: 16, // El padding visual va DENTRO del contenido, no en el contenedor
+    paddingBottom: 100, // Espacio extra al final para que no se corte
+    flexGrow: 1,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  editButtonText: {
-    fontSize: 18,
-    color: '#007BFF',
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#555',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  infoContainer: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    boxShadow: '0px 1px 1.41px rgba(0, 0, 0, 0.2)',
-    elevation: 2,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  value: {
-    fontSize: 16,
-    color: '#666',
-    paddingVertical: 5,
-  },
-  editableValue: {
-    fontSize: 16,
-    color: '#333',
-    paddingVertical: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  button: {
-    backgroundColor: '#007bff',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  notificationButton: {
-    backgroundColor: '#007BFF',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  notificationButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  
+  // ... El resto de tus estilos se mantienen igual ...
+  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
+  avatarBox: { width: 64, height: 64, borderRadius: 12, backgroundColor: '#EFEFEF', alignItems: 'center', justifyContent: 'center' },
+  name: { fontSize: 22, fontWeight: '800', color: '#111' },
+  metaRow: { flexDirection: 'row', alignItems: 'center' },
+  metaText: { fontSize: 12, color: '#666' },
+  metaDot: { marginHorizontal: 6, color: '#999' },
+  lockTrack: { width: 48, height: 28, borderRadius: 14, backgroundColor: '#000', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, flexDirection: 'row' },
+  lockKnob: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#fff' },
+  sectionTitle: { fontSize: 22, fontWeight: 'bold', color: '#555', marginTop: 20, marginBottom: 10 },
+  habitsStack: { position: 'relative', height: 160 },
+  habitCard: { position: 'absolute', left: 0, right: 0, borderRadius: 16, padding: 16 },
+  habitCardMuted: { top: 20, backgroundColor: '#e6e6e6' },
+  habitCardMuted2: { top: 10, backgroundColor: '#ededed' },
+  habitCardMain: { top: 0, backgroundColor: '#EAFBE8' },
+  habitTitle: { fontSize: 16, fontWeight: '800', color: '#2f4f40' },
+  habitSubtitle: { fontSize: 12, color: '#2f4f40', marginTop: 2 },
+  habitBody: { fontSize: 13, color: '#2f4f40', marginTop: 8 },
+  habitActions: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  roundBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#cfead1', alignItems: 'center', justifyContent: 'center' },
+  arrowBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#cfead1', alignItems: 'center', justifyContent: 'center' },
+  listGroup: { backgroundColor: '#f0f0f0', borderRadius: 12, padding: 8 },
+  listItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 8 },
+  listIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#EAE5FF', marginRight: 12 },
+  listText: { flex: 1, fontSize: 14, color: '#3a2a32', fontWeight: '600' },
+  errorText: { color: 'red', fontSize: 16, textAlign: 'center' },
+  premiumCTA: { marginTop: 16, paddingVertical: 14, borderRadius: 24, alignItems: 'center', backgroundColor: '#000', flexDirection: 'row', justifyContent: 'center' },
+  premiumText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  logoutButton: { marginTop: 28, paddingVertical: 14, borderRadius: 24, alignItems: 'center', backgroundColor: '#000' },
+  logoutText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
 
 export default ProfileScreen;

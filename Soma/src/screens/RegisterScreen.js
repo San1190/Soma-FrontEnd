@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Usamos estos iconos que se parecen más a la foto
 
@@ -89,10 +89,10 @@ const RegisterScreen = ({ navigation }) => {
       >
         {/* Imagen del Gato de fondo (Cuerpo oscuro) */}
         <View style={styles.catContainer}>
-            {/* Asegúrate de tener esta imagen o usa la del login temporalmente si no la tienes */}
             <Image 
-              source={require('../../assets/gatos/GatoRegister.png')} 
+              source={require('../../assets/gatos/gatoRegister.png')} 
               style={styles.catImage} 
+              resizeMode='cover'
             />
         </View>
 

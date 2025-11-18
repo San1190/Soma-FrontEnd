@@ -1,65 +1,106 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from 'react-native';
-import { useTheme } from '../context/ThemeContext'; // Para usar currentTheme
-import { Ionicons } from '@expo/vector-icons'; // Para los íconos de Google y Apple
+import React from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+
+const { height, width } = Dimensions.get('window');
+
+// --- CONSTANTES DE DISEÑO ---
+const CAT_CONTAINER_OVERFLOW_WIDTH = width * 1.8; 
+const CAT_CONTAINER_OVERFLOW_HEIGHT = height * 1.0; 
+const DARK_SECTION_TOP_OFFSET = height * 0.45; 
+
+// --- VALORES CLAVE AJUSTADOS ---
+const CAT_VERTICAL_OFFSET = 0.35; // EL GATO NO SE TOCA
+const EXTENSION_ALIGNMENT_POINT = height * 0.50; 
+const CAT_EXTENSION_HEIGHT = height - EXTENSION_ALIGNMENT_POINT;
 
 const LoginScreen = ({ navigation }) => {
   const { currentTheme } = useTheme();
 
-
   const styles = StyleSheet.create({
-    safeArea: {
+    outerContainer: {
       flex: 1,
-      backgroundColor: '#EFEFEF', // Fondo general fuera del contenido principal
+      backgroundColor: '#DCDCDC',
       justifyContent: 'center',
       alignItems: 'center',
     },
     container: {
       flex: 1,
       width: '100%',
-      maxWidth: 400, // Ajustar a un tamaño de móvil típico
-      borderRadius: 20, // Borde redondeado del "móvil" en la imagen
-      overflow: 'hidden', // Para que el gato no se salga del borde
+      borderRadius: 30,
+      overflow: 'hidden',
       backgroundColor: '#EFEFEF', // Fondo claro principal
     },
     contentWrapper: {
       flex: 1,
-      backgroundColor: '#EFEFEF', // Fondo superior claro
-      alignItems: 'center',
-      paddingTop: 40, // Espacio superior
-    },
-    catContainer: {
       width: '100%',
-      height: 280, // Altura del área del gato
-      backgroundColor: '#6B5A66', // Color de fondo del gato
-      justifyContent: 'center',
+    },
+
+    // 1. Fondo Oscuro General
+    darkBackground: {
+      position: 'absolute',
+      top: DARK_SECTION_TOP_OFFSET, 
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: '#8E828A', // Color de fondo oscuro original
+    },
+
+    // 2. CAPA DEL GATO (Imagen PNG - NO SE TOCA)
+    catContainer: {
+      position: 'absolute',
+      left: -(CAT_CONTAINER_OVERFLOW_WIDTH - width) / 2, 
+      width: CAT_CONTAINER_OVERFLOW_WIDTH,
+      height: CAT_CONTAINER_OVERFLOW_HEIGHT,
+      
+      bottom: height - DARK_SECTION_TOP_OFFSET - (height * CAT_VERTICAL_OFFSET), 
+      
       alignItems: 'center',
-      position: 'relative', // Para posicionar la imagen del gato
+      justifyContent: 'center',
+      zIndex: 2, 
     },
     catImage: {
       width: '100%',
       height: '100%',
-      resizeMode: 'contain',
+      resizeMode: 'cover',
+    },
+
+    // 3. RECTÁNGULO DE EXTENSIÓN DEL GATO (TAMAÑO MODIFICADO)
+    catExtensionRectangle: {
       position: 'absolute',
-      top: 0,
-      left: 0,
+      left: -(CAT_CONTAINER_OVERFLOW_WIDTH - width) / 2, 
+      width: CAT_CONTAINER_OVERFLOW_WIDTH,
+      
+      // PUNTO DE UNIÓN MODIFICADO (para hacerlo más pequeño)
+      top: EXTENSION_ALIGNMENT_POINT, 
+      height: CAT_EXTENSION_HEIGHT, 
+      
+      backgroundColor: '#59404E', // Color de la extensión del gato
+      zIndex: 1, 
     },
+
+    // 4. CAPA DE BOTONES Y TEXTOS 
     bottomSection: {
-      backgroundColor: '#8E828A', // Fondo oscuro de la sección inferior
-      paddingHorizontal: 20,
-      paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Espacio para el notch inferior en iOS
-      paddingTop: 30, // Espacio entre los botones y el gato
-      alignItems: 'center',
+      position: 'absolute',
+      bottom: 70,
       width: '100%',
+      paddingHorizontal: width * 0.05,
+      paddingBottom: Platform.OS === 'ios' ? 30 : 20,
+      paddingTop: height * 0.04,
+      alignItems: 'center',
+      zIndex: 3, 
     },
+
+    // --- ESTILOS DE BOTONES Y TEXTOS (Mantenidos) ---
     button: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#FFFFFF', // Fondo blanco de los botones
-      borderRadius: 30, // Botones redondeados
+      backgroundColor: '#FFFFFF',
+      borderRadius: 30,
       paddingVertical: 14,
-      width: '90%', // Ancho de los botones
+      width: '80%',
       marginBottom: 15,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
@@ -73,45 +114,35 @@ const LoginScreen = ({ navigation }) => {
       fontWeight: '600',
       marginLeft: 10,
     },
-    registerText: {
-      color: '#FFFFFF',
-      fontSize: 14,
-      marginTop: 20,
-      marginBottom: 15,
-    },
-    registerLink: {
-      fontWeight: 'bold',
-      textDecorationLine: 'underline',
-    },
-    termsText: {
-      color: '#FFFFFF',
-      fontSize: 12,
-      textAlign: 'center',
-      lineHeight: 18,
-    },
-    termsLink: {
-      fontWeight: 'bold',
-      textDecorationLine: 'underline',
-    },
+    registerText: { color: '#FFFFFF', fontSize: 14, marginTop: 20, marginBottom: 15, },
+    registerLink: { fontWeight: 'bold', textDecorationLine: 'underline', },
+    termsText: { color: '#FFFFFF', fontSize: 12, textAlign: 'center', lineHeight: 18, },
+    termsLink: { fontWeight: 'bold', textDecorationLine: 'underline', },
   });
 
   return (
-    <View style={styles.safeArea}> {/* Usamos View como wrapper para simular el "dispositivo" */}
+    <View style={styles.outerContainer}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <View style={styles.contentWrapper}>
-          {/* Sección del Gato */}
+
+          {/* 1. Fondo Oscuro General */}
+          <View style={styles.darkBackground} />
+
+          {/* 2. Rectángulo de Extensión del Gato */}
+          <View style={styles.catExtensionRectangle} />
+
+          {/* 3. Imagen del Gato (Capa Media - NO SE TOCA) */}
           <View style={styles.catContainer}>
-            <Image 
-              source={require('../../assets/gatos/gatoLogin.png')} 
-              style={styles.catImage} 
-              resizeMode='cover'
+            <Image
+              source={require('../../assets/gatos/gatoLogin.png')}
+              style={styles.catImage}
             />
           </View>
           
-          {/* Sección Inferior con Botones y Textos */}
+          {/* 4. Botones y Textos (Capa Superior) */}
           <View style={styles.bottomSection}>
             <TouchableOpacity style={styles.button}>
               <Ionicons name="logo-google" size={24} color="#4285F4" />
@@ -129,7 +160,7 @@ const LoginScreen = ({ navigation }) => {
 
             <Text style={styles.termsText}>
               Al continuar aceptas los <Text style={styles.termsLink}>Términos</Text>
-              {' y la '}
+              {'\n y la '}
               <Text style={styles.termsLink}>Política de privacidad</Text>
             </Text>
           </View>

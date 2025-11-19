@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Dimensions, TextInput, Alert } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -15,8 +15,11 @@ const CAT_VERTICAL_OFFSET = 0.35; // EL GATO NO SE TOCA
 const EXTENSION_ALIGNMENT_POINT = height * 0.50; 
 const CAT_EXTENSION_HEIGHT = height - EXTENSION_ALIGNMENT_POINT;
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, onAuthSuccess }) => {
   const { currentTheme } = useTheme();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const styles = StyleSheet.create({
     outerContainer: {
@@ -91,6 +94,15 @@ const LoginScreen = ({ navigation }) => {
       alignItems: 'center',
       zIndex: 3, 
     },
+    input: {
+      backgroundColor: '#FFFFFF',
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      width: '80%',
+      marginBottom: 12,
+      color: '#333333',
+    },
 
     // --- ESTILOS DE BOTONES Y TEXTOS (Mantenidos) ---
     button: {
@@ -120,6 +132,25 @@ const LoginScreen = ({ navigation }) => {
     termsLink: { fontWeight: 'bold', textDecorationLine: 'underline', },
   });
 
+  const handleEmailLogin = async () => {
+    const emailTrimmed = email.trim();
+    if (!emailTrimmed || !password) {
+      Alert.alert('Campos requeridos', 'Introduce tu correo y contraseña.');
+      return;
+    };
+    try {
+      setSubmitting(true);
+      const ok = await onAuthSuccess(emailTrimmed, password);
+      if (!ok) {
+        Alert.alert('Error de acceso', 'Correo o contraseña incorrectos.');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo iniciar sesión.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <View style={styles.outerContainer}>
       <KeyboardAvoidingView
@@ -144,6 +175,10 @@ const LoginScreen = ({ navigation }) => {
           
           {/* 4. Botones y Textos (Capa Superior) */}
           <View style={styles.bottomSection}>
+            <TouchableOpacity style={styles.button} onPress={handleEmailLogin} disabled={submitting}>
+              <Ionicons name="log-in-outline" size={24} color="#333333" />
+              <Text style={styles.buttonText}>{submitting ? 'Entrando…' : 'Entrar con correo'}</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
               <Ionicons name="logo-google" size={24} color="#4285F4" />
               <Text style={styles.buttonText}>Entrar con Google</Text>
@@ -153,6 +188,25 @@ const LoginScreen = ({ navigation }) => {
               <Ionicons name="logo-apple" size={24} color="#000000" />
               <Text style={styles.buttonText}>Entrar con Apple</Text>
             </TouchableOpacity>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Correo electrónico"
+              placeholderTextColor="#999"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={email}
+              onChangeText={setEmail}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Contraseña"
+              placeholderTextColor="#999"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
 
             <Text style={styles.registerText}>
               ¿No tienes cuenta? <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>Regístrate aquí</Text>

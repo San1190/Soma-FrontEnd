@@ -3,17 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Image }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
+import FooterNav from '../components/FooterNav';
 import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
-export default function HomeScreen() {
+export default function HomeScreen({ route }) {
   const { currentTheme } = useTheme();
   const { user } = useAuth();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const [activeTab, setActiveTab] = useState('boton');
+  const [activeTab, setActiveTab] = useState(route?.params?.tab || 'boton');
+  const selectTab = (tab) => {
+    setActiveTab(tab);
+    navigation.setParams({ tab });
+  };
   const [colorOn, setColorOn] = useState(true);
   const [waterCount, setWaterCount] = useState(0);
   const [waterGoal, setWaterGoal] = useState(8);
@@ -86,6 +91,11 @@ export default function HomeScreen() {
     };
     loadActivity();
   }, [activeTab, user?.id]);
+
+  React.useEffect(() => {
+    const t = route?.params?.tab;
+    if (t && t !== activeTab) setActiveTab(t);
+  }, [route?.params?.tab]);
   
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: appBg }]}>
@@ -113,7 +123,7 @@ export default function HomeScreen() {
             { key: 'hidratacion', label: 'Hidratación' },
             { key: 'actividad', label: 'Actividad' },
           ].map(p => (
-            <TouchableOpacity key={p.key} style={[styles.pill, activeTab === p.key && [styles.pillActive, { backgroundColor: '#000' }]]} onPress={() => setActiveTab(p.key)}>
+            <TouchableOpacity key={p.key} style={[styles.pill, activeTab === p.key && [styles.pillActive, { backgroundColor: '#000' }]]} onPress={() => selectTab(p.key)}>
               <Text style={[styles.pillText, { color: activeTab === p.key ? '#fff' : currentTheme.textPrimary }]}>{p.label}</Text>
             </TouchableOpacity>
           ))}
@@ -231,15 +241,7 @@ export default function HomeScreen() {
       
       {/* --- INICIO DEL FOOTER (FIJO) --- */}
       {isFocused && (
-        <View style={styles.footerPlaceholder}>
-          <View style={styles.footerIcons}>
-            <TouchableOpacity onPress={() => setActiveTab('boton')}><Ionicons name="home" size={22} color="#fff" /></TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveTab('hidratacion')}><Ionicons name="time" size={22} color="#fff" /></TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveTab('actividad')}><Ionicons name="heart" size={22} color="#fff" /></TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveTab('boton')}><Ionicons name="moon" size={22} color="#fff" /></TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveTab('espejo')}><Ionicons name="eye" size={22} color="#fff" /></TouchableOpacity>
-          </View>
-        </View>
+        <FooterNav />
       )}
       
       {/* --- GATO (FIJO) --- */}

@@ -1,6 +1,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
+import StressScreen from '../screens/StressScreen';
+import GuidedBreathingScreen from '../screens/GuidedBreathingScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -17,9 +19,17 @@ const ProfileStack = () => (
 
 const Tab = createBottomTabNavigator();
 
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="HomeMain" component={HomeScreen} />
+    <Stack.Screen name="Stress" component={StressScreen} />
+    <Stack.Screen name="GuidedBreathing" component={GuidedBreathingScreen} />
+  </Stack.Navigator>
+);
+
 const AppNavigator = () => (
   <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' }, unmountOnBlur: true }} tabBar={() => null}>
-    <Tab.Screen name="Home" component={HomeScreen} />
+    <Tab.Screen name="Home" component={HomeStack} />
     <Tab.Screen name="Profile" component={ProfileStack} />
   </Tab.Navigator>
 );

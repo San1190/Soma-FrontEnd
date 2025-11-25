@@ -11,6 +11,7 @@ export const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#263238',
+    marginTop: 40,
     marginBottom: 30,
   },
   stressNotification: {
@@ -91,6 +92,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    marginBottom: 20,
   },
   buttonText: {
     color: '#ffffff',

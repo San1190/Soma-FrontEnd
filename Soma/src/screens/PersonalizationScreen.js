@@ -8,14 +8,12 @@ const { height, width } = Dimensions.get('window');
 // --- CONSTANTES DE DISEÑO GENERAL ---
 const CONTENT_HEIGHT = height * 0.95; 
 const BORDER_RADIUS = 30; 
-// Altura del área del gato (la imagen PNG define la forma)
 const CAT_IMAGE_HEIGHT = height * 0.4; 
-const NEXT_BUTTON_HEIGHT = 50; // Altura aproximada del botón "Comencemos"
+const NEXT_BUTTON_HEIGHT = 50; 
+const CAT_OVERFLOW_WIDTH = width * 1.5; 
 
-
-// Componente auxiliar para un input con estilo de píldora (No modificado)
+// Componente auxiliar para un input con estilo de píldora
 const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = true, ...props }) => {
-    // ... (El estilo del PillInput permanece igual)
     const styles = StyleSheet.create({
         pillInputContainer: { 
             width: smallWidth ? '48%' : '100%', 
@@ -28,7 +26,8 @@ const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = 
             marginBottom: 4,
         },
         input: {
-            backgroundColor: '#E6E0F5', 
+            // CAMBIO DE COLOR: Usamos un fondo blanco/muy claro para que coincida con la imagen
+            backgroundColor: '#FFFFFF', 
             borderRadius: 12, 
             paddingHorizontal: 12, 
             paddingVertical: 8, 
@@ -36,6 +35,8 @@ const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = 
             fontWeight: '600', 
             color: '#333333',
             opacity: editable ? 1 : 0.8,
+            borderWidth: 1, // Añadimos un borde sutil para definir el campo
+            borderColor: '#E0E0E0', 
         }
     });
     
@@ -47,7 +48,7 @@ const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = 
                 value={value}
                 onChangeText={onChangeText}
                 editable={editable}
-                placeholderTextColor="#5D4D60"
+                placeholderTextColor="#999"
                 {...props}
             />
         </View>
@@ -61,16 +62,16 @@ const PersonalizationScreen = ({ navigation }) => {
   const [goalText, setGoalText] = useState('');
   const [expectationText, setExpectationText] = useState('');
     
-  // --- ESTADOS PARA LOS CAMPOS 'SOY...' --- (Simplificados para el ejemplo)
-  const [nombre, setNombre] = useState('Ana María');
-  const [apellidos, setApellidos] = useState('García Márquez');
-  const [edad, setEdad] = useState('28');
-  const [fechaNac, setFechaNac] = useState('25/11/1997');
-  const [sexo, setSexo] = useState('XX');
-  const [pais, setPais] = useState('España');
-  const [ciudad, setCiudad] = useState('Valencia');
-  const [ocupacion, setOcupacion] = useState('Diseñadora UX');
-  const [telefono, setTelefono] = useState('+ 34 622 09 77 47');
+  // --- ESTADOS VACÍOS PARA LOS CAMPOS 'SOY...' (CORREGIDO) ---
+  const [nombre, setNombre] = useState('');
+  const [apellidos, setApellidos] = useState('');
+  const [edad, setEdad] = useState('');
+  const [fechaNac, setFechaNac] = useState('');
+  const [sexo, setSexo] = useState('');
+  const [pais, setPais] = useState('');
+  const [ciudad, setCiudad] = useState('');
+  const [ocupacion, setOcupacion] = useState('');
+  const [telefono, setTelefono] = useState('');
 
 
   const handleButtonPress = (buttonId) => {
@@ -82,14 +83,13 @@ const PersonalizationScreen = ({ navigation }) => {
     container: {
       width: '100%', height: CONTENT_HEIGHT, borderRadius: BORDER_RADIUS, overflow: 'hidden',
       backgroundColor: '#EFEFEF', 
-      position: 'relative', // Necesario para el botón flotante (nextButton)
+      position: 'relative', 
     },
 
     // 1. Contenido desplazable (ScrollView)
     scrollContainer: {
       flexGrow: 1, paddingHorizontal: 20, paddingTop: 30, 
-      // Padding mínimo, ya que el gato y el botón están ahora DENTRO del flujo
-      paddingBottom: NEXT_BUTTON_HEIGHT + 40, // Espacio para el botón y margen final
+      paddingBottom: CAT_IMAGE_HEIGHT + 70, 
     },
     
     mainTitle: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 4, textAlign: 'center', },
@@ -119,24 +119,22 @@ const PersonalizationScreen = ({ navigation }) => {
         marginBottom: 15, minHeight: 80, textAlignVertical: 'top', 
     },
     
-    // 4. Botón flotante al final del contenido
-    nextButton: {
-      backgroundColor: currentTheme.primary, 
-      borderRadius: 30, paddingVertical: 15, alignItems: 'center',
-      marginTop: 20, marginBottom: 40,
-      width: '90%', 
-      alignSelf: 'center',
-    },
-    nextButtonText: { color: currentTheme.cardBackground, fontSize: 18, fontWeight: '700', },
-    
-    // 5. Imagen del Gato (Ahora es parte del flujo del scroll)
+    // 4. Imagen del Gato en la parte inferior (absoluta y fija - CORRECCIÓN DE FONDO)
     catImageContainer: {
-      height: CAT_IMAGE_HEIGHT, // Mantiene la altura
+      position: 'absolute', bottom: 0, left: 0, right: 0, 
+      height: CAT_IMAGE_HEIGHT,
       zIndex: 1, 
-      marginTop: 40, // Separación del contenido
     },
     catImage: { width: '100%', height: '100%', resizeMode: 'cover', }, 
     
+    nextButton: {
+      backgroundColor: currentTheme.primary, 
+      borderRadius: 30, paddingVertical: 15, alignItems: 'center',
+      position: 'absolute', 
+      bottom: CAT_IMAGE_HEIGHT / 2 + 50, 
+      left: 40, right: 40, zIndex: 2, 
+    },
+    nextButtonText: { color: currentTheme.cardBackground, fontSize: 18, fontWeight: '700', },
   });
 
   return (
@@ -172,15 +170,15 @@ const PersonalizationScreen = ({ navigation }) => {
             <Text style={styles.sectionHeading}>Soy...</Text>
             <View style={styles.dataSection}>
                 <View style={styles.dataRow}>
-                    <PillInput label="nombre" value={nombre} onChangeText={setNombre} smallWidth={true} />
-                    <PillInput label="apellidos" value={apellidos} onChangeText={setApellidos} smallWidth={true} />
-                    <PillInput label="edad" value={edad} onChangeText={setEdad} smallWidth={true} keyboardType="numeric" />
+                    <PillInput label="nombre" value={nombre} onChangeText={setNombre} smallWidth={true} placeholder="Tu Nombre" />
+                    <PillInput label="apellidos" value={apellidos} onChangeText={setApellidos} smallWidth={true} placeholder="Tus Apellidos" />
+                    <PillInput label="edad" value={edad} onChangeText={setEdad} smallWidth={true} keyboardType="numeric" placeholder="Tu Edad" />
                     <PillInput label="fecha de nacimiento" value={fechaNac} onChangeText={setFechaNac} smallWidth={true} placeholder="DD/MM/YYYY" />
                     <PillInput label="sexo" value={sexo} onChangeText={setSexo} smallWidth={true} placeholder="XX/XY" />
-                    <PillInput label="país" value={pais} onChangeText={setPais} smallWidth={true} />
-                    <PillInput label="ciudad" value={ciudad} onChangeText={setCiudad} smallWidth={true} />
-                    <PillInput label="ocupación" value={ocupacion} onChangeText={setOcupacion} smallWidth={true} />
-                    <PillInput label="teléfono" value={telefono} onChangeText={setTelefono} smallWidth={true} keyboardType="phone-pad" />
+                    <PillInput label="país" value={pais} onChangeText={setPais} smallWidth={true} placeholder="Tu País" />
+                    <PillInput label="ciudad" value={ciudad} onChangeText={setCiudad} smallWidth={true} placeholder="Tu Ciudad" />
+                    <PillInput label="ocupación" value={ocupacion} onChangeText={setOcupacion} smallWidth={true} placeholder="Tu Ocupación" />
+                    <PillInput label="teléfono" value={telefono} onChangeText={setTelefono} smallWidth={true} keyboardType="phone-pad" placeholder="Tu Teléfono" />
                 </View>
                 <Text style={styles.infoText}>Todos estos apartados puedes modificarlos posteriormente en tu perfil</Text>
             </View>

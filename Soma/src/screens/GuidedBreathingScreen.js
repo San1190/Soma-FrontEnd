@@ -9,6 +9,10 @@ import { useTheme } from '../context/ThemeContext';
 import API_BASE_URL from '../constants/api';
 import { Platform } from 'react-native';
 import { getUserById } from '../services/users';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
+import FooterNav from '../components/FooterNav';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const STRESS_API_URL = `${API_BASE_URL}/stress`;
 const TEST_USER_ID = 1;
 
@@ -16,9 +20,11 @@ const TEST_USER_ID = 1;
 const GuidedBreathingScreen = ({ navigation }) => {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const isFocused = useIsFocused();
   const styles = makeStyles(currentTheme);
   const [stressLevel, setStressLevel] = useState('Desconocido'); // Estado para el nivel de estrés actual del usuario
   const [exerciseHistory, setExerciseHistory] = useState([]); // Historial de ejercicios de respiración completados por el usuario
+  const insets = useSafeAreaInsets();
 
   // Función para generar datos simulados de frecuencia cardíaca y nivel de estrés para demostración
   const generateSimulatedData = (index) => {
@@ -62,7 +68,7 @@ const GuidedBreathingScreen = ({ navigation }) => {
       try {
         const data = await getUserById(uid);
         setUserProfile(data);
-      } catch {}
+      } catch { }
     };
     fetchStressLevel();
     fetchUser();
@@ -388,88 +394,96 @@ const GuidedBreathingScreen = ({ navigation }) => {
 
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: currentTheme.background }}>
-      <View style={styles.container}>
-        <Text style={[styles.title,{color: currentTheme.textPrimary}]}>Ejercicio de Respiración Guiada</Text>
-        {!isSimplifiedMode && (
-          <View style={styles.userDataContainer}>
-            <Text style={styles.userDataText}>Usuario: {(userProfile?.first_name && userProfile?.last_name) ? `${userProfile.first_name} ${userProfile.last_name}` : (userProfile?.first_name || userProfile?.email || user?.email || 'Cargando...')}</Text>
-            <Text style={styles.userDataText}>Nivel de estrés actual: {stressLevel}</Text>
-            <View style={styles.chipRow}>
-              <View style={[styles.chip,{backgroundColor: (stressLevel==='Bajo')?'#2ecc71':(stressLevel==='Moderado')?'#f39c12':'#e74c3c'}]}>
-                <Text style={{color:'#fff',fontWeight:'600'}}>Estrés: {stressLevel}</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: currentTheme.background }}>
+      <ScrollView contentContainerStyle={{
+        flexGrow: 1,
+        alignItems: 'center',
+        paddingBottom: insets.bottom + 30, // espacio extra para el botón
+        paddingTop: 40,
+      }}>
+        <View style={styles.container}>
+          <Text style={[styles.title, { color: currentTheme.textPrimary }]}>Ejercicio de Respiración Guiada</Text>
+          {!isSimplifiedMode && (
+            <View style={styles.userDataContainer}>
+              <Text style={styles.userDataText}>Usuario: {(userProfile?.first_name && userProfile?.last_name) ? `${userProfile.first_name} ${userProfile.last_name}` : (userProfile?.first_name || userProfile?.email || user?.email || 'Cargando...')}</Text>
+              <Text style={styles.userDataText}>Nivel de estrés actual: {stressLevel}</Text>
+              <View style={styles.chipRow}>
+                <View style={[styles.chip, { backgroundColor: (stressLevel === 'Bajo') ? '#2ecc71' : (stressLevel === 'Moderado') ? '#f39c12' : '#e74c3c' }]}>
+                  <Text style={{ color: '#fff', fontWeight: '600' }}>Estrés: {stressLevel}</Text>
+                </View>
+                <View style={[styles.chip, { backgroundColor: '#3498db' }]}>
+                  <Text style={{ color: '#fff', fontWeight: '600' }}>FC: {data[data.length - 1]?.heartRate ?? '—'} bpm</Text>
+                </View>
               </View>
-              <View style={[styles.chip,{backgroundColor:'#3498db'}]}>
-                <Text style={{color:'#fff',fontWeight:'600'}}>FC: {data[data.length-1]?.heartRate ?? '—'} bpm</Text>
-              </View>
+              <Text style={styles.userDataText}>Ejercicios completados: {exerciseHistory.length}</Text>
             </View>
-            <Text style={styles.userDataText}>Ejercicios completados: {exerciseHistory.length}</Text>
+          )}
+
+          <View style={styles.suggestionButtonsContainer}>
+            <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(5000); setHoldDuration(5000); setExhaleDuration(5000); }}>
+              <Text style={styles.buttonText}>Coherencia 5-5-5</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(4000); setHoldDuration(4000); setExhaleDuration(4000); }}>
+              <Text style={styles.buttonText}>Box 4-4-4</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(4000); setHoldDuration(7000); setExhaleDuration(8000); }}>
+              <Text style={styles.buttonText}>4-7-8</Text>
+            </TouchableOpacity>
           </View>
-        )}
 
-        <View style={styles.suggestionButtonsContainer}>
-          <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(5000); setHoldDuration(5000); setExhaleDuration(5000); }}>
-            <Text style={styles.buttonText}>Coherencia 5-5-5</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(4000); setHoldDuration(4000); setExhaleDuration(4000); }}>
-            <Text style={styles.buttonText}>Box 4-4-4</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.acceptButton} onPress={() => { setInhaleDuration(4000); setHoldDuration(7000); setExhaleDuration(8000); }}>
-            <Text style={styles.buttonText}>4-7-8</Text>
-          </TouchableOpacity>
-        </View>
+          {stressNotificationType !== 'none' && (
+            <View style={styles.stressNotification}>
+              <Text style={styles.stressNotificationText}>
+                {stressNotificationType === 'alert'
+                  ? '¡Nivel de estrés alto detectado! Tómate un momento para respirar.'
+                  : stressNotificationType === 'preventive_alert'
+                    ? 'Se ha detectado un patrón de estrés creciente. Considera tomar un descanso.'
+                    : 'Intervención reciente registrada. Las notificaciones de estrés están en pausa.'}
+              </Text>
+              {showSuggestionButtons && (
+                <View style={styles.suggestionButtonsContainer}>
+                  <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptSuggestion}>
+                    <Text style={styles.buttonText}>Aceptar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.declineButton} onPress={handleDeclineSuggestion}>
+                    <Text style={styles.buttonText}>Rechazar</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
 
-        {stressNotificationType !== 'none' && (
-          <View style={styles.stressNotification}>
-            <Text style={styles.stressNotificationText}>
-              {stressNotificationType === 'alert'
-                ? '¡Nivel de estrés alto detectado! Tómate un momento para respirar.'
-                : stressNotificationType === 'preventive_alert'
-                  ? 'Se ha detectado un patrón de estrés creciente. Considera tomar un descanso.'
-                  : 'Intervención reciente registrada. Las notificaciones de estrés están en pausa.'}
+          <View style={styles.breathingContainer}>
+            <Animated.View style={[styles.breathingCircle, animatedCircleStyle]} />
+            <Text style={styles.instructionText}>
+              {breathingState === 'inhale' && `Inhala (${timer}s)`}
+              {breathingState === 'exhale' && `Exhala (${timer}s)`}
+              {breathingState === 'hold' && `Sostén (${timer}s)`}
+              {breathingState === 'idle' && 'Presiona Iniciar'}
             </Text>
-            {showSuggestionButtons && (
-              <View style={styles.suggestionButtonsContainer}>
-                <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptSuggestion}>
-                  <Text style={styles.buttonText}>Aceptar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.declineButton} onPress={handleDeclineSuggestion}>
-                  <Text style={styles.buttonText}>Rechazar</Text>
-                </TouchableOpacity>
-              </View>
+          </View>
+
+          {breathingState !== 'idle' && (
+            <View style={styles.progressBarContainer}>
+              <Animated.View style={[styles.progressBar, { width: progressBarWidth }]} />
+            </View>
+          )}
+
+          <View style={styles.controls}>
+            {breathingState === 'idle' ? (
+              <TouchableOpacity style={styles.button} onPress={startBreathing}>
+                <Text style={styles.buttonText}>Iniciar</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.button} onPress={stopBreathing}>
+                <Text style={styles.buttonText}>Detener</Text>
+              </TouchableOpacity>
             )}
           </View>
-        )}
-
-        <View style={styles.breathingContainer}>
-          <Animated.View style={[styles.breathingCircle, animatedCircleStyle]} />
-          <Text style={styles.instructionText}>
-            {breathingState === 'inhale' && `Inhala (${timer}s)`}
-            {breathingState === 'exhale' && `Exhala (${timer}s)`}
-            {breathingState === 'hold' && `Sostén (${timer}s)`}
-            {breathingState === 'idle' && 'Presiona Iniciar'}
-          </Text>
         </View>
-
-        {breathingState !== 'idle' && (
-          <View style={styles.progressBarContainer}>
-            <Animated.View style={[styles.progressBar, { width: progressBarWidth }]} />
-          </View>
-        )}
-
-        <View style={styles.controls}>
-          {breathingState === 'idle' ? (
-            <TouchableOpacity style={styles.button} onPress={startBreathing}>
-              <Text style={styles.buttonText}>Iniciar</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.button} onPress={stopBreathing}>
-              <Text style={styles.buttonText}>Detener</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+      {isFocused && <FooterNav />}
+    </SafeAreaView>
 
   );
 };

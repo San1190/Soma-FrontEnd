@@ -4,12 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FooterNav from '../components/FooterNav';
 import TopBar from '../components/TopBar';
 import MiniStatCard from '../components/MiniStatCard';
+import RecommendationBox from '../components/RecommendationBox';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 import { Ionicons } from '@expo/vector-icons';
+import { getSuggestions } from '../services/music';
 
 const StressScreen = () => {
   const { currentTheme } = useTheme();
@@ -20,6 +22,7 @@ const StressScreen = () => {
   const [summary, setSummary] = useState({ suggestion: 'Prueba el mix en tendencia: Barre', metrics: { hrv: 52, heatVar: 1.2, respiration: 25 }, adviceFor: 'Ana' });
   const [bars, setBars] = useState([24, 52, 38, 18, 44, 30]);
   const [locked, setLocked] = useState(false);
+  const [music, setMusic] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,6 +34,9 @@ const StressScreen = () => {
           const metrics = s.metrics || summary.metrics;
           setSummary({ suggestion, metrics, adviceFor: s.adviceFor || summary.adviceFor });
           if (Array.isArray(s.indicatorBars)) setBars(s.indicatorBars);
+          const mood = 'calma';
+          const m = await getSuggestions(mood);
+          setMusic(Array.isArray(m) ? m : []);
         }
       } catch (e) {
         setError('No se pudo cargar los datos');
@@ -100,6 +106,13 @@ const StressScreen = () => {
                 <TouchableOpacity style={styles.circleBtn}><Ionicons name="play" size={16} color="#2f3f47" /></TouchableOpacity>
               </View>
             </View>
+          ))}
+        </ScrollView>
+
+        <Text style={[styles.sectionTitle, { color: currentTheme.textPrimary }]}>Sugerencias musicales</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.habitsRow}>
+          {music.map(p => (
+            <RecommendationBox key={p.id} title={p.name} imageUrl={p.imageUrl} owner={p.owner} url={p.url} />
           ))}
         </ScrollView>
       </ScrollView>

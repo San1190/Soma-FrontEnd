@@ -14,7 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { getUserById } from '../services/users';
 import { Ionicons } from '@expo/vector-icons';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +81,9 @@ const ProfileScreen = () => {
       >
         {/* --- ENCABEZADO DEL PERFIL --- */}
         <View style={styles.headerRow}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.getParent()?.navigate('Home')}>
+            <Ionicons name="chevron-back" size={24} color="#1a1a1a" />
+          </TouchableOpacity>
           <View style={styles.avatarBox}>
             <Ionicons name="person" size={30} color="#6c63ff" />
           </View>
@@ -126,20 +129,20 @@ const ProfileScreen = () => {
         {/* --- SECCIÓN DATOS PERSONALES --- */}
         <Text style={styles.sectionTitle}>Datos personales</Text>
         <View style={styles.listGroup}>
-          <ListItem icon="stats-chart" text="Estadísticas generales" />
-          <ListItem icon="trending-up" text="Evolución total" />
-          <ListItem icon="checkmark-done" text="Historial de hábitos" />
-          <ListItem icon="finger-print" text="Características personales" />
-          <ListItem icon="document-text" text="Documentos médicos" />
+          <ListItem icon="stats-chart" text="Estadísticas generales" onPress={() => navigation.navigate('Stats')} />
+          <ListItem icon="trending-up" text="Evolución total" onPress={() => navigation.navigate('Evolution')} />
+          <ListItem icon="checkmark-done" text="Historial de hábitos" onPress={() => navigation.navigate('HabitsHistory')} />
+          <ListItem icon="finger-print" text="Características personales" onPress={() => navigation.navigate('PersonalTraits')} />
+          <ListItem icon="document-text" text="Documentos médicos" onPress={() => navigation.navigate('MedicalDocuments')} />
         </View>
 
         {/* --- SECCIÓN AJUSTES --- */}
         <Text style={styles.sectionTitle}>Ajustes</Text>
         <View style={styles.listGroup}>
-          <ListItem icon="globe" text="Idioma y región" />
-          <ListItem icon="star" text="Suscripción Premium" />
-          <ListItem icon="card" text="Métodos de pago" />
-          <ListItem icon="help-circle" text="Ayuda y contacto" />
+          <ListItem icon="globe" text="Idioma y región" onPress={() => navigation.navigate('LocaleRegion')} />
+          <ListItem icon="star" text="Suscripción Premium" onPress={() => navigation.navigate('PremiumSubscription')} />
+          <ListItem icon="card" text="Métodos de pago" onPress={() => navigation.navigate('PaymentMethods')} />
+          <ListItem icon="help-circle" text="Ayuda y contacto" onPress={() => navigation.navigate('HelpContact')} />
         </View>
 
         {/* --- BOTONES DE ACCIÓN --- */}
@@ -160,8 +163,8 @@ const ProfileScreen = () => {
   );
 };
 
-const ListItem = ({ icon, text }) => (
-  <TouchableOpacity style={styles.listItem}>
+const ListItem = ({ icon, text, onPress }) => (
+  <TouchableOpacity style={styles.listItem} onPress={onPress}>
     <View style={styles.listIconBox}>
       <Ionicons name={icon} size={20} color="#3a2a32" />
     </View>
@@ -195,6 +198,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     marginTop: 10,
   },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f0f0f0', justifyContent:'center', alignItems:'center', marginRight:10 },
   avatarBox: {
     width: 60,
     height: 60,

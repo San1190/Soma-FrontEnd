@@ -335,7 +335,7 @@ export default function HomeScreen({ route }) {
       {/* --- GATO (FIJO) --- */}
       {isFocused && (
         <View style={styles.catArea}>
-          <Text style={styles.zz}>Z Z</Text>
+          {!colorOn && <Text style={styles.zz}>ZZ</Text>}
           <Image source={catImgSource} style={styles.catImg} resizeMode='contain' />
         </View>
       )}

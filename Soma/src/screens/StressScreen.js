@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import FooterNav from '../components/FooterNav';
 import TopBar from '../components/TopBar';
 import MiniStatCard from '../components/MiniStatCard';
@@ -23,6 +24,7 @@ const StressScreen = () => {
   const [bars, setBars] = useState([24, 52, 38, 18, 44, 30]);
   const [locked, setLocked] = useState(false);
   const [music, setMusic] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,23 +50,47 @@ const StressScreen = () => {
   }, [user]);
 
   const habitCards = [
-    { key: 'disconnect', title: 'Bloques de desconexión', subtitle: '30 días', desc: 'Elige momentos fijos al día para descansar de las pantallas.' },
-    { key: 'breath2', title: 'Respira 2 minutos', subtitle: 'Diario', desc: 'Pequeñas pausas de respiración para reducir el estrés digital.' },
-    { key: 'lightRoutine', title: 'Rutina ligera', subtitle: 'Semanal', desc: 'Actividad suave para equilibrar tu estado.' },
+    {
+      key: 'disconnect',
+      icon: 'B',
+      title: 'Bloques de desconexión',
+      subtitle: '30 días',
+      desc: 'Elige momentos fijos al día para descansar',
+      gradientColors: ['#B8E6D5', '#A8D5E2'],
+      iconBg: '#7BC4A8'
+    },
+    {
+      key: 'breath2',
+      icon: 'R',
+      title: 'Respira 2 minutos',
+      subtitle: 'Diario',
+      desc: 'Pausas de respiración para reducir estrés',
+      gradientColors: ['#F5C6D5', '#E6D5F5'],
+      iconBg: '#D89BB8'
+    },
+    {
+      key: 'lightRoutine',
+      icon: 'R',
+      title: 'Rutina ligera',
+      subtitle: 'Semanal',
+      desc: 'Actividad suave para equilibrar',
+      gradientColors: ['#FFD5B8', '#FFB8D5'],
+      iconBg: '#FFB894'
+    },
   ];
 
   const onStartBreathing = () => navigation.navigate('GuidedBreathing');
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}> 
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}>
         <View style={styles.center}><ActivityIndicator size="large" color="#6b5a66" /></View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}> 
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
         <Text style={[styles.title, { color: currentTheme.textPrimary }]}>¿Qué tal tu estrés?</Text>
@@ -83,7 +109,7 @@ const StressScreen = () => {
         <Text style={[styles.sectionTitle, { color: currentTheme.textPrimary }]}>Todo sobre ti</Text>
         <View style={styles.statsRow}>
           <MiniStatCard title="corazón" subtitle="HRV/min" mode="bars" bars={bars} color="#4b3340" />
-          <MiniStatCard title="calor" subtitle="variación/hora" mode="bars" bars={bars.map(h=>Math.round(h*0.8))} color="#6b5a66" />
+          <MiniStatCard title="calor" subtitle="variación/hora" mode="bars" bars={bars.map(h => Math.round(h * 0.8))} color="#6b5a66" />
           <MiniStatCard title="respiración" subtitle="resp/min" mode="number" value={summary.metrics.respiration} />
         </View>
 
@@ -92,20 +118,57 @@ const StressScreen = () => {
         <TouchableOpacity style={styles.primaryButton} onPress={onStartBreathing}><Text style={styles.primaryText}>Iniciar mis ejercicios de respiración</Text></TouchableOpacity>
 
         <Text style={[styles.sectionTitle, { color: currentTheme.textPrimary }]}>Nuevos hábitos</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.habitsRow}>
-          {habitCards.map((c) => (
-            <View key={c.key} style={styles.habitCard}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={styles.habitTitle}>{c.title}</Text>
-                <Ionicons name="chevron-forward" size={18} color="#2f3f47" />
-              </View>
-              <Text style={styles.habitSub}>{c.subtitle}</Text>
-              <Text style={styles.habitDesc}>{c.desc}</Text>
-              <View style={styles.habitActions}>
-                <TouchableOpacity style={styles.circleBtn}><Text style={styles.circleText}>+</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.circleBtn}><Ionicons name="play" size={16} color="#2f3f47" /></TouchableOpacity>
-              </View>
-            </View>
+        <Text style={styles.sectionDescription}>
+          Añade uno de estos hábitos a tu rutina diaria como meta y verás una gran mejora en muy pequeño tiempo
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={130}
+          decelerationRate="fast"
+          contentContainerStyle={styles.habitsRow}
+          pagingEnabled={false}
+        >
+          {habitCards.map((c, index) => (
+            <TouchableOpacity
+              key={c.key}
+              activeOpacity={0.95}
+              onPress={() => setSelectedCard(selectedCard === c.key ? null : c.key)}
+              style={[
+                { zIndex: selectedCard === c.key ? 100 : index },
+                index > 0 && { marginLeft: -50 }
+              ]}
+            >
+              <LinearGradient
+                colors={c.gradientColors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[
+                  styles.habitCard,
+                  selectedCard === c.key && styles.habitCardExpanded
+                ]}
+              >
+                <View style={styles.habitHeader}>
+                  <View style={[styles.habitIcon, { backgroundColor: c.iconBg }]}>
+                    <Text style={styles.habitIconText}>{c.icon}</Text>
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={styles.habitTitle}>{c.title}</Text>
+                    <Text style={styles.habitSub}>{c.subtitle}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color="#2f3f47" />
+                </View>
+                <Text style={styles.habitDesc}>{c.desc}</Text>
+                <View style={styles.habitActions}>
+                  <TouchableOpacity style={styles.circleBtn} onPress={(e) => e.stopPropagation()}>
+                    <Ionicons name="add" size={18} color="#2f3f47" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.circleBtn} onPress={(e) => e.stopPropagation()}>
+                    <Ionicons name="play" size={16} color="#2f3f47" />
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
           ))}
         </ScrollView>
 
@@ -124,7 +187,7 @@ const StressScreen = () => {
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 220 },
+  content: { padding: 16, paddingBottom: 150, flexGrow: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.06)' },
@@ -139,6 +202,13 @@ const styles = StyleSheet.create({
   askText: { color: '#fff', fontWeight: '700' },
   sectionTitle: { marginTop: 18, fontSize: 18, fontWeight: '700' },
   sectionBody: { color: '#6b7280', marginTop: 8 },
+  sectionDescription: {
+    color: '#6b7280',
+    marginTop: 6,
+    marginBottom: 4,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   statsRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
   miniCard: { flex: 1, borderRadius: 18, padding: 18, backgroundColor: '#EFEFEF' },
   miniTitle: { fontSize: 14, fontWeight: '600' },
@@ -148,13 +218,52 @@ const styles = StyleSheet.create({
   pulse: { color: '#6b7280' },
   primaryButton: { marginTop: 14, paddingVertical: 12, borderRadius: 24, alignItems: 'center', backgroundColor: '#000' },
   primaryText: { color: '#fff', fontWeight: '700' },
-  habitsRow: { paddingVertical: 8 },
-  habitCard: { width: 240, marginRight: 12, borderRadius: 16, padding: 16, backgroundColor: '#DDEAF1' },
-  habitTitle: { fontSize: 16, fontWeight: '700', color: '#2f3f47' },
-  habitSub: { marginTop: 4, color: '#2f3f47' },
-  habitDesc: { marginTop: 8, color: '#2f3f47' },
-  habitActions: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  circleBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  habitsRow: { paddingVertical: 12, paddingRight: 16 },
+  habitCard: {
+    width: 180,
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  habitCardExpanded: {
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 15,
+    elevation: 10,
+    transform: [{ scale: 1.05 }],
+  },
+  habitHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  habitIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  habitIconText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  habitTitle: { fontSize: 14, fontWeight: '700', color: '#2f3f47' },
+  habitSub: { marginTop: 1, color: '#4a5568', fontSize: 12 },
+  habitDesc: {
+    marginTop: 6,
+    marginBottom: 10,
+    color: '#2f3f47',
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  habitActions: { flexDirection: 'row', gap: 8, marginTop: 'auto' },
+  circleBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.85)', alignItems: 'center', justifyContent: 'center' },
   circleText: { fontSize: 18, fontWeight: '700', color: '#2f3f47' },
 });
 

@@ -10,6 +10,7 @@ const FooterNav = () => {
   const isHome = name === 'HomeMain';
   const tab = route.params?.tab;
   const isStress = name === 'Stress';
+  const isFatigue = name === 'Fatigue';
   const activeHome = isHome && (tab === 'boton' || !tab);
   const activeHydra = isHome && tab === 'hidratacion';
   const activeActivity = isHome && tab === 'actividad';
@@ -39,9 +40,9 @@ const FooterNav = () => {
           <Ionicons name="moon" size={24} color={activeActivity ? colors.accentHome : colors.iconDefault} />
           {activeActivity && <View style={styles.indicator} />}
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('HomeMain', { tab: 'espejo' })} style={[styles.iconWrap, activeEspejo && styles.active]}>
-          <Ionicons name="eye" size={24} color={activeEspejo ? colors.accentHome : colors.iconDefault} />
-          {activeEspejo && <View style={styles.indicator} />}
+        <TouchableOpacity onPress={() => navigation.navigate('Fatigue')} style={[styles.iconWrap, (activeEspejo || isFatigue) && styles.active]}>
+          <Ionicons name="eye" size={24} color={(activeEspejo || isFatigue) ? '#CFF3C9' : colors.iconDefault} />
+          {(activeEspejo || isFatigue) && <View style={styles.indicator} />}
         </TouchableOpacity>
       </View>
     </View>

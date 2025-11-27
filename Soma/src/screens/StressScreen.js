@@ -57,14 +57,14 @@ const StressScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}> 
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}> 
         <View style={styles.center}><ActivityIndicator size="large" color="#6b5a66" /></View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}> 
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}> 
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
         <Text style={[styles.title, { color: currentTheme.textPrimary }]}>¿Qué tal tu estrés?</Text>

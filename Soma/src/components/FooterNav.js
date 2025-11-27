@@ -36,9 +36,9 @@ const FooterNav = () => {
           <Ionicons name="heart" size={24} color={isStress ? colors.accentStress : colors.iconDefault} />
           {isStress && <View style={[styles.indicator, { backgroundColor: colors.accentStress }]} />}
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('HomeMain', { tab: 'actividad' })} style={[styles.iconWrap, activeActivity && styles.active]}>
-          <Ionicons name="moon" size={24} color={activeActivity ? colors.accentHome : colors.iconDefault} />
-          {activeActivity && <View style={styles.indicator} />}
+        <TouchableOpacity onPress={() => navigation.navigate('Insomnia')} style={[styles.iconWrap, name === 'Insomnia' && styles.active]}>
+          <Ionicons name="moon" size={24} color={name === 'Insomnia' ? '#DDEAF1' : colors.iconDefault} />
+          {name === 'Insomnia' && <View style={[styles.indicator, { backgroundColor: '#DDEAF1' }]} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Fatigue')} style={[styles.iconWrap, (activeEspejo || isFatigue) && styles.active]}>
           <Ionicons name="eye" size={24} color={(activeEspejo || isFatigue) ? '#CFF3C9' : colors.iconDefault} />

@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import StressScreen from '../screens/StressScreen';
 import FatigueScreen from '../screens/FatigueScreen';
+import InsomniaScreen from '../screens/InsomniaScreen';
 import GuidedBreathingScreen from '../screens/GuidedBreathingScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import StatsScreen from '../screens/StatsScreen';
@@ -43,6 +44,7 @@ const HomeStack = () => (
     <Stack.Screen name="HomeMain" component={HomeScreen} />
     <Stack.Screen name="Stress" component={StressScreen} />
     <Stack.Screen name="Fatigue" component={FatigueScreen} />
+    <Stack.Screen name="Insomnia" component={InsomniaScreen} />
     <Stack.Screen name="GuidedBreathing" component={GuidedBreathingScreen} />
   </Stack.Navigator>
 );

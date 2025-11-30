@@ -15,7 +15,7 @@ export default function HomeScreen({ route }) {
   const { user } = useAuth();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const [activeTab, setActiveTab] = useState(route?.params?.tab || 'boton');
+  const [activeTab, setActiveTab] = useState(route?.params?.tab || 'actividad');
   const selectTab = (tab) => {
     setActiveTab(tab);
     navigation.setParams({ tab });
@@ -106,13 +106,13 @@ export default function HomeScreen({ route }) {
   React.useEffect(() => {
     if (activeTab !== 'actividad') return;
     const id = setInterval(() => {
-      setInsomniaBars(prev => prev.map(v => Math.max(18, Math.min(64, v + Math.round(Math.random()*6-3)))));
-      setFatiguePts(prev => prev.map((v,i) => Math.max(16, Math.min(64, v + (i%2===0?1:-1)))));
+      setInsomniaBars(prev => prev.map(v => Math.max(18, Math.min(64, v + Math.round(Math.random() * 6 - 3)))));
+      setFatiguePts(prev => prev.map((v, i) => Math.max(16, Math.min(64, v + (i % 2 === 0 ? 1 : -1)))));
       setActivityStats(s => ({
-        energy: Math.max(1800, Math.min(2600, s.energy + Math.round(Math.random()*30-15))),
-        idealPct: Math.max(60, Math.min(99, s.idealPct + Math.round(Math.random()*4-2))),
-        distanceKm: Math.max(1, Math.min(12, Math.round((s.distanceKm + (Math.random()*0.3-0.15))*10)/10)),
-        reps: Math.max(200, Math.min(1200, s.reps + Math.round(Math.random()*20-10)))
+        energy: Math.max(1800, Math.min(2600, s.energy + Math.round(Math.random() * 30 - 15))),
+        idealPct: Math.max(60, Math.min(99, s.idealPct + Math.round(Math.random() * 4 - 2))),
+        distanceKm: Math.max(1, Math.min(12, Math.round((s.distanceKm + (Math.random() * 0.3 - 0.15)) * 10) / 10)),
+        reps: Math.max(200, Math.min(1200, s.reps + Math.round(Math.random() * 20 - 10)))
       }));
     }, 2500);
     return () => clearInterval(id);
@@ -132,7 +132,7 @@ export default function HomeScreen({ route }) {
         const needs = Number(res.data?.dailyNeedsMl || 2000);
         const goal = Math.max(1, Math.round(needs / glassSizeMl));
         setWaterGoal(goal);
-      } catch {}
+      } catch { }
     };
     if (activeTab === 'hidratacion') loadHydration();
   }, [activeTab, user?.id]);
@@ -157,7 +157,7 @@ export default function HomeScreen({ route }) {
         const delta = waterCount - prevLoggedCount;
         if (delta !== 0) {
           const uid = user?.id || 1;
-          axios.post(`${API_BASE_URL}/hydration/log`, null, { params: { userId: uid, amountMl: delta * glassSizeMl } }).catch(() => {});
+          axios.post(`${API_BASE_URL}/hydration/log`, null, { params: { userId: uid, amountMl: delta * glassSizeMl } }).catch(() => { });
           setPrevLoggedCount(waterCount);
         }
       },
@@ -185,10 +185,10 @@ export default function HomeScreen({ route }) {
         {/* --- Píldoras de Navegación --- */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
           {[
+            { key: 'actividad', label: 'Actividad' },
             { key: 'boton', label: 'Botón soma' },
             { key: 'espejo', label: 'Espejo somático' },
             { key: 'hidratacion', label: 'Hidratación' },
-            { key: 'actividad', label: 'Actividad' },
           ].map(p => (
             <TouchableOpacity key={p.key} style={[styles.pill, activeTab === p.key && [styles.pillActive, { backgroundColor: '#000' }]]} onPress={() => selectTab(p.key)}>
               <Text style={[styles.pillText, { color: activeTab === p.key ? '#fff' : currentTheme.textPrimary }]}>{p.label}</Text>
@@ -252,8 +252,8 @@ export default function HomeScreen({ route }) {
 
         {/* --- Contenido Tab: Hidratación --- */}
         {activeTab === 'hidratacion' && (
-          <View style={[styles.cardElevated, { backgroundColor: colorOn ? (activeMode==='insomnio' ? '#DDEAF1' : activeMode==='fatigue' ? '#CFF3C9' : '#CFC4E9') : '#EFEFEF', borderColor: colorOn ? (activeMode==='insomnio' ? '#DDEAF1' : activeMode==='fatigue' ? '#CFF3C9' : '#CFC4E9') : '#EFEFEF' }]}>
-            <Text style={[styles.hydraTitle, { color: colorOn ? (activeMode==='insomnio' ? '#2f3f47' : activeMode==='fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>Mi hidratación de hoy</Text>
+          <View style={[styles.cardElevated, { backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#DDEAF1' : activeMode === 'fatigue' ? '#CFF3C9' : '#CFC4E9') : '#EFEFEF', borderColor: colorOn ? (activeMode === 'insomnio' ? '#DDEAF1' : activeMode === 'fatigue' ? '#CFF3C9' : '#CFC4E9') : '#EFEFEF' }]}>
+            <Text style={[styles.hydraTitle, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>Mi hidratación de hoy</Text>
             <View style={styles.hydraRingWrap} {...(ringPan ? ringPan.panHandlers : {})}>
               <View style={styles.hydraRingBase} />
               <View style={styles.hydraRingInner} />
@@ -289,20 +289,20 @@ export default function HomeScreen({ route }) {
                 const delta = next - waterCount;
                 if (delta !== 0) {
                   const uid = user?.id || 1;
-                  axios.post(`${API_BASE_URL}/hydration/log`, null, { params: { userId: uid, amountMl: delta * glassSizeMl } }).catch(() => {});
+                  axios.post(`${API_BASE_URL}/hydration/log`, null, { params: { userId: uid, amountMl: delta * glassSizeMl } }).catch(() => { });
                   setPrevLoggedCount(next);
                 }
                 setWaterCount(next);
               }}>
                 <Ionicons name="add" size={20} color={hydraAccent} />
               </TouchableOpacity>
-              <Text style={[styles.hydraLabel, { color: colorOn ? (activeMode==='insomnio' ? '#2f3f47' : activeMode==='fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>vaso de agua (250 ml)</Text>
+              <Text style={[styles.hydraLabel, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>vaso de agua (250 ml)</Text>
               <TouchableOpacity style={[styles.hydraBtnCircle, { backgroundColor: hydraSoft }]} onPress={() => {
                 const next = Math.max(0, waterCount - 1);
                 const delta = next - waterCount;
                 if (delta !== 0) {
                   const uid = user?.id || 1;
-                  axios.post(`${API_BASE_URL}/hydration/log`, null, { params: { userId: uid, amountMl: delta * glassSizeMl } }).catch(() => {});
+                  axios.post(`${API_BASE_URL}/hydration/log`, null, { params: { userId: uid, amountMl: delta * glassSizeMl } }).catch(() => { });
                   setPrevLoggedCount(next);
                 }
                 setWaterCount(next);
@@ -315,136 +315,38 @@ export default function HomeScreen({ route }) {
         )}
 
         {/* --- Contenido Tab: Actividad --- */}
+        {/* --- Contenido Tab: Actividad (NUEVO DISEÑO) --- */}
         {activeTab === 'actividad' && (
-          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: '#CFC4E9', borderColor: '#CFC4E9' }]}> 
-            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
-              <Text style={[styles.miniTitle, { color: '#3a2a32' }]}>Semana del {dateStr}</Text>
-              <View style={{ flexDirection:'row', gap:8 }}>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>✓</Text></View>
+          <View style={styles.activityContainer}>
+            <View style={styles.chartsRow}>
+              {/* Card Estrés */}
+              <View style={[styles.chartCard, styles.cardStress]}>
+                <Text style={styles.chartTitle}>Indicador del estrés</Text>
+                <View style={styles.barChartContainer}>
+                  {stressBars.map((h, i) => (
+                    <View key={`sbar-${i}`} style={[styles.chartBar, { height: h * 0.6, backgroundColor: '#4b3340' }]} />
+                  ))}
+                </View>
+                <Text style={styles.chartValue}>Elevado</Text>
+                <Text style={styles.chartSub}>pulse para leer</Text>
               </View>
-            </View>
-            <View style={styles.barRow}>
-              {stressBars.map((h, i) => (
-                <View key={`sbar-${i}`} style={[styles.bar, { height: h, backgroundColor: '#4b3340' }]} />
-              ))}
-            </View>
-            <Text style={{ fontSize:18, fontWeight:'700', color:'#3a2a32' }}>{stressLevelText}</Text>
-            <Text style={{ color:'#5a4e55', marginTop:6 }}>Tus picos de estrés han ido aumentando a lo largo de la semana, con el domingo como peor día y media superior a la semana pasada.</Text>
-          </View>
-        )}
 
-        {activeTab === 'actividad' && (
-          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: '#C9D8D3', borderColor: '#C9D8D3' }]}> 
-            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
-              <Text style={[styles.miniTitle, { color: '#2f3f47' }]}>Semana del {dateStr}</Text>
-              <View style={{ flexDirection:'row', gap:8 }}>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>✓</Text></View>
-              </View>
-            </View>
-            <View style={[styles.barRow, { marginTop: 8 }]}> 
-              {insomniaBars.map((h,i)=> (
-                <View key={`inbar-${i}`} style={[styles.bar, { height: h, backgroundColor: '#5f7f92' }]} />
-              ))}
-            </View>
-            <Text style={[styles.cardTitle, { color: '#2f3f47', marginTop:8 }]}>Calidad de sueño {sleepDeltaText}</Text>
-            <Text style={{ color: '#2f3f47', marginTop: 6 }}>Esta semana has tenido más ciclos de sueño completos y menos interrupciones en fase REM.</Text>
-          </View>
-        )}
-
-        {activeTab === 'actividad' && (
-          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: '#CFF3C9', borderColor: '#CFF3C9' }]}> 
-            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
-              <Text style={[styles.miniTitle, { color: '#2f4f40' }]}>Semana del 24 de noviembre</Text>
-              <View style={{ flexDirection:'row', gap:8 }}>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>✓</Text></View>
-              </View>
-            </View>
-            <View style={{ marginTop: 10 }}>
-              <LineChart
-                data={fatiguePts.map(v=>({value:v}))}
-                curved
-                isAnimated
-                thickness={4}
-                color={'#3f6f52'}
-                hideRules
-                hideDataPoints={false}
-                dataPointsColor={'#ffffff'}
-                dataPointRadius={5}
-                dataPointStrokeColor={'#3f6f52'}
-                dataPointStrokeWidth={2}
-                areaChart
-                startFillColor={'#3f6f52'}
-                endFillColor={'#3f6f52'}
-                startOpacity={0.25}
-                endOpacity={0.05}
-                yAxisTextStyle={{ color:'#2f4f40' }}
-                xAxisTextStyle={{ color:'#2f4f40' }}
-                adjustToWidth
-                initialSpacing={0}
-                noOfSections={4}
-                yAxisColor={'transparent'}
-                xAxisColor={'transparent'}
-              />
-            </View>
-            <Text style={{ color:'#2f4f40', marginTop: 12, fontWeight:'700', fontSize:16 }}>Tu fatiga visual 38% mejor</Text>
-            <Text style={{ color:'#2f4f40' }}>Esta semana has mejorado mucho; hábitos saludables ayudan.</Text>
-          </View>
-        )}
-
-        {activeTab === 'actividad' && (
-          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }]}>
-            <Text style={[styles.cardTitle, { color: currentTheme.textPrimary }]}>Actividad física</Text>
-            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginTop:4 }}>
-              <Text style={{ fontSize:18, fontWeight:'700', color:'#1a1a1a' }}>Hoy</Text>
-              <View style={{ flexDirection:'row', gap:8 }}>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
-                <View style={styles.circleBtn}><Text style={styles.circleText}>˅</Text></View>
+              {/* Card Sueño */}
+              <View style={[styles.chartCard, styles.cardSleep]}>
+                <Text style={styles.chartTitle}>Calidad del sueño</Text>
+                <View style={styles.barChartContainer}>
+                  {sleepBars.map((h, i) => (
+                    <View key={`slbar-${i}`} style={[styles.chartBar, { height: h * 0.6, backgroundColor: '#5f7f92' }]} />
+                  ))}
+                </View>
+                <Text style={styles.chartValue}>{sleepDeltaText}</Text>
+                <Text style={styles.chartSub}>pulse para leer</Text>
               </View>
             </View>
 
-            <View style={styles.activityItemRow}>
-              <View style={{ flex:1 }}>
-                <Text style={styles.activityLabel}>Energía en reposo</Text>
-                <Text style={styles.activityValue}>{Math.max(600, Math.round(activityStats.energy*0.5))} kcal</Text>
-              </View>
-              <View style={styles.miniBarsGrey}><View style={[styles.miniBarGrey,{height:18}]} /><View style={[styles.miniBarGrey,{height:24}]} /><View style={[styles.miniBarGrey,{height:30}]} /><View style={[styles.miniBarGrey,{height:22}]} /><View style={[styles.miniBarGrey,{height:28}]} /><View style={[styles.miniBarGrey,{height:36, backgroundColor:'#1a1a1a'}]} /></View>
-            </View>
-
-            <View style={styles.activityItemRow}>
-              <View style={{ flex:1 }}>
-                <Text style={styles.activityLabel}>Movimiento</Text>
-                <Text style={styles.activityValue}>{Math.round(activityStats.energy*0.06)} kcal</Text>
-              </View>
-              <View style={styles.donutWrap}>
-                <PieChart
-                  data={[{value:70,color:'#1a1a1a'},{value:30,color:'#bbbbbb'}]}
-                  donut
-                  radius={28}
-                  innerRadius={16}
-                  centerLabelComponent={() => (<Text style={{fontSize:10,color:'#000'}}>70%</Text>)}
-                />
-              </View>
-            </View>
-
-            <View style={styles.activityItemRow}>
-              <View style={{ flex:1 }}>
-                <Text style={styles.activityLabel}>Distancia andando / corriendo</Text>
-                <Text style={styles.activityValue}>{activityStats.distanceKm} km</Text>
-              </View>
-              <View style={styles.miniBarsGrey}><View style={[styles.miniBarGrey,{height:16}]} /><View style={[styles.miniBarGrey,{height:22}]} /><View style={[styles.miniBarGrey,{height:20}]} /><View style={[styles.miniBarGrey,{height:26}]} /><View style={[styles.miniBarGrey,{height:28}]} /><View style={[styles.miniBarGrey,{height:34, backgroundColor:'#1a1a1a'}]} /></View>
-            </View>
-
-            <View style={styles.activityItemRow}>
-              <View style={{ flex:1 }}>
-                <Text style={styles.activityLabel}>Pasos</Text>
-                <Text style={styles.activityValue}>{activityStats.reps} pasos</Text>
-              </View>
-              <View style={styles.miniBarsGrey}><View style={[styles.miniBarGrey,{height:12}]} /><View style={[styles.miniBarGrey,{height:18}]} /><View style={[styles.miniBarGrey,{height:28}]} /><View style={[styles.miniBarGrey,{height:32}]} /><View style={[styles.miniBarGrey,{height:26}]} /><View style={[styles.miniBarGrey,{height:36, backgroundColor:'#1a1a1a'}]} /></View>
-            </View>
-            <TouchableOpacity style={[styles.btnLarge, { backgroundColor: '#000', marginTop: 10 }]}><Text style={styles.btnLargeText}>Obtener consejos sobre mi actividad</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.moreInfoBtn}>
+              <Text style={styles.moreInfoText}>más información para ti</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -524,9 +426,9 @@ const styles = StyleSheet.create({
   hydraRingInner: { position: 'absolute', left: 28, top: 28, width: 144, height: 144, borderRadius: 72, backgroundColor: '#CFC4E9' },
   hydraHaloSeg: { position: 'absolute', width: 16, height: 6, borderRadius: 3 },
   hydraSegDot: { position: 'absolute', width: 14, height: 14, borderRadius: 7 },
-  hydraHandle: { position: 'absolute', width: 22, height: 22, borderRadius: 11, backgroundColor: '#4b3340', borderWidth: 2, borderColor: '#fff', shadowColor:'#000', shadowOpacity:0.2, shadowRadius:4, shadowOffset:{width:0,height:2} },
+  hydraHandle: { position: 'absolute', width: 22, height: 22, borderRadius: 11, backgroundColor: '#4b3340', borderWidth: 2, borderColor: '#fff', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   hydraHandleInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff' },
-  hydraOverlayBtn: { position:'absolute', width:28, height:28, borderRadius:14, backgroundColor:'#EAE5FF', alignItems:'center', justifyContent:'center', shadowColor:'#000', shadowOpacity:0.12, shadowRadius:6, shadowOffset:{ width:0, height:4 }, elevation:4 },
+  hydraOverlayBtn: { position: 'absolute', width: 28, height: 28, borderRadius: 14, backgroundColor: '#EAE5FF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   hydraBubble1: { position: 'absolute', left: 26, top: 100, width: 42, height: 42, borderRadius: 21, backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
   hydraBubble2: { position: 'absolute', right: 24, top: 56, width: 34, height: 34, borderRadius: 17, backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
   hydraBubble3: { position: 'absolute', right: 52, bottom: 22, width: 26, height: 26, borderRadius: 13, backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
@@ -534,7 +436,7 @@ const styles = StyleSheet.create({
   hydraDotSmall2: { position: 'absolute', left: 118, top: 18, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EAE5FF' },
   hydraDotSmall3: { position: 'absolute', left: 76, top: 28, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EAE5FF' },
   counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
-  hydraBtnCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor:'#000', shadowOpacity:0.12, shadowRadius:6, shadowOffset:{ width:0, height:4 }, elevation:4 },
+  hydraBtnCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   counterSymbol: { fontSize: 18, fontWeight: '700' },
   counterLabel: { fontSize: 14 },
   hydraLabel: { fontSize: 14, color: '#3a2a32' },
@@ -557,14 +459,14 @@ const styles = StyleSheet.create({
   smallStatValue: { fontSize: 16, fontWeight: '700', color: '#2f3f47', marginTop: 4 },
   miniBars: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginTop: 8 },
   miniBar: { width: 10, borderRadius: 6, backgroundColor: '#bdbdbd' },
-  activityItemRow: { flexDirection:'row', alignItems:'center', backgroundColor:'#E5E5E5', borderRadius:16, padding:12, marginTop:8 },
-  activityLabel: { fontSize:14, color:'#4a4a4a' },
-  activityValue: { fontSize:20, fontWeight:'700', color:'#1a1a1a', marginTop:4 },
-  miniBarsGrey: { flexDirection:'row', alignItems:'flex-end', gap:6 },
-  miniBarGrey: { width:10, borderRadius:6, backgroundColor:'#b5b5b5' },
-  donutWrap: { width:60, alignItems:'center', justifyContent:'center' },
-  circleBtn: { width:32, height:32, borderRadius:16, backgroundColor:'#fff', alignItems:'center', justifyContent:'center' },
-  circleText: { fontSize:16, fontWeight:'700', color:'#1a1a1a' },
+  activityItemRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E5E5E5', borderRadius: 16, padding: 12, marginTop: 8 },
+  activityLabel: { fontSize: 14, color: '#4a4a4a' },
+  activityValue: { fontSize: 20, fontWeight: '700', color: '#1a1a1a', marginTop: 4 },
+  miniBarsGrey: { flexDirection: 'row', alignItems: 'flex-end', gap: 6 },
+  miniBarGrey: { width: 10, borderRadius: 6, backgroundColor: '#b5b5b5' },
+  donutWrap: { width: 60, alignItems: 'center', justifyContent: 'center' },
+  circleBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  circleText: { fontSize: 16, fontWeight: '700', color: '#1a1a1a' },
 
   // Estilos del Footer Fijo
   footerPlaceholder: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, backgroundColor: '#000', borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 12, zIndex: 100 },
@@ -585,5 +487,72 @@ const styles = StyleSheet.create({
   catImg: { width: 360, height: 220 },
   // --- 👆 FIN DE CAMBIOS DEL GATO ---
 
-  badgeMuted: { opacity: 0.5 }, // Este estilo no se usa ahora, pero lo dejo por si acaso
+  badgeMuted: { opacity: 0.5 },
+
+  // New Activity Styles
+  activityContainer: {
+    backgroundColor: '#CFF3C9', // Light green background
+    borderRadius: 24,
+    padding: 16,
+    marginTop: 12,
+  },
+  chartsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  chartCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 220,
+  },
+  cardStress: {
+    backgroundColor: '#BFAEE3', // Purple
+  },
+  cardSleep: {
+    backgroundColor: '#DDEAF1', // Light Blue/Teal
+  },
+  chartTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  barChartContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 6,
+    height: 80,
+    marginBottom: 10,
+  },
+  chartBar: {
+    width: 12,
+    borderRadius: 6,
+  },
+  chartValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  chartSub: {
+    fontSize: 10,
+    color: '#4a4a4a',
+  },
+  moreInfoBtn: {
+    backgroundColor: '#2F4F40', // Dark green
+    borderRadius: 24,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  moreInfoText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
 });

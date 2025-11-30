@@ -172,9 +172,14 @@ const StressScreen = () => {
           ))}
         </ScrollView>
 
-        <Text style={[styles.sectionTitle, { color: currentTheme.textPrimary }]}>Sugerencias musicales</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 18 }}>
+          <Text style={[styles.sectionTitle, { color: currentTheme.textPrimary, marginTop: 0 }]}>Sugerencias musicales</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('MusicRecommendation', { mood: 'calma' })}>
+            <Text style={{ color: currentTheme.primary, fontWeight: '600' }}>Ver todo</Text>
+          </TouchableOpacity>
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.habitsRow}>
-          {music.map(p => (
+          {music.slice(0, 5).map(p => (
             <RecommendationBox key={p.id} title={p.name} imageUrl={p.imageUrl} owner={p.owner} url={p.url} />
           ))}
         </ScrollView>

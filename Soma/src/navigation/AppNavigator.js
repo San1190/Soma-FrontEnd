@@ -16,6 +16,7 @@ import PremiumSubscriptionScreen from '../screens/PremiumSubscriptionScreen';
 import PaymentMethodsScreen from '../screens/PaymentMethodsScreen';
 import HelpContactScreen from '../screens/HelpContactScreen';
 import DailySummaryScreen from '../screens/DailySummaryScreen';
+import MusicRecommendationScreen from '../screens/MusicRecommendationScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 
 
@@ -48,6 +49,7 @@ const HomeStack = () => (
     <Stack.Screen name="Fatigue" component={FatigueScreen} />
     <Stack.Screen name="Insomnia" component={InsomniaScreen} />
     <Stack.Screen name="GuidedBreathing" component={GuidedBreathingScreen} />
+    <Stack.Screen name="MusicRecommendation" component={MusicRecommendationScreen} />
   </Stack.Navigator>
 );
 

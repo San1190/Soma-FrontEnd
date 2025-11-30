@@ -104,7 +104,9 @@ const StressScreen = () => {
           <Image source={require('../../assets/gatos/gatoEstres.png')} style={styles.cat} />
         </View>
 
-        <TouchableOpacity style={styles.askButton}><Text style={styles.askText}>Pregunta lo que quieras a Somat</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.askButton} onPress={() => navigation.navigate('Chat')}>
+          <Text style={styles.askText}>Pregunta lo que quieras a Somat</Text>
+        </TouchableOpacity>
 
         <Text style={[styles.sectionTitle, { color: currentTheme.textPrimary }]}>Todo sobre ti</Text>
         <View style={styles.statsRow}>

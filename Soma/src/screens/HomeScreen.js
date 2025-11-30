@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Image, PanResponder } from 'react-native';
+import { LineChart, PieChart } from 'react-native-gifted-charts';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -32,10 +33,13 @@ export default function HomeScreen({ route }) {
   const hydraSoft = '#EAE5FF';
   const [stressBars, setStressBars] = useState([20, 40, 60, 80, 100]);
   const [sleepBars, setSleepBars] = useState([30, 45, 55, 70, 60]);
+  const [insomniaBars, setInsomniaBars] = useState([26, 34, 28, 40, 32, 24]);
+  const [fatiguePts, setFatiguePts] = useState([22, 28, 34, 40, 48, 54]);
   const [stressLevelText, setStressLevelText] = useState('Elevado');
   const [sleepDeltaText, setSleepDeltaText] = useState('16% mejor');
+  const [activityStats, setActivityStats] = useState({ energy: 2013, idealPct: 90, distanceKm: 3.0, reps: 450 });
+  const dateStr = React.useMemo(() => new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }), []);
   const name = user?.first_name || 'Ana';
-  const dateStr = new Date().toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
 
   const palette = {
     off: { appBg: '#EFEFEF' },
@@ -98,6 +102,21 @@ export default function HomeScreen({ route }) {
     };
     loadActivity();
   }, [activeTab, user?.id]);
+
+  React.useEffect(() => {
+    if (activeTab !== 'actividad') return;
+    const id = setInterval(() => {
+      setInsomniaBars(prev => prev.map(v => Math.max(18, Math.min(64, v + Math.round(Math.random()*6-3)))));
+      setFatiguePts(prev => prev.map((v,i) => Math.max(16, Math.min(64, v + (i%2===0?1:-1)))));
+      setActivityStats(s => ({
+        energy: Math.max(1800, Math.min(2600, s.energy + Math.round(Math.random()*30-15))),
+        idealPct: Math.max(60, Math.min(99, s.idealPct + Math.round(Math.random()*4-2))),
+        distanceKm: Math.max(1, Math.min(12, Math.round((s.distanceKm + (Math.random()*0.3-0.15))*10)/10)),
+        reps: Math.max(200, Math.min(1200, s.reps + Math.round(Math.random()*20-10)))
+      }));
+    }, 2500);
+    return () => clearInterval(id);
+  }, [activeTab]);
 
   React.useEffect(() => {
     const t = route?.params?.tab;
@@ -297,30 +316,135 @@ export default function HomeScreen({ route }) {
 
         {/* --- Contenido Tab: Actividad --- */}
         {activeTab === 'actividad' && (
-          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }]}>
-            <View style={styles.statsRow}>
-              <View style={[styles.miniCard, { backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#DDEAF1' : activeMode === 'fatigue' ? '#CFF3C9' : '#CFC4E9') : '#EFEFEF' }]}>
-                <Text style={[styles.miniTitle, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>Indicador del estrés</Text>
-                <View style={styles.barRow}>
-                  {stressBars.map((h, i) => (
-                    <View key={`sbar-${i}`} style={[styles.bar, { height: h, backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#5f7f92' : activeMode === 'fatigue' ? '#3f6f52' : '#4b3340') : '#B0B0B0' }]} />
-                  ))}
-                </View>
-                <Text style={[styles.miniValue, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>{stressLevelText}</Text>
-                <Text style={{ color: colorOn ? '#5a4e55' : '#7a7a7a' }}>pulsa para leer</Text>
-              </View>
-              <View style={[styles.miniCard, { backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#DDEAF1' : activeMode === 'fatigue' ? '#CFF3C9' : '#C9D8D3') : '#EFEFEF' }]}>
-                <Text style={[styles.miniTitle, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#2f3f47') : '#5b5b5b' }]}>Calidad del sueño</Text>
-                <View style={styles.barRow}>
-                  {sleepBars.map((h, i) => (
-                    <View key={`slbar-${i}`} style={[styles.bar, { height: h, backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#5f7f92' : activeMode === 'fatigue' ? '#3f6f52' : '#5f7f92') : '#B0B0B0' }]} />
-                  ))}
-                </View>
-                <Text style={[styles.miniValue, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#2f3f47') : '#5b5b5b' }]}>{sleepDeltaText}</Text>
-                <Text style={{ color: colorOn ? '#617a86' : '#7a7a7a' }}>pulsa para leer</Text>
+          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: '#CFC4E9', borderColor: '#CFC4E9' }]}> 
+            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
+              <Text style={[styles.miniTitle, { color: '#3a2a32' }]}>Semana del {dateStr}</Text>
+              <View style={{ flexDirection:'row', gap:8 }}>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>✓</Text></View>
               </View>
             </View>
-            <TouchableOpacity style={[styles.btnLarge, { backgroundColor: '#000' }]}><Text style={styles.btnLargeText}>más información para ti</Text></TouchableOpacity>
+            <View style={styles.barRow}>
+              {stressBars.map((h, i) => (
+                <View key={`sbar-${i}`} style={[styles.bar, { height: h, backgroundColor: '#4b3340' }]} />
+              ))}
+            </View>
+            <Text style={{ fontSize:18, fontWeight:'700', color:'#3a2a32' }}>{stressLevelText}</Text>
+            <Text style={{ color:'#5a4e55', marginTop:6 }}>Tus picos de estrés han ido aumentando a lo largo de la semana, con el domingo como peor día y media superior a la semana pasada.</Text>
+          </View>
+        )}
+
+        {activeTab === 'actividad' && (
+          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: '#C9D8D3', borderColor: '#C9D8D3' }]}> 
+            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
+              <Text style={[styles.miniTitle, { color: '#2f3f47' }]}>Semana del {dateStr}</Text>
+              <View style={{ flexDirection:'row', gap:8 }}>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>✓</Text></View>
+              </View>
+            </View>
+            <View style={[styles.barRow, { marginTop: 8 }]}> 
+              {insomniaBars.map((h,i)=> (
+                <View key={`inbar-${i}`} style={[styles.bar, { height: h, backgroundColor: '#5f7f92' }]} />
+              ))}
+            </View>
+            <Text style={[styles.cardTitle, { color: '#2f3f47', marginTop:8 }]}>Calidad de sueño {sleepDeltaText}</Text>
+            <Text style={{ color: '#2f3f47', marginTop: 6 }}>Esta semana has tenido más ciclos de sueño completos y menos interrupciones en fase REM.</Text>
+          </View>
+        )}
+
+        {activeTab === 'actividad' && (
+          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: '#CFF3C9', borderColor: '#CFF3C9' }]}> 
+            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
+              <Text style={[styles.miniTitle, { color: '#2f4f40' }]}>Semana del 24 de noviembre</Text>
+              <View style={{ flexDirection:'row', gap:8 }}>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>✓</Text></View>
+              </View>
+            </View>
+            <View style={{ marginTop: 10 }}>
+              <LineChart
+                data={fatiguePts.map(v=>({value:v}))}
+                curved
+                isAnimated
+                thickness={4}
+                color={'#3f6f52'}
+                hideRules
+                hideDataPoints={false}
+                dataPointsColor={'#ffffff'}
+                dataPointRadius={5}
+                dataPointStrokeColor={'#3f6f52'}
+                dataPointStrokeWidth={2}
+                areaChart
+                startFillColor={'#3f6f52'}
+                endFillColor={'#3f6f52'}
+                startOpacity={0.25}
+                endOpacity={0.05}
+                yAxisTextStyle={{ color:'#2f4f40' }}
+                xAxisTextStyle={{ color:'#2f4f40' }}
+                adjustToWidth
+                initialSpacing={0}
+                noOfSections={4}
+                yAxisColor={'transparent'}
+                xAxisColor={'transparent'}
+              />
+            </View>
+            <Text style={{ color:'#2f4f40', marginTop: 12, fontWeight:'700', fontSize:16 }}>Tu fatiga visual 38% mejor</Text>
+            <Text style={{ color:'#2f4f40' }}>Esta semana has mejorado mucho; hábitos saludables ayudan.</Text>
+          </View>
+        )}
+
+        {activeTab === 'actividad' && (
+          <View style={[styles.cardElevated, styles.cardWide, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }]}>
+            <Text style={[styles.cardTitle, { color: currentTheme.textPrimary }]}>Actividad física</Text>
+            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginTop:4 }}>
+              <Text style={{ fontSize:18, fontWeight:'700', color:'#1a1a1a' }}>Hoy</Text>
+              <View style={{ flexDirection:'row', gap:8 }}>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>+</Text></View>
+                <View style={styles.circleBtn}><Text style={styles.circleText}>˅</Text></View>
+              </View>
+            </View>
+
+            <View style={styles.activityItemRow}>
+              <View style={{ flex:1 }}>
+                <Text style={styles.activityLabel}>Energía en reposo</Text>
+                <Text style={styles.activityValue}>{Math.max(600, Math.round(activityStats.energy*0.5))} kcal</Text>
+              </View>
+              <View style={styles.miniBarsGrey}><View style={[styles.miniBarGrey,{height:18}]} /><View style={[styles.miniBarGrey,{height:24}]} /><View style={[styles.miniBarGrey,{height:30}]} /><View style={[styles.miniBarGrey,{height:22}]} /><View style={[styles.miniBarGrey,{height:28}]} /><View style={[styles.miniBarGrey,{height:36, backgroundColor:'#1a1a1a'}]} /></View>
+            </View>
+
+            <View style={styles.activityItemRow}>
+              <View style={{ flex:1 }}>
+                <Text style={styles.activityLabel}>Movimiento</Text>
+                <Text style={styles.activityValue}>{Math.round(activityStats.energy*0.06)} kcal</Text>
+              </View>
+              <View style={styles.donutWrap}>
+                <PieChart
+                  data={[{value:70,color:'#1a1a1a'},{value:30,color:'#bbbbbb'}]}
+                  donut
+                  radius={28}
+                  innerRadius={16}
+                  centerLabelComponent={() => (<Text style={{fontSize:10,color:'#000'}}>70%</Text>)}
+                />
+              </View>
+            </View>
+
+            <View style={styles.activityItemRow}>
+              <View style={{ flex:1 }}>
+                <Text style={styles.activityLabel}>Distancia andando / corriendo</Text>
+                <Text style={styles.activityValue}>{activityStats.distanceKm} km</Text>
+              </View>
+              <View style={styles.miniBarsGrey}><View style={[styles.miniBarGrey,{height:16}]} /><View style={[styles.miniBarGrey,{height:22}]} /><View style={[styles.miniBarGrey,{height:20}]} /><View style={[styles.miniBarGrey,{height:26}]} /><View style={[styles.miniBarGrey,{height:28}]} /><View style={[styles.miniBarGrey,{height:34, backgroundColor:'#1a1a1a'}]} /></View>
+            </View>
+
+            <View style={styles.activityItemRow}>
+              <View style={{ flex:1 }}>
+                <Text style={styles.activityLabel}>Pasos</Text>
+                <Text style={styles.activityValue}>{activityStats.reps} pasos</Text>
+              </View>
+              <View style={styles.miniBarsGrey}><View style={[styles.miniBarGrey,{height:12}]} /><View style={[styles.miniBarGrey,{height:18}]} /><View style={[styles.miniBarGrey,{height:28}]} /><View style={[styles.miniBarGrey,{height:32}]} /><View style={[styles.miniBarGrey,{height:26}]} /><View style={[styles.miniBarGrey,{height:36, backgroundColor:'#1a1a1a'}]} /></View>
+            </View>
+            <TouchableOpacity style={[styles.btnLarge, { backgroundColor: '#000', marginTop: 10 }]}><Text style={styles.btnLargeText}>Obtener consejos sobre mi actividad</Text></TouchableOpacity>
           </View>
         )}
 
@@ -424,6 +548,23 @@ const styles = StyleSheet.create({
   miniValue: { fontSize: 18, fontWeight: '700', marginVertical: 6 },
   barRow: { flexDirection: 'row', alignItems: 'flex-end', height: 100, gap: 10, marginVertical: 10, paddingHorizontal: 8 },
   bar: { width: 18, borderRadius: 10 },
+  trendWrap: { height: 100, position: 'relative', marginTop: 8 },
+  trendPoint: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: '#3f6f52' },
+  trendLine: { position: 'absolute', height: 4, backgroundColor: '#3f6f52', borderRadius: 2 },
+  smallStatsRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  smallStatCard: { flex: 1, backgroundColor: '#EFEFEF', borderRadius: 12, padding: 12 },
+  smallStatTitle: { fontSize: 12, color: '#2f3f47' },
+  smallStatValue: { fontSize: 16, fontWeight: '700', color: '#2f3f47', marginTop: 4 },
+  miniBars: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginTop: 8 },
+  miniBar: { width: 10, borderRadius: 6, backgroundColor: '#bdbdbd' },
+  activityItemRow: { flexDirection:'row', alignItems:'center', backgroundColor:'#E5E5E5', borderRadius:16, padding:12, marginTop:8 },
+  activityLabel: { fontSize:14, color:'#4a4a4a' },
+  activityValue: { fontSize:20, fontWeight:'700', color:'#1a1a1a', marginTop:4 },
+  miniBarsGrey: { flexDirection:'row', alignItems:'flex-end', gap:6 },
+  miniBarGrey: { width:10, borderRadius:6, backgroundColor:'#b5b5b5' },
+  donutWrap: { width:60, alignItems:'center', justifyContent:'center' },
+  circleBtn: { width:32, height:32, borderRadius:16, backgroundColor:'#fff', alignItems:'center', justifyContent:'center' },
+  circleText: { fontSize:16, fontWeight:'700', color:'#1a1a1a' },
 
   // Estilos del Footer Fijo
   footerPlaceholder: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, backgroundColor: '#000', borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 12, zIndex: 100 },

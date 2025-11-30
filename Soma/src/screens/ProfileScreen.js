@@ -129,6 +129,7 @@ const ProfileScreen = ({ navigation }) => {
         {/* --- SECCIÓN DATOS PERSONALES --- */}
         <Text style={styles.sectionTitle}>Datos personales</Text>
         <View style={styles.listGroup}>
+          <ListItem icon="calendar" text="Resumen diario" onPress={() => navigation.navigate('DailySummary')} />
           <ListItem icon="stats-chart" text="Estadísticas generales" onPress={() => navigation.navigate('Stats')} />
           <ListItem icon="trending-up" text="Evolución total" onPress={() => navigation.navigate('Evolution')} />
           <ListItem icon="checkmark-done" text="Historial de hábitos" onPress={() => navigation.navigate('HabitsHistory')} />

@@ -1,159 +1,337 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Switch, Dimensions, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { LineChart } from 'react-native-gifted-charts';
-import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
-import API_BASE_URL from '../constants/api';
+import { BarChart, LineChart, PieChart } from 'react-native-gifted-charts';
+import { useNavigation } from '@react-navigation/native';
 
-export default function DailySummaryScreen({ route }) {
-  const { currentTheme } = useTheme();
-  const { user } = useAuth();
-  const [summary, setSummary] = useState(null);
-  const [activeView, setActiveView] = useState(route?.params?.view || 'correlacion');
-  const stressSeries = [12, 22, 18, 30, 28, 20, 14, 10];
-  const sleepSeries = [80, 78, 82, 70, 75, 83, 85, 88];
-  const labels = ['00', '03', '06', '09', '12', '15', '18', '21'];
+const screenWidth = Dimensions.get('window').width;
 
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        if (!user?.user_id && !user?.id) return;
-        const uid = user?.user_id || user?.id;
-        const res = await axios.get(`${API_BASE_URL}/summary/daily/${uid}`);
-        setSummary(res.data);
-      } catch {}
-    };
-    fetchSummary();
-  }, [user?.user_id, user?.id]);
+export default function DailySummaryScreen() {
+  const navigation = useNavigation();
+  const [isEnabled, setIsEnabled] = useState(true);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+  // Mock Data
+  const stressData = [
+    { value: 20, label: 'L' },
+    { value: 15, label: 'M' },
+    { value: 30, label: 'X' },
+    { value: 45, label: 'J' },
+    { value: 55, label: 'V' },
+    { value: 60, label: 'S' },
+    { value: 75, label: 'D', frontColor: '#4A3B52' },
+  ];
+
+  const sleepData = [
+    { value: 60, frontColor: '#5F7F92' },
+    { value: 50, frontColor: '#5F7F92' },
+    { value: 70, frontColor: '#5F7F92' },
+    { value: 40, frontColor: '#5F7F92' },
+    { value: 65, frontColor: '#5F7F92' },
+    { value: 55, frontColor: '#5F7F92' },
+    { value: 80, frontColor: '#5F7F92' }
+  ];
+
+  const fatigueData = [
+    { value: 20 }, { value: 25 }, { value: 40 }, { value: 50 }, { value: 60 }, { value: 70 }
+  ];
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <LinearGradient colors={["#e7f0f4", "#ffffff"]} style={styles.header}>
-        <View style={styles.headerRow}>
-          <Ionicons name="stats-chart" size={22} color="#1a1a1a" />
-          <Text style={styles.title}>Resumen diario</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Ionicons name="person" size={24} color="black" />
+          <Switch
+            trackColor={{ false: "#767577", true: "#000" }}
+            thumbColor={isEnabled ? "#fff" : "#f4f3f4"}
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+          />
         </View>
-        <Text style={styles.subtitle}>Tu día en una vista: sueño, estrés, actividad y pantalla</Text>
-      </LinearGradient>
+        <Text style={styles.mainTitle}>Actividad</Text>
+        <Text style={styles.subtitle}>Descubre de un vistazo cómo te encuentras y tu actividad diaria. ¡El movimiento es salud!</Text>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.kpisRow}>
-          <View style={[styles.kpiCard, { backgroundColor:'#f0f7ff' }]}>
-            <Text style={styles.kpiLabel}>Calidad del sueño</Text>
-            <Text style={styles.kpiValue}>{summary?.sleepQualityAvg ?? '—'}</Text>
-          </View>
-          <View style={[styles.kpiCard, { backgroundColor:'#f3eaff' }]}>
-            <Text style={styles.kpiLabel}>Picos de estrés</Text>
-            <Text style={styles.kpiValue}>{summary?.stressPeaksCount ?? '—'}</Text>
-          </View>
-        </View>
-        <View style={styles.kpisRow}>
-          <View style={[styles.kpiCard, { backgroundColor:'#eaf9ef' }]}>
-            <Text style={styles.kpiLabel}>Horas de actividad</Text>
-            <Text style={styles.kpiValue}>{summary?.activityHours != null ? `${summary.activityHours.toFixed(1)}h` : '—'}</Text>
-          </View>
-          <View style={[styles.kpiCard, { backgroundColor:'#fff6ea' }]}>
-            <Text style={styles.kpiLabel}>Tiempo de pantalla</Text>
-            <Text style={styles.kpiValue}>{summary?.screenTimeMinutes != null ? `${Math.floor(summary.screenTimeMinutes/60)}h ${summary.screenTimeMinutes%60}m` : '—'}</Text>
-          </View>
-        </View>
-        <View style={styles.pillsRow}>
-          {[
-            { key: 'correlacion', label: 'Estrés vs Sueño' },
-            { key: 'actividad', label: 'Actividad' },
-            { key: 'pantalla', label: 'Pantalla' },
-            { key: 'sueno', label: 'Sueño' },
-          ].map(p => (
-            <TouchableOpacity key={p.key} style={[styles.pill, activeView === p.key && [styles.pillActive, { backgroundColor: '#000' }]]} onPress={() => setActiveView(p.key)}>
-              <Text style={[styles.pillText, { color: activeView === p.key ? '#fff' : currentTheme.textPrimary }]}>{p.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {activeView === 'correlacion' && (
-          <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Estrés vs. sueño</Text>
-            <LineChart
-              data={stressSeries.map((v,i)=>({value:v,label:labels[i]}))}
-              data2={sleepSeries.map((v,i)=>({value:v,label:labels[i]}))}
-              curved
-              spacing={30}
-              thickness={3}
-              color="#8b5cf6"
-              color2="#10b981"
-              yAxisTextStyle={{ color:'#6b7280' }}
-              xAxisLabelTextStyle={{ color:'#6b7280' }}
-              hideRule
-              areaChart
-              startFillColor1="#ede9fe"
-              startFillColor2="#dcfce7"
-            />
-            <Text style={styles.chartDesc}>Correlación estimada: {summary?.correlationStressSleep != null ? summary.correlationStressSleep.toFixed(2) : '—'}</Text>
-          </View>
-        )}
-
-        {activeView === 'actividad' && (
-          <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Actividad estimada</Text>
-            <View style={{ flexDirection:'row', alignItems:'flex-end', gap:10, height:140 }}>
-              {[4,6,3,5,2,7].map((h,i)=>(
-                <View key={`act-${i}`} style={{ width:18, height:h*16, borderRadius:8, backgroundColor:'#3f6f52' }} />
-              ))}
+        {/* Stress Section */}
+        <Text style={styles.sectionTitle}>Indicador del estrés</Text>
+        <View style={[styles.card, styles.stressCard]}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardDate}>Semana del 24 de noviembre</Text>
+            <View style={styles.iconGroup}>
+              <Ionicons name="add-circle-outline" size={20} color="#555" />
+              <Ionicons name="chevron-down-circle-outline" size={20} color="#555" />
             </View>
-            <Text style={styles.chartDesc}>{summary?.activityHours != null ? `${summary.activityHours.toFixed(1)}h activas estimadas` : '—'}</Text>
           </View>
-        )}
-
-        {activeView === 'pantalla' && (
-          <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Tiempo de pantalla</Text>
-            <Text style={[styles.chartDesc, { marginTop:4 }]}>{summary?.screenTimeMinutes != null ? `${Math.floor(summary.screenTimeMinutes/60)}h ${summary.screenTimeMinutes%60}m` : '—'}</Text>
-          </View>
-        )}
-
-        {activeView === 'sueno' && (
-          <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Calidad del sueño</Text>
-            <LineChart
-              data={sleepSeries.map((v,i)=>({value:v,label:labels[i]}))}
-              curved
-              spacing={30}
-              thickness={3}
-              color="#5f7f92"
-              yAxisTextStyle={{ color:'#6b7280' }}
-              xAxisLabelTextStyle={{ color:'#6b7280' }}
-              hideRule
-              areaChart
-              startFillColor1="#DDEAF1"
+          <View style={styles.chartContainer}>
+            <BarChart
+              data={stressData}
+              barWidth={22}
+              noOfSections={3}
+              barBorderRadius={4}
+              frontColor={'#6B5B7B'}
+              yAxisThickness={0}
+              xAxisThickness={0}
+              hideRules
+              hideYAxisText
+              height={100}
+              width={screenWidth - 90}
+              isAnimated
             />
-            <Text style={styles.chartDesc}>Promedio: {summary?.sleepQualityAvg ?? '—'}</Text>
           </View>
-        )}
+          <Text style={styles.cardStatusTitle}>Elevado</Text>
+          <Text style={styles.cardDescription}>Tus picos de estrés han ido aumentando a lo largo de la semana, siendo el domingo tu peor día y la media es superior a la de la semana pasada.</Text>
+        </View>
+
+        {/* Sleep Section */}
+        <Text style={styles.sectionTitle}>Indicador de insomnio (sueño)</Text>
+        <View style={[styles.card, styles.sleepCard]}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardDate}>Semana del 24 de noviembre</Text>
+            <View style={styles.iconGroup}>
+              <Ionicons name="add-circle-outline" size={20} color="#555" />
+              <Ionicons name="chevron-down-circle-outline" size={20} color="#555" />
+            </View>
+          </View>
+          <View style={styles.chartContainer}>
+            <BarChart
+              data={sleepData}
+              barWidth={22}
+              noOfSections={3}
+              barBorderRadius={4}
+              yAxisThickness={0}
+              xAxisThickness={0}
+              hideRules
+              hideYAxisText
+              height={100}
+              width={screenWidth - 90}
+              isAnimated
+            />
+          </View>
+          <Text style={styles.cardStatusTitle}>Calidad de sueño 16% mejor</Text>
+          <Text style={styles.cardDescription}>Esta semana has tenido más ciclos de sueño completos y menos sueños interrumpidos en fase REM.</Text>
+        </View>
+
+        {/* Visual Fatigue Section */}
+        <Text style={styles.sectionTitle}>Indicador de fatiga visual</Text>
+        <View style={[styles.card, styles.fatigueCard]}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardDate}>Semana del 24 de noviembre</Text>
+            <View style={styles.iconGroup}>
+              <Ionicons name="add-circle-outline" size={20} color="#555" />
+              <Ionicons name="chevron-down-circle-outline" size={20} color="#555" />
+            </View>
+          </View>
+          <View style={styles.chartContainer}>
+            <LineChart
+              data={fatigueData}
+              curved
+              thickness={5}
+              color="#666"
+              hideRules
+              hideYAxisText
+              hideAxesAndRules
+              height={100}
+              width={screenWidth - 90}
+              dataPointsColor={'white'}
+              dataPointsRadius={6}
+              isAnimated
+            />
+          </View>
+          <Text style={styles.cardStatusTitle}>Tu fatiga visual 38% mejor</Text>
+          <Text style={styles.cardDescription}>Esta semana has logrado mejorar mucho, hemos visto que has completado dos hábitos relacionados con la fatiga. ¡Felicidades!</Text>
+        </View>
+
+        {/* Physical Activity Section */}
+        <Text style={styles.sectionTitle}>Actividad física</Text>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardDate}>Hoy</Text>
+          <View style={styles.iconGroup}>
+            <Ionicons name="add" size={20} color="#555" />
+            <Ionicons name="chevron-down" size={20} color="#555" />
+          </View>
+        </View>
+
+        {/* Small Cards Row */}
+        <View style={styles.smallCardContainer}>
+          {/* Energy */}
+          <View style={styles.smallCard}>
+            <Text style={styles.smallCardLabel}>Energía en reposo</Text>
+            <Text style={styles.smallCardValue}>1013 kcal</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 30, gap: 2 }}>
+              {[...Array(10)].map((_, i) => <View key={i} style={{ width: 4, height: Math.random() * 20 + 5, backgroundColor: '#555', borderRadius: 2 }} />)}
+            </View>
+          </View>
+
+          {/* Movement */}
+          <View style={styles.smallCard}>
+            <Text style={styles.smallCardLabel}>Movimiento</Text>
+            <Text style={styles.smallCardValue}>128 kcal</Text>
+            <View style={{ alignItems: 'center' }}>
+              <PieChart
+                data={[{ value: 70, color: 'black' }, { value: 30, color: 'transparent' }]}
+                donut
+                radius={25}
+                innerRadius={18}
+                backgroundColor="transparent"
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Distance */}
+        <View style={styles.smallCardContainer}>
+          <View style={[styles.smallCard, { width: '100%' }]}>
+            <Text style={styles.smallCardLabel}>Distancia andando/corriendo</Text>
+            <Text style={styles.smallCardValue}>3 km</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 30, gap: 4 }}>
+              {[...Array(20)].map((_, i) => <View key={i} style={{ width: 4, height: Math.random() * 20 + 5, backgroundColor: '#555', borderRadius: 2 }} />)}
+            </View>
+          </View>
+        </View>
+
+        {/* Steps */}
+        <View style={styles.smallCardContainer}>
+          <View style={[styles.smallCard, { width: '100%' }]}>
+            <Text style={styles.smallCardLabel}>Pasos</Text>
+            <Text style={styles.smallCardValue}>430 pasos</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 30, gap: 4 }}>
+              {[...Array(20)].map((_, i) => <View key={i} style={{ width: 4, height: Math.random() * 20 + 5, backgroundColor: '#555', borderRadius: 2 }} />)}
+            </View>
+          </View>
+        </View>
+
+        {/* Advice Button */}
+        <TouchableOpacity style={styles.adviceButton} onPress={() => navigation.navigate('Home', { screen: 'Chat' })}>
+          <Text style={styles.adviceButtonText}>Dame consejos sobre mi actividad Somat</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex:1, backgroundColor:'#f8fafb', ...(Platform.OS === 'web' ? { minHeight: '100vh' } : {}) },
-  header: { paddingHorizontal:16, paddingTop:12, paddingBottom:18 },
-  headerRow: { flexDirection:'row', alignItems:'center', gap:8 },
-  title: { fontSize:22, fontWeight:'800', color:'#111' },
-  subtitle: { fontSize:13, color:'#4b5563', marginTop:6 },
-  content: { padding:16 },
-  pillsRow: { flexDirection:'row', alignItems:'center', marginBottom:12 },
-  pill: { paddingHorizontal:12, paddingVertical:8, borderRadius:16, backgroundColor:'#E6E6E6', marginRight:8 },
-  pillActive: { backgroundColor:'#000' },
-  pillText: { fontSize:12 },
-  kpisRow: { flexDirection:'row', gap:12, marginBottom:12 },
-  kpiCard: { flex:1, borderRadius:16, padding:16, shadowColor:'#000', shadowOpacity:0.06, shadowRadius:8, shadowOffset:{ width:0, height:4 }, elevation:2 },
-  kpiLabel: { fontSize:12, color:'#374151' },
-  kpiValue: { fontSize:20, fontWeight:'800', color:'#111827', marginTop:6 },
-  chartCard: { backgroundColor:'#fff', borderRadius:18, padding:16, shadowColor:'#000', shadowOpacity:0.06, shadowRadius:8, shadowOffset:{ width:0, height:4 }, elevation:2 },
-  chartTitle: { fontSize:16, fontWeight:'800', color:'#111827', marginBottom:8 },
-  chartDesc: { fontSize:12, color:'#6b7280', marginTop:8 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F0F4F5', // Light gray/blueish background
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  card: {
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
+  },
+  stressCard: {
+    backgroundColor: '#CDB4DB', // Muted Purple
+  },
+  sleepCard: {
+    backgroundColor: '#C3E0DC', // Muted Teal
+  },
+  fatigueCard: {
+    backgroundColor: '#C9E4CA', // Muted Green
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  cardDate: {
+    fontSize: 12,
+    color: '#444',
+    fontWeight: '500',
+  },
+  iconGroup: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  chartContainer: {
+    alignItems: 'center',
+    marginBottom: 15,
+    overflow: 'hidden', // Ensure chart doesn't bleed
+  },
+  cardStatusTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 5,
+  },
+  cardDescription: {
+    fontSize: 12,
+    color: '#333',
+    lineHeight: 18,
+  },
+  smallCardContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  smallCard: {
+    flex: 1,
+    backgroundColor: '#E6E6E6',
+    borderRadius: 20,
+    padding: 15,
+    justifyContent: 'space-between',
+  },
+  smallCardLabel: {
+    fontSize: 11,
+    color: '#555',
+    fontWeight: '600',
+  },
+  smallCardValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+    marginVertical: 8,
+  },
+  adviceButton: {
+    backgroundColor: '#000',
+    borderRadius: 30,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  adviceButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

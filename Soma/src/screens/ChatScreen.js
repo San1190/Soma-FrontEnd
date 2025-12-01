@@ -72,7 +72,7 @@ export default function ChatScreen() {
                 ref={flatListRef}
                 data={messages}
                 renderItem={renderItem}
-                keyExtractor={item => item.id}
+                keyExtractor={(item, index) => (item.id ? `${item.id}-${index}` : `${index}`)}
                 contentContainerStyle={styles.list}
             />
 

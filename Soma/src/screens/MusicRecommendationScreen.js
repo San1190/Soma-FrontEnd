@@ -68,7 +68,7 @@ export default function MusicRecommendationScreen() {
             ) : (
                 <FlatList
                     data={playlists}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, index) => (item.id ? `${item.id}-${index}` : `${index}`)}
                     renderItem={renderItem}
                     contentContainerStyle={styles.list}
                     ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20, color: currentTheme.textSecondary }}>No se encontraron playlists.</Text>}

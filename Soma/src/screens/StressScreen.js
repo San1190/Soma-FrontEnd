@@ -181,8 +181,8 @@ const StressScreen = () => {
           </TouchableOpacity>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.habitsRow}>
-          {music.slice(0, 5).map(p => (
-            <RecommendationBox key={p.id} title={p.name} imageUrl={p.imageUrl} owner={p.owner} url={p.url} />
+          {music.slice(0, 5).map((p, index) => (
+            <RecommendationBox key={(p.id ? `${p.id}-${index}` : `${index}`)} title={p.name} imageUrl={p.imageUrl} owner={p.owner} url={p.url} />
           ))}
         </ScrollView>
       </ScrollView>

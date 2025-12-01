@@ -15,7 +15,7 @@ export default function HomeScreen({ route }) {
   const { user } = useAuth();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const [activeTab, setActiveTab] = useState(route?.params?.tab || 'actividad');
+  const [activeTab, setActiveTab] = useState(route?.params?.tab || 'boton');
   const selectTab = (tab) => {
     setActiveTab(tab);
     navigation.setParams({ tab });
@@ -47,7 +47,7 @@ export default function HomeScreen({ route }) {
     fatigue: { appBg: '#EAFBE8' },
     insomnio: { appBg: '#DDEAF1' },
   };
-  const appBg = !colorOn ? palette.off.appBg : palette[activeMode]?.appBg || palette.stress.appBg;
+  const appBg = !colorOn ? palette.off.appBg : (palette[activeMode]?.appBg || palette.stress.appBg);
 
   const cats = {
     off: require('../../assets/gatos/GatoApagado.png'),
@@ -185,10 +185,10 @@ export default function HomeScreen({ route }) {
         {/* --- Píldoras de Navegación --- */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
           {[
-            { key: 'actividad', label: 'Actividad' },
             { key: 'boton', label: 'Botón soma' },
             { key: 'espejo', label: 'Espejo somático' },
             { key: 'hidratacion', label: 'Hidratación' },
+            { key: 'actividad', label: 'Actividad' },
           ].map(p => (
             <TouchableOpacity key={p.key} style={[styles.pill, activeTab === p.key && [styles.pillActive, { backgroundColor: '#000' }]]} onPress={() => selectTab(p.key)}>
               <Text style={[styles.pillText, { color: activeTab === p.key ? '#fff' : currentTheme.textPrimary }]}>{p.label}</Text>
@@ -320,7 +320,7 @@ export default function HomeScreen({ route }) {
           <View style={styles.activityContainer}>
             <View style={styles.chartsRow}>
               {/* Card Estrés */}
-              <View style={[styles.chartCard, styles.cardStress]}>
+              <View style={[styles.chartCard, { backgroundColor: colorOn ? '#EAE5FF' : '#EFEFEF', borderColor: colorOn ? '#EAE5FF' : '#EFEFEF' }]}>
                 <Text style={styles.chartTitle}>Indicador del estrés</Text>
                 <View style={styles.barChartContainer}>
                   {stressBars.map((h, i) => (
@@ -332,7 +332,7 @@ export default function HomeScreen({ route }) {
               </View>
 
               {/* Card Sueño */}
-              <View style={[styles.chartCard, styles.cardSleep]}>
+              <View style={[styles.chartCard, { backgroundColor: colorOn ? '#DDEAF1' : '#EFEFEF', borderColor: colorOn ? '#DDEAF1' : '#EFEFEF' }]}>
                 <Text style={styles.chartTitle}>Calidad del sueño</Text>
                 <View style={styles.barChartContainer}>
                   {sleepBars.map((h, i) => (
@@ -344,7 +344,7 @@ export default function HomeScreen({ route }) {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.moreInfoBtn}>
+            <TouchableOpacity style={[styles.moreInfoBtn, { backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#5f7f92' : activeMode === 'fatigue' ? '#3f6f52' : '#6b5a66') : '#7a7a7a' }]} onPress={() => navigation.navigate('Profile', { screen: 'DailySummary', params: { view: 'actividad' } })}>
               <Text style={styles.moreInfoText}>más información para ti</Text>
             </TouchableOpacity>
           </View>

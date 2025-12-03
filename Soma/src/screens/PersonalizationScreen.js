@@ -7,14 +7,14 @@ import { register } from '../services/auth';
 
 const { height, width } = Dimensions.get('window');
 
-// --- CONSTANTES DE DISEÑO GENERAL ---
-const CONTENT_HEIGHT = height * 0.95;
+// --- CONSTANTES DE DISEÑO ---
+const CONTENT_HEIGHT = height * 1;
 const BORDER_RADIUS = 30;
-const CAT_IMAGE_HEIGHT = height * 0.4;
-const NEXT_BUTTON_HEIGHT = 50;
-const CAT_OVERFLOW_WIDTH = width * 1.5;
+// Aumentamos la altura del contenedor para dar espacio vertical al gato
+const CAT_IMAGE_HEIGHT = height * 0.5; 
 
-// Componente auxiliar para un input con estilo de píldora
+const CAT_IMAGE_WIDTH = width * 2;
+
 const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = true, ...props }) => {
   const styles = StyleSheet.create({
     pillInputContainer: {
@@ -28,7 +28,6 @@ const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = 
       marginBottom: 4,
     },
     input: {
-      // CAMBIO DE COLOR: Usamos un fondo blanco/muy claro para que coincida con la imagen
       backgroundColor: '#FFFFFF',
       borderRadius: 12,
       paddingHorizontal: 12,
@@ -37,7 +36,7 @@ const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = 
       fontWeight: '600',
       color: '#333333',
       opacity: editable ? 1 : 0.8,
-      borderWidth: 1, // Añadimos un borde sutil para definir el campo
+      borderWidth: 1,
       borderColor: '#E0E0E0',
     }
   });
@@ -57,18 +56,17 @@ const PillInput = ({ label, value, onChangeText, smallWidth = false, editable = 
   );
 };
 
-
 const PersonalizationScreen = ({ navigation, route }) => {
   const { currentTheme } = useTheme();
   const { login } = useAuth();
   const { email, password } = route.params || {};
-  const [selectedButton, setSelectedButton] = useState(null);
+  
+  const [selectedButtons, setSelectedButtons] = useState([]); 
   const [goalText, setGoalText] = useState('');
   const [expectationText, setExpectationText] = useState('');
   const [loading, setLoading] = useState(false);
 
-
-  // --- ESTADOS VACÍOS PARA LOS CAMPOS 'SOY...' (CORREGIDO) ---
+  // --- ESTADOS DE DATOS PERSONALES ---
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [edad, setEdad] = useState('');
@@ -79,11 +77,13 @@ const PersonalizationScreen = ({ navigation, route }) => {
   const [ocupacion, setOcupacion] = useState('');
   const [telefono, setTelefono] = useState('');
 
-
   const handleButtonPress = (buttonId) => {
-    setSelectedButton(buttonId === selectedButton ? null : buttonId);
+    if (selectedButtons.includes(buttonId)) {
+      setSelectedButtons(selectedButtons.filter(id => id !== buttonId));
+    } else {
+      setSelectedButtons([...selectedButtons, buttonId]);
+    }
   };
-
 
   const handleFinishPersonalization = async () => {
     if (!email || !password) {
@@ -151,18 +151,15 @@ const PersonalizationScreen = ({ navigation, route }) => {
       backgroundColor: '#EFEFEF',
       position: 'relative',
     },
-
-    // 1. Contenido desplazable (ScrollView)
     scrollContainer: {
       flexGrow: 1, paddingHorizontal: 20, paddingTop: 30,
-      paddingBottom: CAT_IMAGE_HEIGHT + 70,
+      // Damos mucho espacio abajo para que el contenido no choque con el gato grande
+      paddingBottom: CAT_IMAGE_HEIGHT + 100, 
     },
-
     mainTitle: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 4, textAlign: 'center', },
     subtitle: { fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 30, paddingHorizontal: 20, },
     sectionHeading: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 10, marginTop: 20, },
 
-    // 2. Estilos de los botones inclinados (Se mantienen)
     buttonRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', marginBottom: 15, },
     button: {
       backgroundColor: '#E6E0F5', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20,
@@ -173,7 +170,6 @@ const PersonalizationScreen = ({ navigation, route }) => {
     buttonText: { color: '#5D4D60', fontWeight: '600', fontSize: 13, textAlign: 'center', },
     selectedButtonText: { color: '#FFFFFF', },
 
-    // 3. Estilos de datos personales "Soy..." (Input rows)
     dataSection: { marginTop: 10, },
     dataRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', },
     infoText: { fontSize: 12, color: '#888', textAlign: 'center', marginTop: 20, marginBottom: 10, },
@@ -184,24 +180,47 @@ const PersonalizationScreen = ({ navigation, route }) => {
       fontSize: 15, color: '#333', borderWidth: 1, borderColor: '#E0E0E0',
       marginBottom: 15, minHeight: 80, textAlignVertical: 'top',
     },
-
-    // 4. Imagen del Gato en la parte inferior (absoluta y fija - CORRECCIÓN DE FONDO)
+    
+    // --- ESTILOS DE LA IMAGEN ---
     catImageContainer: {
-      position: 'absolute', bottom: 0, left: 0, right: 0,
+      position: 'absolute', 
+      bottom: 0, 
+      left: 0, 
+      right: 0,
       height: CAT_IMAGE_HEIGHT,
       zIndex: 1,
+      // Alineamos todo al centro y abajo
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      // Esto oculta lo que se salga por los lados (importante)
+      overflow: 'hidden', 
+      borderBottomLeftRadius: BORDER_RADIUS,
+      borderBottomRightRadius: BORDER_RADIUS,
     },
-    catImage: { width: '100%', height: '100%', resizeMode: 'cover', },
-
+    catImage: { 
+      // CLAVE: Ancho mas grande que la pantalla para compensar las zonas muertas
+      width: CAT_IMAGE_WIDTH, 
+      height: '100%', 
+      resizeMode: 'contain', // Se ajusta sin deformarse
+    },
+    
     nextButton: {
       backgroundColor: currentTheme.primary,
       borderRadius: 30, paddingVertical: 15, alignItems: 'center',
       position: 'absolute',
-      bottom: CAT_IMAGE_HEIGHT / 2 + 50,
+      // Ajustamos la posición del botón para que flote sobre la imagen
+      bottom: CAT_IMAGE_HEIGHT / 2 + 60,
       left: 40, right: 40, zIndex: 2,
     },
     nextButtonText: { color: currentTheme.cardBackground, fontSize: 18, fontWeight: '700', },
   });
+
+  const buttonOptions = [
+    'dormir mejor', 'ser productivo', 'beber más agua', 'aprender', 
+    'reducir mis niveles de cortisol', 'una relación saludable con la tecnología', 
+    'mejorar mis hábitos', 'conocerme', 'una interfaz adaptada a mí', 
+    'otro', 'manejar la ansiedad', 'sentir calma'
+  ];
 
   return (
     <View style={styles.outerContainer}>
@@ -221,15 +240,21 @@ const PersonalizationScreen = ({ navigation, route }) => {
 
             <Text style={styles.sectionHeading}>Quiero...</Text>
             <View style={styles.buttonRow}>
-              {['dormir mejor', 'ser productivo', 'beber más agua', 'aprender', 'reducir mis niveles de cortisol', 'una relación saludable con la tecnología', 'mejorar mis hábitos', 'conocerme', 'una interfaz adaptada a mí', 'otro', 'manejar la ansiedad', 'sentir calma'].map((label, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.button, selectedButton === label && (index % 2 === 0 ? styles.buttonLeftSelected : styles.buttonRightSelected),]}
-                  onPress={() => handleButtonPress(label)}
-                >
-                  <Text style={[styles.buttonText, selectedButton === label && styles.selectedButtonText]}>{label}</Text>
-                </TouchableOpacity>
-              ))}
+              {buttonOptions.map((label, index) => {
+                const isSelected = selectedButtons.includes(label);
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.button,
+                      isSelected && (index % 2 === 0 ? styles.buttonLeftSelected : styles.buttonRightSelected),
+                    ]}
+                    onPress={() => handleButtonPress(label)}
+                  >
+                    <Text style={[styles.buttonText, isSelected && styles.selectedButtonText]}>{label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
             {/* --- SECCIÓN DATOS PERSONALES INPUTS --- */}
@@ -249,8 +274,6 @@ const PersonalizationScreen = ({ navigation, route }) => {
               <Text style={styles.infoText}>Todos estos apartados puedes modificarlos posteriormente en tu perfil</Text>
             </View>
 
-
-            {/* Inputs adicionales (Largos) */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>¿Qué te gustaría lograr?</Text>
               <TextInput
@@ -268,7 +291,6 @@ const PersonalizationScreen = ({ navigation, route }) => {
               />
             </View>
 
-            {/* 1. Botón Flotante (Ahora parte del Scroll) */}
             <TouchableOpacity
               style={[styles.nextButton, loading && { opacity: 0.6 }]}
               onPress={handleFinishPersonalization}
@@ -281,7 +303,6 @@ const PersonalizationScreen = ({ navigation, route }) => {
               )}
             </TouchableOpacity>
 
-            {/* 2. Fondo Fijo: Imagen del Gato (Ahora parte del Scroll) */}
             <View style={styles.catImageContainer}>
               <Image
                 source={require('../../assets/gatos/gatoCola.png')}

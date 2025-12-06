@@ -235,7 +235,16 @@ export default function HomeScreen({ route }) {
             <Text style={[styles.cardTitle, { color: currentTheme.textPrimary }]}>Todo listo para iniciar la transmisión</Text>
             <Text style={[styles.bigNumber, { color: currentTheme.textPrimary }]}>100%</Text>
             <Text style={{ color: currentTheme.textSecondary }}>Somatiza tu dispositivo en un click y descubre todos los datos relevantes sobre tu salud</Text>
-            <TouchableOpacity style={[styles.btnLarge, { backgroundColor: '#000' }]}><Text style={styles.btnLargeText}>Activar conexión con wearable</Text></TouchableOpacity>
+            <TouchableOpacity style={[
+              styles.btnLarge,
+              {
+                backgroundColor: colorOn
+                  ? (activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52')
+                  : '#000'
+              }
+            ]}>
+              <Text style={styles.btnLargeText}>Activar conexión con wearable</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -486,9 +495,9 @@ const styles = StyleSheet.create({
   chipsCanvas: { position: 'relative', height: 120, marginTop: 10 },
 
   // Estilos para el espejo somático activo
-  espejoSubtitle: { fontSize: 12, fontWeight: '600', marginBottom: 12, lineHeight: 18 },
-  espejoTitle: { fontSize: 28, fontWeight: '800', marginBottom: 12, marginTop: 8 },
-  espejoDescription: { fontSize: 14, lineHeight: 20, marginBottom: 16 },
+  espejoSubtitle: { fontSize: 11, fontWeight: '500', marginBottom: 16, lineHeight: 16 },
+  espejoTitle: { fontSize: 32, fontWeight: '900', marginBottom: 16, marginTop: 0 },
+  espejoDescription: { fontSize: 15, lineHeight: 22, marginBottom: 20 },
   espejoButton: { marginTop: 12, paddingVertical: 14, borderRadius: 24, alignItems: 'center' },
   espejoButtonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 

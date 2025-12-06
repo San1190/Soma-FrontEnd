@@ -3,7 +3,7 @@
 // Definimos la paleta de colores de SOMA
 const themes = {
   light: {
-    background: '#F0F2F5', // Un fondo claro y suave
+    background: '#FFFFFF', // Blanco puro
     primary: '#4CAF50',    // Un verde primario
     accent1: '#8BC34A',    // Un verde acento más claro
     accent2: '#CDDC39',    // Un verde lima

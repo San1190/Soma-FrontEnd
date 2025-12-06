@@ -3,7 +3,7 @@
 
 const stressThemes = {
   low: {
-    background: '#F7F7F7',
+    background: '#FFFFFF',
     primary: '#CFF3C9',
     accent1: '#E8FBE8',
     accent2: '#DDEEE5',
@@ -13,7 +13,7 @@ const stressThemes = {
     borderColor: '#E6ECF1',
   },
   moderate: {
-    background: '#FFF7E9',
+    background: '#FFFFFF',
     primary: '#FFB74D',
     accent1: '#FFE0B2',
     accent2: '#FFF1DC',
@@ -23,7 +23,7 @@ const stressThemes = {
     borderColor: '#FFE6C7',
   },
   high: {
-    background: '#FFF2E5',
+    background: '#FFFFFF',
     primary: '#FF8A00',
     accent1: '#FFC180',
     accent2: '#FFE3C7',
@@ -33,7 +33,7 @@ const stressThemes = {
     borderColor: '#FFD8B2',
   },
   calm: {
-    background: '#EEF1F5',
+    background: '#FFFFFF',
     primary: '#708A99',
     accent1: '#9EB5C3',
     accent2: '#DDEAF1',
@@ -43,7 +43,7 @@ const stressThemes = {
     borderColor: '#E6ECF1',
   },
   sleep: {
-    background: '#F9F5FF',
+    background: '#FFFFFF',
     primary: '#CFC4E9',
     accent1: '#EAE5FF',
     accent2: '#F6F2FF',

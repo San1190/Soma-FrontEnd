@@ -314,7 +314,10 @@ export default function HomeScreen({ route }) {
                   </>
                 )}
 
-                <TouchableOpacity style={[styles.espejoButton, { backgroundColor: '#2F4F40' }]}>
+                <TouchableOpacity style={[
+                  styles.espejoButton,
+                  { backgroundColor: activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52' }
+                ]}>
                   <Text style={styles.espejoButtonText}>Infórmate sobre mi estado</Text>
                 </TouchableOpacity>
               </>

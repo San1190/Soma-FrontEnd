@@ -198,6 +198,7 @@ export default function HomeScreen({ route }) {
             { key: 'espejo', label: 'Espejo somático' },
             { key: 'hidratacion', label: 'Hidratación' },
             { key: 'actividad', label: 'Actividad' },
+            { key: 'prediccion', label: 'Predicciones' },
           ].map(p => (
             <TouchableOpacity
               key={p.key}
@@ -323,10 +324,17 @@ export default function HomeScreen({ route }) {
                   </>
                 )}
 
+
                 <TouchableOpacity style={[
                   styles.espejoButton,
                   { backgroundColor: activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52' }
-                ]}>
+                ]}
+                  onPress={() => {
+                    if (activeMode === 'stress') navigation.navigate('Stress');
+                    else if (activeMode === 'fatigue') navigation.navigate('Fatigue');
+                    else if (activeMode === 'insomnio') navigation.navigate('Insomnia');
+                  }}
+                >
                   <Text style={styles.espejoButtonText}>Infórmate sobre mi estado</Text>
                 </TouchableOpacity>
               </>
@@ -400,7 +408,7 @@ export default function HomeScreen({ route }) {
         )}
 
         {/* --- Contenido Tab: Actividad --- */}
-        {/* --- Contenido Tab: Actividad (NUEVO DISEÑO) --- */}
+        {/* --- Contenido Tab: Actividad (NUEVO DISEÑO CON ACTIVE HABITS) --- */}
         {activeTab === 'actividad' && (
           <View style={[
             styles.activityContainer,
@@ -436,8 +444,59 @@ export default function HomeScreen({ route }) {
               </View>
             </View>
 
+            {/* --- ACTIVE HABITS LINK --- */}
+            <TouchableOpacity
+              style={[
+                styles.moreInfoBtn,
+                {
+                  marginTop: 12,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 20,
+                  backgroundColor: colorOn ? '#4b3340' : '#4a4a4a'
+                }
+              ]}
+              onPress={() => navigation.navigate('Stress')}
+            >
+              <Text style={styles.moreInfoText}>Ver mis hábitos activos</Text>
+              <Ionicons name="arrow-forward" size={18} color="#fff" />
+            </TouchableOpacity>
+
             <TouchableOpacity style={[styles.moreInfoBtn, { backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#5f7f92' : activeMode === 'fatigue' ? '#3f6f52' : '#6b5a66') : '#7a7a7a' }]} onPress={() => navigation.navigate('Profile', { screen: 'DailySummary', params: { view: 'actividad' } })}>
               <Text style={styles.moreInfoText}>más información para ti</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* --- Contenido Tab: Predicción --- */}
+        {activeTab === 'prediccion' && (
+          <View style={[
+            styles.cardElevated,
+            {
+              backgroundColor: colorOn
+                ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9')
+                : currentTheme.cardBackground,
+              borderColor: colorOn
+                ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9')
+                : currentTheme.borderColor
+            }
+          ]}>
+            <Text style={[styles.cardTitle, { color: currentTheme.textPrimary }]}>Predicción de Bienestar</Text>
+            <Text style={{ color: currentTheme.textSecondary, marginBottom: 16 }}>
+              Analizamos tus datos históricos para prevenir el estrés y mejorar tu salud futura.
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.btnLarge,
+                {
+                  backgroundColor: colorOn
+                    ? (activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52')
+                    : '#000'
+                }
+              ]}
+              onPress={() => navigation.navigate('WellnessPrediction')}
+            >
+              <Text style={styles.btnLargeText}>Ver mi predicción</Text>
             </TouchableOpacity>
           </View>
         )}

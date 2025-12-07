@@ -228,6 +228,7 @@ const styles = StyleSheet.create({
   habitsRow: { paddingVertical: 12, paddingRight: 16 },
   habitCard: {
     width: 180,
+    height: 180,
     borderRadius: 16,
     padding: 14,
     shadowColor: '#000',

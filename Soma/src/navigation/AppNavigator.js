@@ -31,7 +31,7 @@ const ProfileStack = () => (
     <Stack.Screen name="Stats" component={StatsScreen} options={{ headerShown: true, headerTitle: 'Estadísticas generales' }} />
     <Stack.Screen name="Evolution" component={EvolutionScreen} options={{ headerShown: true, headerTitle: 'Evolución total' }} />
     <Stack.Screen name="HabitsHistory" component={HabitsHistoryScreen} options={{ headerShown: true, headerTitle: 'Historial de hábitos' }} />
-    <Stack.Screen name="DailySummary" component={DailySummaryScreen} options={{ headerShown: true, headerTitle: 'Resumen diario' }} />
+    <Stack.Screen name="DailySummary" component={DailySummaryScreen} options={{ headerShown: false }} />
     <Stack.Screen name="PersonalTraits" component={PersonalTraitsScreen} options={{ headerShown: true, headerTitle: 'Características personales' }} />
     <Stack.Screen name="MedicalDocuments" component={MedicalDocumentsScreen} options={{ headerShown: true, headerTitle: 'Documentos médicos' }} />
     <Stack.Screen name="LocaleRegion" component={LocaleRegionScreen} options={{ headerShown: true, headerTitle: 'Idioma y región' }} />

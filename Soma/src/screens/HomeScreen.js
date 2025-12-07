@@ -165,14 +165,23 @@ export default function HomeScreen({ route }) {
     setRingPan(responder);
   }, [waterGoal, waterCount, prevLoggedCount, user?.id]);
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: appBg }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
         {/* --- Inicio del Contenido --- */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.avatar}><Ionicons name="person" size={20} color={currentTheme.textPrimary} /></TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity style={[styles.toggleTrack, colorOn ? styles.toggleOn : styles.toggleOff]} onPress={() => setColorOn(v => !v)}>
+            <TouchableOpacity
+              style={[
+                styles.toggleTrack,
+                colorOn ? [
+                  styles.toggleOn,
+                  { backgroundColor: activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52' }
+                ] : styles.toggleOff
+              ]}
+              onPress={() => setColorOn(v => !v)}
+            >
               <View style={[styles.toggleKnob, colorOn ? styles.knobRight : styles.knobLeft]}>
                 <Ionicons name="person" size={16} color={colorOn ? '#000' : '#000'} />
               </View>
@@ -190,7 +199,21 @@ export default function HomeScreen({ route }) {
             { key: 'hidratacion', label: 'Hidratación' },
             { key: 'actividad', label: 'Actividad' },
           ].map(p => (
-            <TouchableOpacity key={p.key} style={[styles.pill, activeTab === p.key && [styles.pillActive, { backgroundColor: '#000' }]]} onPress={() => selectTab(p.key)}>
+            <TouchableOpacity
+              key={p.key}
+              style={[
+                styles.pill,
+                activeTab === p.key && [
+                  styles.pillActive,
+                  {
+                    backgroundColor: colorOn
+                      ? (activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52')
+                      : '#000'
+                  }
+                ]
+              ]}
+              onPress={() => selectTab(p.key)}
+            >
               <Text style={[styles.pillText, { color: activeTab === p.key ? '#fff' : currentTheme.textPrimary }]}>{p.label}</Text>
             </TouchableOpacity>
           ))}
@@ -198,56 +221,118 @@ export default function HomeScreen({ route }) {
 
         {/* --- Contenido Tab: Botón --- */}
         {activeTab === 'boton' && (
-          <View style={[styles.cardElevated, { backgroundColor: currentTheme.cardBackground, borderColor: currentTheme.borderColor }]}>
+          <View style={[
+            styles.cardElevated,
+            {
+              backgroundColor: colorOn
+                ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9')
+                : currentTheme.cardBackground,
+              borderColor: colorOn
+                ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9')
+                : currentTheme.borderColor
+            }
+          ]}>
             <Text style={[styles.cardTitle, { color: currentTheme.textPrimary }]}>Todo listo para iniciar la transmisión</Text>
             <Text style={[styles.bigNumber, { color: currentTheme.textPrimary }]}>100%</Text>
             <Text style={{ color: currentTheme.textSecondary }}>Somatiza tu dispositivo en un click y descubre todos los datos relevantes sobre tu salud</Text>
-            <TouchableOpacity style={[styles.btnLarge, { backgroundColor: '#000' }]}><Text style={styles.btnLargeText}>Activar conexión con wearable</Text></TouchableOpacity>
+            <TouchableOpacity style={[
+              styles.btnLarge,
+              {
+                backgroundColor: colorOn
+                  ? (activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52')
+                  : '#000'
+              }
+            ]}>
+              <Text style={styles.btnLargeText}>Activar conexión con wearable</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {/* --- Contenido Tab: Espejo (Como en la imagen) --- */}
-        {/* --- 👇 CAMBIO AQUÍ (JSX) --- */}
+        {/* --- Contenido Tab: Espejo Somático --- */}
         {activeTab === 'espejo' && (
-          <View style={styles.cardMuted}>
-            <Text style={[styles.cardTitleMuted, { color: currentTheme.textPrimary }]}>Activa el botón de arriba a la derecha</Text>
-            <Text style={styles.mutedBody}>Los colores de la interfaz de Soma cambian en función de los parámetros que tienes más alterados si utilizas el Espejo Somático</Text>
-            <View style={styles.chipsCanvas}>
+          <View style={[
+            styles.cardMuted,
+            colorOn && activeMode === 'stress' && { backgroundColor: '#BFAEE3' },
+            colorOn && activeMode === 'insomnio' && { backgroundColor: '#DDEAF1' },
+            colorOn && activeMode === 'fatigue' && { backgroundColor: '#CFF3C9' }
+          ]}>
+            {!colorOn ? (
+              <>
+                <Text style={[styles.cardTitleMuted, { color: currentTheme.textPrimary }]}>Activa el botón de arriba a la derecha</Text>
+                <Text style={styles.mutedBody}>Los colores de la interfaz de Soma cambian en función de los parámetros que tienes más alterados si utilizas el Espejo Somático</Text>
+                <View style={styles.chipsCanvas}>
+                  {/* Estrés */}
+                  <TouchableOpacity onPress={() => setActiveMode('stress')} style={[
+                    styles.badge,
+                    styles.badgeShadow,
+                    styles.badgeStress,
+                    { backgroundColor: '#DADADA', transform: [{ rotate: '0deg' }] }
+                  ]}>
+                    <Text style={[styles.badgeText, styles.badgeTextGray]}>Estrés</Text>
+                  </TouchableOpacity>
 
-              {/* Estrés */}
-              <TouchableOpacity onPress={() => setActiveMode('stress')} style={[
-                styles.badge,
-                styles.badgeShadow,
-                styles.badgeStress, // Estilo base (posición, color, rotación)
-                !colorOn && { backgroundColor: '#DADADA', transform: [{ rotate: '0deg' }] } // Estilo "apagado"
-              ]}>
-                <Text style={[styles.badgeText, colorOn ? styles.badgeTextLight : styles.badgeTextGray]}>Estrés</Text>
-              </TouchableOpacity>
+                  {/* Fatiga */}
+                  <TouchableOpacity onPress={() => setActiveMode('fatigue')} style={[
+                    styles.badge,
+                    styles.badgeShadow,
+                    styles.badgeFatigue,
+                    { backgroundColor: '#DADADA', transform: [{ rotate: '0deg' }] }
+                  ]}>
+                    <Text style={[styles.badgeText, styles.badgeTextGray]}>Fatiga</Text>
+                  </TouchableOpacity>
 
-              {/* Fatiga */}
-              <TouchableOpacity onPress={() => setActiveMode('fatigue')} style={[
-                styles.badge,
-                styles.badgeShadow,
-                styles.badgeFatigue, // Estilo base
-                !colorOn && { backgroundColor: '#DADADA', transform: [{ rotate: '0deg' }] } // Estilo "apagado"
-              ]}>
-                <Text style={[styles.badgeText, !colorOn && styles.badgeTextGray]}>Fatiga</Text>
-              </TouchableOpacity>
+                  {/* Insomnio */}
+                  <TouchableOpacity onPress={() => setActiveMode('insomnio')} style={[
+                    styles.badge,
+                    styles.badgeShadow,
+                    styles.badgeInsomnio,
+                    { backgroundColor: '#DADADA', transform: [{ rotate: '0deg' }] }
+                  ]}>
+                    <Text style={[styles.badgeText, styles.badgeTextGray]}>Insomnio</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.espejoSubtitle, { color: '#1a1a1a' }]}>El alma se tiñe de los colores de sus pensamientos - Heráclito</Text>
 
-              {/* Insomnio */}
-              <TouchableOpacity onPress={() => setActiveMode('insomnio')} style={[
-                styles.badge,
-                styles.badgeShadow,
-                styles.badgeInsomnio, // Estilo base
-                !colorOn && { backgroundColor: '#DADADA', transform: [{ rotate: '0deg' }] } // Estilo "apagado"
-              ]}>
-                <Text style={[styles.badgeText, colorOn ? styles.badgeTextLight : styles.badgeTextGray]}>Insomnio</Text>
-              </TouchableOpacity>
+                {activeMode === 'stress' && (
+                  <>
+                    <Text style={[styles.espejoTitle, { color: '#1a1a1a' }]}>Estrés digital</Text>
+                    <Text style={[styles.espejoDescription, { color: '#1a1a1a' }]}>
+                      El estrés digital se produce por el uso constante de dispositivos digitales, la cual implica una sobrecarga sensorial y la conectados...¡Ten cuidado! Puede provocar fatiga visual e insomnio
+                    </Text>
+                  </>
+                )}
 
-            </View>
+                {activeMode === 'insomnio' && (
+                  <>
+                    <Text style={[styles.espejoTitle, { color: '#1a1a1a' }]}>Insomnio</Text>
+                    <Text style={[styles.espejoDescription, { color: '#1a1a1a' }]}>
+                      La fatiga o astrenopia se produce cuando usas los ojos durante demasiadas tareas en las que peligran sobre todo el enfoque...ahora mismo estoy en desarrollo
+                    </Text>
+                  </>
+                )}
+
+                {activeMode === 'fatigue' && (
+                  <>
+                    <Text style={[styles.espejoTitle, { color: '#1a1a1a' }]}>Fatiga visual</Text>
+                    <Text style={[styles.espejoDescription, { color: '#1a1a1a' }]}>
+                      La fatiga o astrenopia se produce cuando usas en usas y que pendiente durante un tiempo prolongado, sobre todo al dormir
+                    </Text>
+                  </>
+                )}
+
+                <TouchableOpacity style={[
+                  styles.espejoButton,
+                  { backgroundColor: activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52' }
+                ]}>
+                  <Text style={styles.espejoButtonText}>Infórmate sobre mi estado</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         )}
-        {/* --- 👆 FIN DEL CAMBIO (JSX) --- */}
 
 
         {/* --- Contenido Tab: Hidratación --- */}
@@ -317,7 +402,14 @@ export default function HomeScreen({ route }) {
         {/* --- Contenido Tab: Actividad --- */}
         {/* --- Contenido Tab: Actividad (NUEVO DISEÑO) --- */}
         {activeTab === 'actividad' && (
-          <View style={styles.activityContainer}>
+          <View style={[
+            styles.activityContainer,
+            {
+              backgroundColor: colorOn
+                ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9')
+                : '#EFEFEF'
+            }
+          ]}>
             <View style={styles.chartsRow}>
               {/* Card Estrés */}
               <View style={[styles.chartCard, { backgroundColor: colorOn ? '#EAE5FF' : '#EFEFEF', borderColor: colorOn ? '#EAE5FF' : '#EFEFEF' }]}>
@@ -402,6 +494,13 @@ const styles = StyleSheet.create({
   mutedBody: { color: '#6b7280', fontSize: 15 },
   chipsCanvas: { position: 'relative', height: 120, marginTop: 10 },
 
+  // Estilos para el espejo somático activo
+  espejoSubtitle: { fontSize: 11, fontWeight: '500', marginBottom: 16, lineHeight: 16 },
+  espejoTitle: { fontSize: 32, fontWeight: '900', marginBottom: 16, marginTop: 0 },
+  espejoDescription: { fontSize: 15, lineHeight: 22, marginBottom: 20 },
+  espejoButton: { marginTop: 12, paddingVertical: 14, borderRadius: 24, alignItems: 'center' },
+  espejoButtonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+
   bigNumber: { fontSize: 48, fontWeight: '800', marginVertical: 8 },
   btnLarge: { marginTop: 12, paddingVertical: 12, borderRadius: 24, alignItems: 'center' },
   btnLargeText: { color: '#fff', fontWeight: '700' },
@@ -473,25 +572,24 @@ const styles = StyleSheet.create({
   footerIcons: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '86%', alignSelf: 'center', paddingBottom: Platform.OS === 'ios' ? 12 : 6 },
 
   // --- 👇 CAMBIOS EN LOS ESTILOS DEL GATO ---
-  catArea: { position: 'absolute', bottom: 88, left: 0, right: 0, alignItems: 'center', pointerEvents: 'none', zIndex: -1 },
+  catArea: { position: 'absolute', bottom: 88, right: -50, alignItems: 'flex-end', pointerEvents: 'none', zIndex: -1 },
   zz: {
     position: 'absolute',
-    right: 80, // Ajustado
-    bottom: 140, // Ajustado
+    right: 60, // Ajustado para gato más grande
+    bottom: 120, // Ajustado para gato más grande
     color: '#000',
     opacity: 0.4,
     fontWeight: '700',
-    fontSize: 22, // Añadido
-    transform: [{ rotate: '15deg' }] // Añadido
+    fontSize: 20, // Aumentado para gato más grande
+    transform: [{ rotate: '15deg' }]
   },
-  catImg: { width: 360, height: 220 },
+  catImg: { width: 240, height: 160 },
   // --- 👆 FIN DE CAMBIOS DEL GATO ---
 
   badgeMuted: { opacity: 0.5 },
 
   // New Activity Styles
   activityContainer: {
-    backgroundColor: '#CFF3C9', // Light green background
     borderRadius: 24,
     padding: 16,
     marginTop: 12,

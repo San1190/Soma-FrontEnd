@@ -403,7 +403,19 @@ export default function HomeScreen({ route }) {
                 <Ionicons name="remove" size={20} color={hydraAccent} />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity style={[styles.hydraCTA, { backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#5f7f92' : activeMode === 'fatigue' ? '#3f6f52' : '#6b5a66') : '#7a7a7a' }]}><Text style={styles.hydraCTAText}>personaliza tu objetivo</Text></TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.hydraCTA,
+                {
+                  backgroundColor: colorOn
+                    ? (activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52')
+                    : '#7a7a7a'
+                }
+              ]}
+              onPress={() => navigation.navigate('HydrationGoal')}
+            >
+              <Text style={styles.hydraCTAText}>Personaliza tu objetivo</Text>
+            </TouchableOpacity>
           </View>
         )}
 

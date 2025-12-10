@@ -11,6 +11,7 @@ const FooterNav = () => {
   const tab = route.params?.tab;
   const isStress = name === 'Stress';
   const isFatigue = name === 'Fatigue';
+  const isSmartAlarm = name === 'SmartAlarm';
   const activeHome = isHome && (tab === 'boton' || !tab);
   const activeHydra = isHome && tab === 'hidratacion';
   const activeActivity = isHome && tab === 'actividad';
@@ -28,9 +29,9 @@ const FooterNav = () => {
           <Ionicons name="home" size={24} color={activeHome ? colors.accentHome : colors.iconDefault} />
           {activeHome && <View style={styles.indicator} />}
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('HomeMain', { tab: 'hidratacion' })} style={[styles.iconWrap, activeHydra && styles.active]}>
-          <Ionicons name="time" size={24} color={activeHydra ? colors.accentHome : colors.iconDefault} />
-          {activeHydra && <View style={styles.indicator} />}
+        <TouchableOpacity onPress={() => navigation.navigate('SmartAlarm')} style={[styles.iconWrap, isSmartAlarm && styles.active]}>
+          <Ionicons name="time" size={24} color={isSmartAlarm ? colors.accentHome : colors.iconDefault} />
+          {isSmartAlarm && <View style={styles.indicator} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Stress')} style={[styles.iconWrap, isStress && styles.active]}>
           <Ionicons name="heart" size={24} color={isStress ? colors.accentStress : colors.iconDefault} />

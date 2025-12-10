@@ -18,6 +18,7 @@ import HelpContactScreen from '../screens/HelpContactScreen';
 import DailySummaryScreen from '../screens/DailySummaryScreen';
 import MusicRecommendationScreen from '../screens/MusicRecommendationScreen';
 import ChatScreen from '../screens/ChatScreen';
+import SmartAlarmScreen from '../screens/SmartAlarmScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 
 
@@ -46,6 +47,7 @@ const Tab = createBottomTabNavigator();
 const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={HomeScreen} />
+    <Stack.Screen name="SmartAlarm" component={SmartAlarmScreen} />
     <Stack.Screen name="Stress" component={StressScreen} />
     <Stack.Screen name="Fatigue" component={FatigueScreen} />
     <Stack.Screen name="Insomnia" component={InsomniaScreen} />

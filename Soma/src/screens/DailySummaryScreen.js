@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, Dimensions, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BarChart, LineChart, PieChart } from 'react-native-gifted-charts';
@@ -42,13 +42,23 @@ export default function DailySummaryScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="person" size={24} color="black" />
-          <Switch
-            trackColor={{ false: "#767577", true: "#000" }}
-            thumbColor={isEnabled ? "#fff" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.toggleTrack,
+              isEnabled ? [
+                styles.toggleOn,
+                { backgroundColor: '#4b3340' }
+              ] : styles.toggleOff
+            ]}
+            onPress={toggleSwitch}
+          >
+            <View style={[styles.toggleKnob, isEnabled ? styles.knobRight : styles.knobLeft]}>
+              <Ionicons name="person" size={16} color="#000" />
+            </View>
+          </TouchableOpacity>
         </View>
         <Text style={styles.mainTitle}>Actividad</Text>
         <Text style={styles.subtitle}>Descubre de un vistazo cómo te encuentras y tu actividad diaria. ¡El movimiento es salud!</Text>
@@ -214,7 +224,7 @@ export default function DailySummaryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F4F5', // Light gray/blueish background
+    backgroundColor: '#FFFFFF', // Blanco puro
   },
   scrollContent: {
     padding: 20,
@@ -226,6 +236,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  toggleTrack: {
+    width: 78,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3
+  },
+  toggleOn: { backgroundColor: '#000' },
+  toggleOff: { backgroundColor: '#E6E6E6' },
+  toggleKnob: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  knobLeft: { alignSelf: 'flex-start' },
+  knobRight: { alignSelf: 'flex-end' },
   mainTitle: {
     fontSize: 28,
     fontWeight: 'bold',

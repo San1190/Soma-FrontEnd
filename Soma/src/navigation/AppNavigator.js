@@ -19,6 +19,8 @@ import DailySummaryScreen from '../screens/DailySummaryScreen';
 import MusicRecommendationScreen from '../screens/MusicRecommendationScreen';
 import ChatScreen from '../screens/ChatScreen';
 import SmartAlarmScreen from '../screens/SmartAlarmScreen';
+import WellnessPredictionScreen from '../screens/WellnessPredictionScreen';
+import HydrationGoalScreen from '../screens/HydrationGoalScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 
 
@@ -32,7 +34,7 @@ const ProfileStack = () => (
     <Stack.Screen name="Stats" component={StatsScreen} options={{ headerShown: true, headerTitle: 'Estadísticas generales' }} />
     <Stack.Screen name="Evolution" component={EvolutionScreen} options={{ headerShown: true, headerTitle: 'Evolución total' }} />
     <Stack.Screen name="HabitsHistory" component={HabitsHistoryScreen} options={{ headerShown: true, headerTitle: 'Historial de hábitos' }} />
-    <Stack.Screen name="DailySummary" component={DailySummaryScreen} options={{ headerShown: true, headerTitle: 'Resumen diario' }} />
+    <Stack.Screen name="DailySummary" component={DailySummaryScreen} options={{ headerShown: false }} />
     <Stack.Screen name="PersonalTraits" component={PersonalTraitsScreen} options={{ headerShown: true, headerTitle: 'Características personales' }} />
     <Stack.Screen name="MedicalDocuments" component={MedicalDocumentsScreen} options={{ headerShown: true, headerTitle: 'Documentos médicos' }} />
     <Stack.Screen name="LocaleRegion" component={LocaleRegionScreen} options={{ headerShown: true, headerTitle: 'Idioma y región' }} />
@@ -54,6 +56,8 @@ const HomeStack = () => (
     <Stack.Screen name="GuidedBreathing" component={GuidedBreathingScreen} />
     <Stack.Screen name="MusicRecommendation" component={MusicRecommendationScreen} />
     <Stack.Screen name="Chat" component={ChatScreen} />
+    <Stack.Screen name="WellnessPrediction" component={WellnessPredictionScreen} />
+    <Stack.Screen name="HydrationGoal" component={HydrationGoalScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

@@ -29,8 +29,12 @@ export default function HomeScreen({ route }) {
   const arcStartDeg = -60;
   const arcSweepDeg = 300;
   const [activeMode, setActiveMode] = useState('stress');
-  const hydraAccent = '#4b3340';
-  const hydraSoft = '#EAE5FF';
+  const hydraAccent = colorOn
+    ? (activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52')
+    : '#7a7a7a';
+  const hydraSoft = colorOn
+    ? (activeMode === 'stress' ? '#EAE5FF' : activeMode === 'insomnio' ? '#D0E5ED' : '#E0F5DD')
+    : '#E5E5E5';
   const [stressBars, setStressBars] = useState([20, 40, 60, 80, 100]);
   const [sleepBars, setSleepBars] = useState([30, 45, 55, 70, 60]);
   const [insomniaBars, setInsomniaBars] = useState([26, 34, 28, 40, 32, 24]);
@@ -345,21 +349,21 @@ export default function HomeScreen({ route }) {
 
         {/* --- Contenido Tab: Hidratación --- */}
         {activeTab === 'hidratacion' && (
-          <View style={[styles.cardElevated, { backgroundColor: colorOn ? (activeMode === 'insomnio' ? '#DDEAF1' : activeMode === 'fatigue' ? '#CFF3C9' : '#CFC4E9') : '#EFEFEF', borderColor: colorOn ? (activeMode === 'insomnio' ? '#DDEAF1' : activeMode === 'fatigue' ? '#CFF3C9' : '#CFC4E9') : '#EFEFEF' }]}>
-            <Text style={[styles.hydraTitle, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>Mi hidratación de hoy</Text>
+          <View style={[styles.cardElevated, { backgroundColor: colorOn ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9') : '#EFEFEF', borderColor: colorOn ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9') : '#EFEFEF' }]}>
+            <Text style={[styles.hydraTitle, { color: colorOn ? (activeMode === 'stress' ? '#3a2a32' : activeMode === 'insomnio' ? '#2f3f47' : '#2f4f40') : '#5b5b5b' }]}>Mi hidratación de hoy</Text>
             <View style={styles.hydraRingWrap} {...(ringPan ? ringPan.panHandlers : {})}>
-              <View style={styles.hydraRingBase} />
-              <View style={styles.hydraRingInner} />
+              <View style={[styles.hydraRingBase, { borderColor: hydraSoft }]} />
+              <View style={[styles.hydraRingInner, { backgroundColor: colorOn ? (activeMode === 'stress' ? '#BFAEE3' : activeMode === 'insomnio' ? '#DDEAF1' : '#CFF3C9') : '#EFEFEF' }]} />
               {(() => {
-                const r = 86;
+                const r = 68;  // Reducido de 86 a 68
                 const total = 96;
                 const filledCount = Math.round((waterCount / Math.max(1, waterGoal)) * total);
                 const segs = [];
                 for (let i = 0; i < total; i++) {
                   const deg = arcStartDeg + (i * (arcSweepDeg / total));
                   const rad = deg * Math.PI / 180;
-                  const cx = 100 + r * Math.cos(rad) - 8;
-                  const cy = 100 + r * Math.sin(rad) - 2;
+                  const cx = 80 + r * Math.cos(rad) - 6;  // Ajustado centro de 100 a 80
+                  const cy = 80 + r * Math.sin(rad) - 2;  // Ajustado centro de 100 a 80
                   const filled = i <= filledCount;
                   segs.push(
                     <View key={`halo-${i}`} style={[styles.hydraHaloSeg, { left: cx, top: cy, backgroundColor: filled ? hydraAccent : 'transparent', transform: [{ rotate: `${deg + 90}deg` }] }]} />
@@ -368,11 +372,11 @@ export default function HomeScreen({ route }) {
                 return segs;
               })()}
               {(() => {
-                const r = 86;
+                const r = 68;  // Reducido de 86 a 68
                 const deg = arcStartDeg + Math.min(arcSweepDeg, waterCount * (arcSweepDeg / Math.max(1, waterGoal)));
                 const rad = deg * Math.PI / 180;
-                const cx = 100 + r * Math.cos(rad) - 10;
-                const cy = 100 + r * Math.sin(rad) - 10;
+                const cx = 80 + r * Math.cos(rad) - 10;  // Ajustado centro de 100 a 80
+                const cy = 80 + r * Math.sin(rad) - 10;  // Ajustado centro de 100 a 80
                 return <View style={[styles.hydraHandle, { left: cx, top: cy, backgroundColor: hydraAccent }]}><View style={styles.hydraHandleInner} /></View>;
               })()}
             </View>
@@ -389,7 +393,7 @@ export default function HomeScreen({ route }) {
               }}>
                 <Ionicons name="add" size={20} color={hydraAccent} />
               </TouchableOpacity>
-              <Text style={[styles.hydraLabel, { color: colorOn ? (activeMode === 'insomnio' ? '#2f3f47' : activeMode === 'fatigue' ? '#2f4f40' : '#3a2a32') : '#5b5b5b' }]}>vaso de agua (250 ml)</Text>
+              <Text style={[styles.hydraLabel, { color: colorOn ? (activeMode === 'stress' ? '#3a2a32' : activeMode === 'insomnio' ? '#2f3f47' : '#2f4f40') : '#5b5b5b' }]}>vaso de agua (250 ml)</Text>
               <TouchableOpacity style={[styles.hydraBtnCircle, { backgroundColor: hydraSoft }]} onPress={() => {
                 const next = Math.max(0, waterCount - 1);
                 const delta = next - waterCount;
@@ -465,7 +469,7 @@ export default function HomeScreen({ route }) {
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   paddingHorizontal: 20,
-                  backgroundColor: colorOn ? '#4b3340' : '#4a4a4a'
+                  backgroundColor: colorOn ? (activeMode === 'stress' ? '#4b3340' : activeMode === 'insomnio' ? '#5f7f92' : '#3f6f52') : '#4a4a4a'
                 }
               ]}
               onPress={() => navigation.navigate('Stress')}
@@ -555,12 +559,12 @@ const styles = StyleSheet.create({
   pill: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16, marginRight: 8, backgroundColor: 'rgba(0,0,0,0.06)' },
   pillActive: {},
   pillText: { fontSize: 12, fontWeight: '600' },
-  cardElevated: { borderRadius: 16, padding: 16, marginTop: 12, borderWidth: 1, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3, maxWidth: 380, alignSelf: 'center' },
+  cardElevated: { borderRadius: 20, padding: 20, marginTop: 12, borderWidth: 1, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3, width: '100%', maxWidth: 380, alignSelf: 'center', minHeight: 320 },
   cardWide: { maxWidth: undefined, width: '100%', alignSelf: 'stretch', marginHorizontal: -8 },
   cardTitle: { fontSize: 16, marginBottom: 8 },
 
   // Estilos de la tarjeta "Espejo Somático"
-  cardMuted: { borderRadius: 20, padding: 16, marginTop: 12, backgroundColor: '#EFEFEF', maxWidth: 380, alignSelf: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
+  cardMuted: { borderRadius: 20, padding: 20, marginTop: 12, backgroundColor: '#EFEFEF', width: '100%', maxWidth: 380, alignSelf: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4, minHeight: 320 },
   cardTitleMuted: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
   mutedBody: { color: '#6b7280', fontSize: 15 },
   chipsCanvas: { position: 'relative', height: 120, marginTop: 10 },
@@ -591,13 +595,13 @@ const styles = StyleSheet.create({
   // Estilos de Hidratación
   hydraCard: { backgroundColor: '#CFC4E9', borderColor: '#CFC4E9' },
   hydraTitle: { fontSize: 16, fontWeight: '700', color: '#3a2a32' },
-  hydraRingWrap: { alignSelf: 'center', width: 200, height: 200, marginVertical: 10, position: 'relative' },
-  hydraRingBase: { width: 200, height: 200, borderRadius: 100, borderWidth: 14, borderColor: '#EAE5FF' },
-  hydraRingInner: { position: 'absolute', left: 28, top: 28, width: 144, height: 144, borderRadius: 72, backgroundColor: '#CFC4E9' },
-  hydraHaloSeg: { position: 'absolute', width: 16, height: 6, borderRadius: 3 },
-  hydraSegDot: { position: 'absolute', width: 14, height: 14, borderRadius: 7 },
-  hydraHandle: { position: 'absolute', width: 22, height: 22, borderRadius: 11, backgroundColor: '#4b3340', borderWidth: 2, borderColor: '#fff', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  hydraHandleInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff' },
+  hydraRingWrap: { alignSelf: 'center', width: 160, height: 160, marginVertical: 6, position: 'relative' },
+  hydraRingBase: { width: 160, height: 160, borderRadius: 80, borderWidth: 11, borderColor: '#EAE5FF' },
+  hydraRingInner: { position: 'absolute', left: 22, top: 22, width: 116, height: 116, borderRadius: 58, backgroundColor: '#CFC4E9' },
+  hydraHaloSeg: { position: 'absolute', width: 13, height: 5, borderRadius: 2.5 },
+  hydraSegDot: { position: 'absolute', width: 11, height: 11, borderRadius: 5.5 },
+  hydraHandle: { position: 'absolute', width: 18, height: 18, borderRadius: 9, backgroundColor: '#4b3340', borderWidth: 2, borderColor: '#fff', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 3, shadowOffset: { width: 0, height: 2 } },
+  hydraHandleInner: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#fff' },
   hydraOverlayBtn: { position: 'absolute', width: 28, height: 28, borderRadius: 14, backgroundColor: '#EAE5FF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   hydraBubble1: { position: 'absolute', left: 26, top: 100, width: 42, height: 42, borderRadius: 21, backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
   hydraBubble2: { position: 'absolute', right: 24, top: 56, width: 34, height: 34, borderRadius: 17, backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
@@ -605,12 +609,12 @@ const styles = StyleSheet.create({
   hydraDotSmall1: { position: 'absolute', left: 90, top: 20, width: 10, height: 10, borderRadius: 5, backgroundColor: '#EAE5FF' },
   hydraDotSmall2: { position: 'absolute', left: 118, top: 18, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EAE5FF' },
   hydraDotSmall3: { position: 'absolute', left: 76, top: 28, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EAE5FF' },
-  counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
-  hydraBtnCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
+  counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
+  hydraBtnCircle: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   counterSymbol: { fontSize: 18, fontWeight: '700' },
   counterLabel: { fontSize: 14 },
-  hydraLabel: { fontSize: 14, color: '#3a2a32' },
-  hydraCTA: { marginTop: 14, paddingVertical: 12, borderRadius: 22, alignItems: 'center', backgroundColor: '#6b5a66' },
+  hydraLabel: { fontSize: 13, color: '#3a2a32' },
+  hydraCTA: { marginTop: 10, paddingVertical: 12, borderRadius: 22, alignItems: 'center', backgroundColor: '#6b5a66' },
   hydraCTAText: { color: '#fff', fontWeight: '700' },
 
   // Estilos de Actividad
@@ -661,9 +665,18 @@ const styles = StyleSheet.create({
 
   // New Activity Styles
   activityContainer: {
-    borderRadius: 24,
-    padding: 16,
+    borderRadius: 20,
+    padding: 20,
     marginTop: 12,
+    width: '100%',
+    maxWidth: 380,
+    alignSelf: 'center',
+    minHeight: 320,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   chartsRow: {
     flexDirection: 'row',

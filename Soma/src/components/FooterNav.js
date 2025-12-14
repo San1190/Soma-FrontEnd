@@ -12,10 +12,7 @@ const FooterNav = () => {
   const isStress = name === 'Stress';
   const isFatigue = name === 'Fatigue';
   const isSmartAlarm = name === 'SmartAlarm';
-  const activeHome = isHome && (tab === 'boton' || !tab);
-  const activeHydra = isHome && tab === 'hidratacion';
-  const activeActivity = isHome && tab === 'actividad';
-  const activeEspejo = isHome && tab === 'espejo';
+  const activeHome = isHome && (tab === 'boton' || tab === 'espejo' || tab === 'hidratacion' || tab === 'actividad' || !tab);
   const colors = {
     accentHome: '#DDEAF1',
     accentStress: '#CFC4E9',
@@ -41,9 +38,9 @@ const FooterNav = () => {
           <Ionicons name="moon" size={24} color={name === 'Insomnia' ? '#DDEAF1' : colors.iconDefault} />
           {name === 'Insomnia' && <View style={[styles.indicator, { backgroundColor: '#DDEAF1' }]} />}
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Fatigue')} style={[styles.iconWrap, (activeEspejo || isFatigue) && styles.active]}>
-          <Ionicons name="eye" size={24} color={(activeEspejo || isFatigue) ? '#CFF3C9' : colors.iconDefault} />
-          {(activeEspejo || isFatigue) && <View style={styles.indicator} />}
+        <TouchableOpacity onPress={() => navigation.navigate('Fatigue')} style={[styles.iconWrap, isFatigue && styles.active]}>
+          <Ionicons name="eye" size={24} color={isFatigue ? '#CFF3C9' : colors.iconDefault} />
+          {isFatigue && <View style={styles.indicator} />}
         </TouchableOpacity>
       </View>
     </View>

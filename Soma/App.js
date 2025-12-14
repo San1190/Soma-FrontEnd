@@ -1,17 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, ActivityIndicator, Text, Alert } from 'react-native'; // Importar Alert
+import { View, ActivityIndicator, Text, Alert } from 'react-native';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { AntiStressProvider, useAntiStress } from './src/context/AntiStressContext';
 
+import { useFonts, Afacad_400Regular, Afacad_500Medium, Afacad_600SemiBold, Afacad_700Bold } from '@expo-google-fonts/afacad';
 import { registerForPushNotificationsAsync } from './src/utils/notifications';
 import axios from 'axios';
 import * as Notifications from 'expo-notifications';
-import API_BASE_URL from './src/constants/api'; // Usar la constante central
+import API_BASE_URL from './src/constants/api';
 
 const Stack = createStackNavigator();
 
@@ -20,7 +21,7 @@ Notifications.setNotificationHandler({
     // Lógica para suprimir notificaciones no críticas si el modo antiestrés está activo
     // Esta lógica es difícil de aplicar aquí globalmente sin acceso al estado del context.
     // La moveremos al listener 'addNotificationReceivedListener'
-    
+
     // Dejamos que Expo muestre la alerta por defecto
     return {
       shouldShowAlert: true,
@@ -34,7 +35,7 @@ function AppContent() {
   const { user, isLoading, login } = useAuth();
   const { currentTheme } = useTheme();
   const { isAntiStressModeActive, activateMode, deactivateMode, isSleepModeActive } = useAntiStress();
-  
+
   const notificationListener = useRef();
   const responseListener = useRef();
 
@@ -49,7 +50,7 @@ function AppContent() {
         return;
       }
       console.log('Expo Push Token:', token);
-      
+
       if (user && user.id && token) {
         // Registrar el token en el backend
         axios.post(`${API_BASE_URL}/users/${user.id}/register-push-token`, JSON.stringify(token), { // Enviar como JSON
@@ -57,21 +58,21 @@ function AppContent() {
             'Content-Type': 'application/json', // Cambiar a JSON
           },
         })
-        .then(response => {
-          console.log('Push token registrado exitosamente:', response.data);
-        })
-        .catch(error => {
-          console.error('Error al registrar push token:', error.response ? error.response.data : error.message);
-        });
+          .then(response => {
+            console.log('Push token registrado exitosamente:', response.data);
+          })
+          .catch(error => {
+            console.error('Error al registrar push token:', error.response ? error.response.data : error.message);
+          });
       }
     });
 
     // Listener para notificaciones recibidas MIENTRAS la app está abierta
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       console.log("Notificación recibida:", notification);
-      
+
       const notificationData = notification.request.content.data;
-      
+
       // 3. Revisar el payload de la notificación
       if (notificationData && notificationData.type === 'ANTI_STRESS_ACTIVATE') {
         if (!isAntiStressModeActive) {
@@ -116,13 +117,13 @@ function AppContent() {
 
     if (isAntiStressModeActive && user && user.id) {
       console.log("Modo antiestrés activo. Iniciando sondeo de nivel de estrés...");
-      
+
       pollingInterval = setInterval(async () => {
         try {
           const response = await axios.get(STRESS_API_URL);
           // Asumimos que la API devuelve { stressLevel: "Bajo" | "Moderado" | "Alto" }
-          const stressCategory = response.data.stressLevel; 
-          
+          const stressCategory = response.data.stressLevel;
+
           console.log(`Sondeo de estrés: ${stressCategory}`);
 
           // Nivel de estrés (1-10) del servicio de estrés (opcional)
@@ -177,19 +178,35 @@ function AppContent() {
       </Stack.Navigator>
       {/* Overlays para modos */}
       {isSleepModeActive && (
-        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(221, 234, 241, 0.25)', pointerEvents: 'none' }} />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(221, 234, 241, 0.25)', pointerEvents: 'none' }} />
       )}
       {isAntiStressModeActive && (
-        <View style={{ position:'absolute', top:0, left:0, right:0, bottom:0, backgroundColor: 'rgba(234, 229, 255, 0.22)', pointerEvents: 'none' }} />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(234, 229, 255, 0.22)', pointerEvents: 'none' }} />
       )}
     </NavigationContainer>
   );
 }
 
 export default function App() {
+  let [fontsLoaded] = useFonts({
+    Afacad_400Regular,
+    Afacad_500Medium,
+    Afacad_600SemiBold,
+    Afacad_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color="#4b3340" />
+        <Text style={{ marginTop: 10 }}>Cargando fuentes...</Text>
+      </View>
+    );
+  }
+
   return (
     <AuthProvider>
-      <AntiStressProvider> 
+      <AntiStressProvider>
         <ThemeProvider>
           <AppContent />
         </ThemeProvider>

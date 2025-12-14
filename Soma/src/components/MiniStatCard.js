@@ -17,10 +17,10 @@ export const MiniStatCard = ({ title, subtitle, mode = 'bars', value, bars = [],
 };
 
 const styles = StyleSheet.create({
-  card: { flex: 1, borderRadius: 18, padding: 18, backgroundColor: '#EFEFEF' },
+  card: { flex: 1, borderRadius: 18, padding: 18, backgroundColor: '#EFEFEF', minWidth: 0 },
   title: { fontSize: 14, fontWeight: '600' },
-  barRow: { flexDirection: 'row', alignItems: 'flex-end', height: 90, gap: 8, marginVertical: 10 },
-  bar: { width: 16, borderRadius: 10 },
+  barRow: { flexDirection: 'row', alignItems: 'flex-end', height: 90, gap: 4, marginVertical: 10, paddingHorizontal: 4 },
+  bar: { flex: 1, borderRadius: 10, minWidth: 0 },
   value: { fontSize: 28, fontWeight: '700', marginVertical: 10 },
   subtitle: { fontSize: 14, fontWeight: '700', marginVertical: 4 },
   pulse: { color: '#6b7280' },

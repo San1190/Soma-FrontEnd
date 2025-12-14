@@ -5,12 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 const TopBar = ({ onAvatarPress, variant = 'lock', active = false, onToggle }) => {
   return (
     <View style={styles.topBar}>
-      <TouchableOpacity onPress={onAvatarPress} style={styles.avatar}><Ionicons name="person" size={20} color="#000" /></TouchableOpacity>
       {variant === 'lock' && (
         <TouchableOpacity onPress={onToggle} style={[styles.lock, active ? styles.lockOn : styles.lockOff]}>
           <Ionicons name="lock-closed" size={16} color="#fff" />
         </TouchableOpacity>
       )}
+      <TouchableOpacity onPress={onAvatarPress} style={styles.avatar}><Ionicons name="person" size={20} color="#000" /></TouchableOpacity>
     </View>
   );
 };

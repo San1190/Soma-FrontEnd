@@ -7,6 +7,7 @@ import TopBar from '../components/TopBar';
 import MiniStatCard from '../components/MiniStatCard';
 import RecommendationBox from '../components/RecommendationBox';
 import HabitUnlockedModal from '../components/HabitUnlockedModal';
+import BreathingExerciseCard from '../components/BreathingExerciseCard';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
@@ -257,14 +258,14 @@ const StressScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#FFFFFF' }]}>
         <View style={styles.center}><ActivityIndicator size="large" color="#6b5a66" /></View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAE5FF' }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#FFFFFF' }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
         <Text style={[styles.title, { color: currentTheme.textPrimary }]}>¿Qué tal tu estrés?</Text>
@@ -289,9 +290,7 @@ const StressScreen = () => {
           <MiniStatCard title="respiración" subtitle="resp/min" mode="number" value={summary.metrics.respiration} />
         </View>
 
-        <Text style={[styles.sectionTitle, { color: currentTheme.textPrimary }]}>Ejercicios de respiración guiada</Text>
-        <Text style={styles.sectionBody}>Te recomendamos realizar ejercicios de respiración a diario e introducirlos en tu rutina.</Text>
-        <TouchableOpacity style={styles.primaryButton} onPress={onStartBreathing}><Text style={styles.primaryText}>Iniciar mis ejercicios de respiración</Text></TouchableOpacity>
+        <BreathingExerciseCard />
 
         {/* --- ACTIVE HABITS SECTION (NEW) --- */}
         {activeHabits.length > 0 && (

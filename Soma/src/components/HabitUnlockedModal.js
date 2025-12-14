@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const HabitUnlockedModal = ({ visible, onClose, habit }) => {
     const scaleValue = useRef(new Animated.Value(0)).current;
@@ -12,7 +11,7 @@ const HabitUnlockedModal = ({ visible, onClose, habit }) => {
             Animated.parallel([
                 Animated.spring(scaleValue, {
                     toValue: 1,
-                    friction: 5,
+                    friction: 8,
                     tension: 40,
                     useNativeDriver: true,
                 }),
@@ -34,28 +33,34 @@ const HabitUnlockedModal = ({ visible, onClose, habit }) => {
         <Modal transparent visible={visible} animationType="none">
             <View style={styles.overlay}>
                 <Animated.View style={[styles.container, { opacity: opacityValue, transform: [{ scale: scaleValue }] }]}>
-                    <LinearGradient
-                        colors={['#4b3340', '#2f3f47']}
-                        style={styles.gradient}
-                    >
-                        <View style={styles.iconContainer}>
-                            <Ionicons name="trophy" size={50} color="#FFD700" />
-                        </View>
+                    {/* Close button */}
+                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                        <Ionicons name="close" size={24} color="#6b7280" />
+                    </TouchableOpacity>
 
-                        <Text style={styles.title}>NUEVO PROTOCOLO</Text>
-                        <Text style={styles.subtitle}>Has iniciado el hábito:</Text>
+                    {/* Icon */}
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="checkmark-circle" size={64} color="#4b3340" />
+                    </View>
 
-                        <View style={styles.habitCard}>
-                            <Text style={styles.habitTitle}>{habit.title}</Text>
-                            <Text style={styles.habitDesc}>{habit.description}</Text>
-                        </View>
+                    {/* Title */}
+                    <Text style={styles.title}>Nuevo hábito añadido</Text>
 
-                        <Text style={styles.footer}>¡Mantén la racha para desbloquear recompensas!</Text>
+                    {/* Habit info */}
+                    <View style={styles.habitCard}>
+                        <Text style={styles.habitTitle}>{habit.title}</Text>
+                        <Text style={styles.habitDesc}>{habit.description}</Text>
+                    </View>
 
-                        <TouchableOpacity style={styles.button} onPress={onClose}>
-                            <Text style={styles.buttonText}>¡VAMOS!</Text>
-                        </TouchableOpacity>
-                    </LinearGradient>
+                    {/* Encouragement */}
+                    <Text style={styles.encouragement}>
+                        Complétalo cada día para crear una racha y mejorar tu bienestar
+                    </Text>
+
+                    {/* Button */}
+                    <TouchableOpacity style={styles.button} onPress={onClose}>
+                        <Text style={styles.buttonText}>Entendido</Text>
+                    </TouchableOpacity>
                 </Animated.View>
             </View>
         </Modal>
@@ -65,7 +70,7 @@ const HabitUnlockedModal = ({ visible, onClose, habit }) => {
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
@@ -73,81 +78,79 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         maxWidth: 340,
-        borderRadius: 24,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
-    },
-    gradient: {
-        padding: 30,
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 24,
         alignItems: 'center',
-    },
-    iconContainer: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 20,
-        borderWidth: 2,
-        borderColor: '#FFD700',
-        shadowColor: '#FFD700',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
         shadowRadius: 20,
+        shadowOffset: { width: 0, height: 10 },
         elevation: 10,
     },
+    closeButton: {
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#f3f4f6',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
+    },
+    iconContainer: {
+        marginTop: 20,
+        marginBottom: 16,
+    },
     title: {
-        fontSize: 24,
-        fontWeight: '900',
-        color: '#fff',
-        letterSpacing: 2,
-        marginBottom: 8,
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#1a1a1a',
+        marginBottom: 20,
         textAlign: 'center',
     },
-    subtitle: {
-        fontSize: 16,
-        color: 'rgba(255,255,255,0.7)',
-        marginBottom: 20,
-    },
     habitCard: {
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: '#f9fafb',
         width: '100%',
         padding: 16,
-        borderRadius: 16,
-        marginBottom: 24,
-        borderLeftWidth: 4,
-        borderLeftColor: '#CFF3C9',
+        borderRadius: 12,
+        marginBottom: 16,
+        borderLeftWidth: 3,
+        borderLeftColor: '#4b3340',
     },
     habitTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
-        color: '#fff',
-        marginBottom: 4,
+        color: '#1a1a1a',
+        marginBottom: 6,
     },
     habitDesc: {
         fontSize: 14,
-        color: '#E0E0E0',
+        color: '#6b7280',
+        lineHeight: 20,
     },
-    footer: {
-        fontSize: 12,
-        color: 'rgba(255,255,255,0.5)',
+    encouragement: {
+        fontSize: 13,
+        color: '#9ca3af',
         marginBottom: 24,
         textAlign: 'center',
-        fontStyle: 'italic',
+        lineHeight: 18,
+        paddingHorizontal: 8,
     },
     button: {
-        backgroundColor: '#fff',
-        paddingVertical: 14,
-        paddingHorizontal: 40,
-        borderRadius: 30,
-        elevation: 5,
+        backgroundColor: '#000',
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        borderRadius: 24,
+        width: '100%',
+        alignItems: 'center',
     },
     buttonText: {
-        color: '#4b3340',
-        fontWeight: '800',
-        fontSize: 16,
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 15,
     },
 });
 

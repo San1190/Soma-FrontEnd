@@ -18,7 +18,7 @@ const FatigueScreen = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       const jitter = (arr, factor = 6, min = 8, max = 64) => arr.map(v => {
-        const j = Math.round(v + (Math.random() * factor - factor/2));
+        const j = Math.round(v + (Math.random() * factor - factor / 2));
         return Math.min(max, Math.max(min, j));
       });
       setBarsEyes(prev => jitter(prev, 8));
@@ -32,7 +32,7 @@ const FatigueScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#EAFBE8' }]}> 
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#FFFFFF' }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
         <Text style={[styles.title, { color: '#2f4f40' }]}>¿Qué tal tu fatiga?</Text>

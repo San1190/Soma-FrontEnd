@@ -8,6 +8,8 @@ import TopBar from '../components/TopBar';
 import HabitUnlockedModal from '../components/HabitUnlockedModal'; // NEW
 import axios from 'axios';
 import API_BASE_URL from '../constants/api';
+import FooterNav from '../components/FooterNav';
+import { useIsFocused } from '@react-navigation/native';
 
 const WellnessPredictionScreen = () => {
     const { currentTheme } = useTheme();
@@ -16,7 +18,7 @@ const WellnessPredictionScreen = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [locked, setLocked] = useState(false);
-
+    const isFocused = useIsFocused();
     // Modal State
     const [modalVisible, setModalVisible] = useState(false);
     const [newHabit, setNewHabit] = useState(null);
@@ -214,6 +216,7 @@ const WellnessPredictionScreen = () => {
                     </>
                 )}
             </ScrollView>
+            {isFocused && <FooterNav />}
             {/* Modal */}
             <HabitUnlockedModal visible={modalVisible} onClose={() => setModalVisible(false)} habit={newHabit} />
         </SafeAreaView>
@@ -223,7 +226,7 @@ const WellnessPredictionScreen = () => {
 const styles = StyleSheet.create({
     safeArea: { flex: 1 },
     content: { flex: 1 },
-    scrollContent: { padding: 20, paddingBottom: 40 },
+    scrollContent: { padding: 20, paddingBottom: 140 },
 
     centerContainer: {
         flex: 1,

@@ -202,7 +202,9 @@ const FatigueScreen = () => {
           <Image source={require('../../assets/gatos/GatoVerde.png')} style={styles.cat} />
         </View>
 
-        <TouchableOpacity style={styles.askButton}><Text style={styles.askText}>Pregunta lo que quieras a Somat</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.askButton} onPress={() => navigation.navigate('Chat')}>
+          <Text style={styles.askText}>Pregunta lo que quieras a Somat</Text>
+        </TouchableOpacity>
 
         <Text style={[styles.sectionTitle, { color: '#2f4f40' }]}>Todo sobre ti</Text>
         <View style={styles.statsRow}>
@@ -238,7 +240,7 @@ const FatigueScreen = () => {
                 <View key={c.key} style={styles.habitCard}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text style={styles.habitTitle}>{c.title}</Text>
-                    <Text style={{ color: '#2f4f40' }}>pulsa para leer</Text>
+                    <Text style={{ color: '#2f4f40', width: '25%' }}>pulsa para leer</Text>
                   </View>
                   <Text style={styles.habitSub}>{c.subtitle}</Text>
                   <Text style={styles.habitDesc}>{c.desc}</Text>

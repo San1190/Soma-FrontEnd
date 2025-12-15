@@ -202,7 +202,9 @@ export default function InsomniaScreen() {
           <Image source={require('../../assets/gatos/GatoAzul.png')} style={styles.cat} />
         </View>
 
-        <TouchableOpacity style={styles.askButton}><Text style={styles.askText}>Pregunta lo que quieras a Somat</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.askButton} onPress={() => navigation.navigate('Chat')}>
+          <Text style={styles.askText}>Pregunta lo que quieras a Somat</Text>
+        </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>Todo sobre ti</Text>
         <View style={styles.statsRow}>
@@ -234,7 +236,9 @@ export default function InsomniaScreen() {
           <Text style={styles.alarmBody}>Accede a la sección de alarmas y observa cómo mejora la precisión de tu sueño</Text>
         </View>
 
-        <TouchableOpacity style={styles.primaryButton}><Text style={styles.primaryText}>Modifica tu alarma</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('SmartAlarm')}>
+          <Text style={styles.primaryText}>Modifica tu alarma</Text>
+        </TouchableOpacity>
 
         {/* --- SUGGESTED HABITS SECTION --- */}
         {availableHabits.length > 0 && (
@@ -245,7 +249,7 @@ export default function InsomniaScreen() {
                 <View key={c.key} style={styles.habitCard}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text style={styles.habitTitle}>{c.title}</Text>
-                    <Text style={{ color: '#2f3f47' }}>pulsa para leer</Text>
+                    <Text style={{ color: '#2f3f47', width: '25%' }}>pulsa para leer</Text>
                   </View>
                   <Text style={styles.habitSub}>{c.subtitle}</Text>
                   <Text style={styles.habitDesc}>{c.desc}</Text>

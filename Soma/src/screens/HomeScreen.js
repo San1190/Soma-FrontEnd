@@ -9,6 +9,7 @@ import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { FontSizes, FontFamilies, LineHeights } from '../constants/typography';
 
 export default function HomeScreen({ route }) {
   const { currentTheme } = useTheme();
@@ -553,32 +554,32 @@ const styles = StyleSheet.create({
   toggleKnob: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   knobLeft: { alignSelf: 'flex-start' },
   knobRight: { alignSelf: 'flex-end' },
-  date: { marginTop: 8, fontSize: 12, fontFamily: 'Afacad_400Regular' },
-  title: { marginTop: 6, fontSize: 24, fontWeight: '700', fontFamily: 'Afacad_700Bold' },
+  date: { marginTop: 8, fontSize: FontSizes.caption, fontFamily: FontFamilies.regular, lineHeight: FontSizes.caption * LineHeights.normal },
+  title: { marginTop: 6, fontSize: FontSizes.xLarge, fontFamily: FontFamilies.bold, lineHeight: FontSizes.xLarge * LineHeights.tight },
   pillsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
   pill: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16, marginRight: 8, backgroundColor: 'rgba(0,0,0,0.06)' },
   pillActive: {},
-  pillText: { fontSize: 12, fontWeight: '600', fontFamily: 'Afacad_600SemiBold' },
+  pillText: { fontSize: FontSizes.label, fontFamily: FontFamilies.semiBold, lineHeight: FontSizes.label * LineHeights.normal },
   cardElevated: { borderRadius: 20, padding: 20, marginTop: 12, borderWidth: 1, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3, width: '100%', maxWidth: 380, alignSelf: 'center', minHeight: 320 },
   cardWide: { maxWidth: undefined, width: '100%', alignSelf: 'stretch', marginHorizontal: -8 },
-  cardTitle: { fontSize: 16, marginBottom: 8, fontFamily: 'Afacad_400Regular' },
+  cardTitle: { fontSize: FontSizes.mediumSmall, marginBottom: 8, fontFamily: FontFamilies.regular, lineHeight: FontSizes.mediumSmall * LineHeights.normal },
 
   // Estilos de la tarjeta "Espejo Somático"
   cardMuted: { borderRadius: 20, padding: 20, marginTop: 12, backgroundColor: '#EFEFEF', width: '100%', maxWidth: 380, alignSelf: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4, minHeight: 320 },
-  cardTitleMuted: { fontSize: 18, fontWeight: '700', marginBottom: 10, fontFamily: 'Afacad_700Bold' },
-  mutedBody: { color: '#6b7280', fontSize: 15, fontFamily: 'Afacad_400Regular' },
+  cardTitleMuted: { fontSize: FontSizes.medium, fontFamily: FontFamilies.bold, marginBottom: 10, lineHeight: FontSizes.medium * LineHeights.snug },
+  mutedBody: { color: '#6b7280', fontSize: FontSizes.regularSmall, fontFamily: FontFamilies.regular, lineHeight: FontSizes.regularSmall * LineHeights.relaxed },
   chipsCanvas: { position: 'relative', height: 120, marginTop: 10 },
 
   // Estilos para el espejo somático activo
-  espejoSubtitle: { fontSize: 11, fontWeight: '500', marginBottom: 16, lineHeight: 16, fontFamily: 'Afacad_500Medium' },
-  espejoTitle: { fontSize: 32, fontWeight: '900', marginBottom: 16, marginTop: 0, fontFamily: 'Afacad_700Bold' },
-  espejoDescription: { fontSize: 15, lineHeight: 22, marginBottom: 20, fontFamily: 'Afacad_400Regular' },
+  espejoSubtitle: { fontSize: FontSizes.small, fontFamily: FontFamilies.medium, marginBottom: 16, lineHeight: FontSizes.small * LineHeights.normal },
+  espejoTitle: { fontSize: 30, fontFamily: FontFamilies.bold, marginBottom: 16, marginTop: 0, lineHeight: 30 * LineHeights.tight },
+  espejoDescription: { fontSize: FontSizes.regularSmall, fontFamily: FontFamilies.regular, marginBottom: 20, lineHeight: FontSizes.regularSmall * LineHeights.relaxed },
   espejoButton: { marginTop: 12, paddingVertical: 14, borderRadius: 24, alignItems: 'center' },
-  espejoButtonText: { color: '#fff', fontWeight: '700', fontSize: 14, fontFamily: 'Afacad_700Bold' },
+  espejoButtonText: { color: '#fff', fontSize: FontSizes.button, fontFamily: FontFamilies.bold, lineHeight: FontSizes.button * LineHeights.normal },
 
-  bigNumber: { fontSize: 48, fontWeight: '800', marginVertical: 8, fontFamily: 'Afacad_700Bold' },
-  btnLarge: { marginTop: 12, paddingVertical: 12, borderRadius: 24, alignItems: 'center' },
-  btnLargeText: { color: '#fff', fontWeight: '700', fontFamily: 'Afacad_700Bold' },
+  bigNumber: { fontSize: 48, fontFamily: FontFamilies.bold, marginVertical: 8, lineHeight: 48 * LineHeights.tight },
+  btnLarge: { marginTop: 12, paddingVertical: 12, borderRadius: 24, alignItems: 'center', minHeight: 44 },
+  btnLargeText: { color: '#fff', fontSize: FontSizes.button, fontFamily: FontFamilies.bold, lineHeight: FontSizes.button * LineHeights.normal },
 
   // Estilos de las "Badges" o "Chips"
   badgesRow: { flexDirection: 'row', gap: 8, marginVertical: 8 },
@@ -594,7 +595,7 @@ const styles = StyleSheet.create({
 
   // Estilos de Hidratación
   hydraCard: { backgroundColor: '#CFC4E9', borderColor: '#CFC4E9' },
-  hydraTitle: { fontSize: 16, fontWeight: '700', color: '#3a2a32', fontFamily: 'Afacad_700Bold' },
+  hydraTitle: { fontSize: FontSizes.mediumSmall, fontFamily: FontFamilies.bold, color: '#3a2a32', lineHeight: FontSizes.mediumSmall * LineHeights.normal },
   hydraRingWrap: { alignSelf: 'center', width: 160, height: 160, marginVertical: 6, position: 'relative' },
   hydraRingBase: { width: 160, height: 160, borderRadius: 80, borderWidth: 11, borderColor: '#EAE5FF' },
   hydraRingInner: { position: 'absolute', left: 22, top: 22, width: 116, height: 116, borderRadius: 58, backgroundColor: '#CFC4E9' },
@@ -611,11 +612,11 @@ const styles = StyleSheet.create({
   hydraDotSmall3: { position: 'absolute', left: 76, top: 28, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EAE5FF' },
   counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
   hydraBtnCircle: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
-  counterSymbol: { fontSize: 18, fontWeight: '700', fontFamily: 'Afacad_700Bold' },
-  counterLabel: { fontSize: 14, fontFamily: 'Afacad_400Regular' },
-  hydraLabel: { fontSize: 13, color: '#3a2a32', fontFamily: 'Afacad_400Regular' },
-  hydraCTA: { marginTop: 10, paddingVertical: 12, borderRadius: 22, alignItems: 'center', backgroundColor: '#6b5a66' },
-  hydraCTAText: { color: '#fff', fontWeight: '700', fontFamily: 'Afacad_700Bold' },
+  counterSymbol: { fontSize: FontSizes.medium, fontFamily: FontFamilies.bold, lineHeight: FontSizes.medium * LineHeights.normal },
+  counterLabel: { fontSize: FontSizes.button, fontFamily: FontFamilies.regular, lineHeight: FontSizes.button * LineHeights.normal },
+  hydraLabel: { fontSize: FontSizes.label, color: '#3a2a32', fontFamily: FontFamilies.regular, lineHeight: FontSizes.label * LineHeights.normal },
+  hydraCTA: { marginTop: 10, paddingVertical: 12, borderRadius: 22, alignItems: 'center', backgroundColor: '#6b5a66', minHeight: 44 },
+  hydraCTAText: { color: '#fff', fontSize: FontSizes.button, fontFamily: FontFamilies.bold, lineHeight: FontSizes.button * LineHeights.normal },
 
   // Estilos de Actividad
   statsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 4 },
@@ -699,12 +700,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDEAF1', // Light Blue/Teal
   },
   chartTitle: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: FontSizes.caption,
+    fontFamily: FontFamilies.semiBold,
     color: '#1a1a1a',
     textAlign: 'center',
     marginBottom: 10,
-    fontFamily: 'Afacad_600SemiBold',
+    lineHeight: FontSizes.caption * LineHeights.normal,
   },
   barChartContainer: {
     flexDirection: 'row',
@@ -718,16 +719,17 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   chartValue: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: FontSizes.medium,
+    fontFamily: FontFamilies.bold,
     color: '#1a1a1a',
     marginBottom: 4,
-    fontFamily: 'Afacad_700Bold',
+    lineHeight: FontSizes.medium * LineHeights.snug,
   },
   chartSub: {
-    fontSize: 10,
+    fontSize: FontSizes.xSmall,
     color: '#4a4a4a',
-    fontFamily: 'Afacad_400Regular',
+    fontFamily: FontFamilies.regular,
+    lineHeight: FontSizes.xSmall * LineHeights.normal,
   },
   moreInfoBtn: {
     backgroundColor: '#2F4F40',
@@ -735,11 +737,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 16,
+    minHeight: 44,
   },
   moreInfoText: {
     color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-    fontFamily: 'Afacad_600SemiBold',
+    fontSize: FontSizes.button,
+    fontFamily: FontFamilies.semiBold,
+    lineHeight: FontSizes.button * LineHeights.normal,
   },
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { FontSizes, FontFamilies, ComponentSpacing } from '../constants/typography';
 
 const CustomButton = ({ title, onPress, disabled, style, textStyle }) => {
   const { currentTheme } = useTheme();
@@ -17,15 +18,17 @@ const CustomButton = ({ title, onPress, disabled, style, textStyle }) => {
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 15,
-    borderRadius: 10,
+    paddingVertical: ComponentSpacing.buttonPaddingVertical,
+    paddingHorizontal: ComponentSpacing.buttonPaddingHorizontal,
+    borderRadius: ComponentSpacing.buttonBorderRadius,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
+    minHeight: ComponentSpacing.buttonMinHeight, // Asegurar touch target de 44px
   },
   text: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: FontSizes.button, // 14px - optimizado para botones móviles
+    fontFamily: FontFamilies.semiBold, // Afacad_600SemiBold
   },
 });
 

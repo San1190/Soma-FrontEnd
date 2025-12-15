@@ -9,6 +9,7 @@ import {
   Alert,
   Platform
 } from 'react-native';
+import InfoModal from '../components/InfoModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { getUserById } from '../services/users';
@@ -19,6 +20,8 @@ const ProfileScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [addHabitModalVisible, setAddHabitModalVisible] = useState(false);
+  const [habitDetailsModalVisible, setHabitDetailsModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -115,11 +118,11 @@ const ProfileScreen = ({ navigation }) => {
               Revisa tus mensajes y redes de forma consciente para reducir el estrés digital.
             </Text>
             <View style={styles.habitActions}>
-              <TouchableOpacity style={styles.iconButton}>
+              <TouchableOpacity style={styles.iconButton} onPress={() => setAddHabitModalVisible(true)}>
                 <Ionicons name="add" size={20} color="#2f4f40" />
               </TouchableOpacity>
               <View style={{ flex: 1 }} />
-              <TouchableOpacity style={styles.iconButton}>
+              <TouchableOpacity style={styles.iconButton} onPress={() => setHabitDetailsModalVisible(true)}>
                 <Ionicons name="arrow-forward" size={20} color="#2f4f40" />
               </TouchableOpacity>
             </View>
@@ -147,7 +150,7 @@ const ProfileScreen = ({ navigation }) => {
         </View>
 
         {/* --- BOTONES DE ACCIÓN --- */}
-        <TouchableOpacity style={styles.premiumButton}>
+        <TouchableOpacity style={styles.premiumButton} onPress={() => navigation.navigate('PremiumSubscription')}>
           <Text style={styles.premiumButtonText}>Pasar a Premium</Text>
           <Ionicons name="diamond-outline" size={20} color="#fff" />
         </TouchableOpacity>
@@ -160,6 +163,23 @@ const ProfileScreen = ({ navigation }) => {
         <Text style={styles.versionText}>Versión 1.0.2 - SOMA</Text>
 
       </ScrollView>
+
+      <InfoModal
+        visible={addHabitModalVisible}
+        onClose={() => setAddHabitModalVisible(false)}
+        icon="add-circle"
+        title="Añadir Hábito"
+        description="Puedes añadir más hábitos personalizados desde la sección de hábitos en la pantalla principal. Selecciona entre nuestras recomendaciones o crea tus propios hábitos."
+      />
+
+      <InfoModal
+        visible={habitDetailsModalVisible}
+        onClose={() => setHabitDetailsModalVisible(false)}
+        icon="checkmark-done"
+        title="Historial de Hábitos"
+        description="Accede a tu historial completo de hábitos para ver tu progreso, rachas y estadísticas detalladas. Mantén tu motivación alta revisando tus logros."
+        buttonText="Ver Historial"
+      />
     </SafeAreaView>
   );
 };
@@ -199,7 +219,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     marginTop: 10,
   },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f0f0f0', justifyContent:'center', alignItems:'center', marginRight:10 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
   avatarBox: {
     width: 60,
     height: 60,

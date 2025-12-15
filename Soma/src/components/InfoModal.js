@@ -1,0 +1,138 @@
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const InfoModal = ({ visible, onClose, icon = "information-circle", title, description, buttonText = "Entendido" }) => {
+    const scaleValue = useRef(new Animated.Value(0)).current;
+    const opacityValue = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (visible) {
+            Animated.parallel([
+                Animated.spring(scaleValue, {
+                    toValue: 1,
+                    friction: 8,
+                    tension: 40,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(opacityValue, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        } else {
+            scaleValue.setValue(0);
+            opacityValue.setValue(0);
+        }
+    }, [visible]);
+
+    if (!visible) return null;
+
+    return (
+        <Modal transparent visible={visible} animationType="none">
+            <View style={styles.overlay}>
+                <Animated.View style={[styles.container, { opacity: opacityValue, transform: [{ scale: scaleValue }] }]}>
+                    {/* Close button */}
+                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                        <Ionicons name="close" size={24} color="#6b7280" />
+                    </TouchableOpacity>
+
+                    {/* Icon */}
+                    <View style={styles.iconContainer}>
+                        <Ionicons name={icon} size={64} color="#6c63ff" />
+                    </View>
+
+                    {/* Title */}
+                    <Text style={styles.title}>{title}</Text>
+
+                    {/* Description */}
+                    <View style={styles.descriptionCard}>
+                        <Text style={styles.description}>{description}</Text>
+                    </View>
+
+                    {/* Button */}
+                    <TouchableOpacity style={styles.button} onPress={onClose}>
+                        <Text style={styles.buttonText}>{buttonText}</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            </View>
+        </Modal>
+    );
+};
+
+const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    container: {
+        width: '100%',
+        maxWidth: 340,
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 24,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 10 },
+        elevation: 10,
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#f3f4f6',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
+    },
+    iconContainer: {
+        marginTop: 20,
+        marginBottom: 16,
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#1a1a1a',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    descriptionCard: {
+        backgroundColor: '#f9fafb',
+        width: '100%',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 16,
+        borderLeftWidth: 3,
+        borderLeftColor: '#6c63ff',
+    },
+    description: {
+        fontSize: 14,
+        color: '#6b7280',
+        lineHeight: 20,
+        textAlign: 'center',
+    },
+    button: {
+        backgroundColor: '#000',
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        borderRadius: 24,
+        width: '100%',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 15,
+    },
+});
+
+export default InfoModal;

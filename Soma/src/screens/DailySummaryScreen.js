@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BarChart, LineChart, PieChart } from 'react-native-gifted-charts';
 import { useNavigation } from '@react-navigation/native';
+import { FontSizes, FontFamilies, LineHeights } from '../constants/typography';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -262,23 +263,26 @@ const styles = StyleSheet.create({
   knobLeft: { alignSelf: 'flex-start' },
   knobRight: { alignSelf: 'flex-end' },
   mainTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: FontSizes.xLarge,
+    fontFamily: FontFamilies.bold,
     color: '#000',
     marginBottom: 5,
+    lineHeight: FontSizes.xLarge * LineHeights.tight,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: FontSizes.regularSmall,
+    fontFamily: FontFamilies.regular,
     color: '#666',
     marginBottom: 20,
-    lineHeight: 20,
+    lineHeight: FontSizes.regularSmall * LineHeights.relaxed,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: FontSizes.medium,
+    fontFamily: FontFamilies.semiBold,
     color: '#333',
     marginTop: 15,
     marginBottom: 10,
+    lineHeight: FontSizes.medium * LineHeights.snug,
   },
   card: {
     borderRadius: 24,
@@ -309,9 +313,10 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   cardDate: {
-    fontSize: 12,
+    fontSize: FontSizes.caption,
+    fontFamily: FontFamilies.medium,
     color: '#444',
-    fontWeight: '500',
+    lineHeight: FontSizes.caption * LineHeights.normal,
   },
   iconGroup: {
     flexDirection: 'row',
@@ -323,15 +328,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden', // Ensure chart doesn't bleed
   },
   cardStatusTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: FontSizes.mediumSmall,
+    fontFamily: FontFamilies.bold,
     color: '#000',
     marginBottom: 5,
+    lineHeight: FontSizes.mediumSmall * LineHeights.normal,
   },
   cardDescription: {
-    fontSize: 12,
+    fontSize: FontSizes.button,
+    fontFamily: FontFamilies.regular,
     color: '#333',
-    lineHeight: 18,
+    lineHeight: FontSizes.button * LineHeights.relaxed,
   },
   smallCardContainer: {
     flexDirection: 'row',
@@ -346,15 +353,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   smallCardLabel: {
-    fontSize: 11,
+    fontSize: FontSizes.small,
+    fontFamily: FontFamilies.semiBold,
     color: '#555',
-    fontWeight: '600',
+    lineHeight: FontSizes.small * LineHeights.normal,
   },
   smallCardValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: FontSizes.mediumLarge,
+    fontFamily: FontFamilies.bold,
     color: '#000',
     marginVertical: 8,
+    lineHeight: FontSizes.mediumLarge * LineHeights.snug,
   },
   adviceButton: {
     backgroundColor: '#000',
@@ -363,10 +372,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
     marginBottom: 20,
+    minHeight: 44,
   },
   adviceButtonText: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: FontSizes.button,
+    fontFamily: FontFamilies.semiBold,
+    lineHeight: FontSizes.button * LineHeights.normal,
   },
 });

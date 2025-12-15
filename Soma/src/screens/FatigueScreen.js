@@ -189,10 +189,10 @@ const FatigueScreen = () => {
   const availableHabits = habitCards.filter(c => !activeHabits.some(h => h.title === c.title));
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
-        <Text style={[styles.title, { color: '#2f4f40' }]}>¿Qué tal tu fatiga?</Text>
+        <Text style={[styles.title, { color: currentTheme.textPrimary }]}>¿Qué tal tu fatiga?</Text>
 
         <View style={styles.suggestionCard}>
           <View style={{ flex: 1 }}>

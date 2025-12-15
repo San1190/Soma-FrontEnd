@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import themes from '../constants/colors';
 import stressThemes from '../constants/stressThemes';
 import { useAntiStress } from './AntiStressContext';
@@ -18,12 +19,31 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(colorScheme || 'light');
   const [stressCategory, setStressCategory] = useState(null);
   const [displayTheme, setDisplayTheme] = useState(themes[colorScheme || 'light']);
+  const [isSomaticMode, setIsSomaticMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const rafRef = useRef(null);
   const prevThemeRef = useRef(null);
-  
+
   // 2. Obtener el estado de anti-estrés
   const { isAntiStressModeActive, isSleepModeActive } = useAntiStress();
   const { user } = useAuth();
+
+  // Load somatic mode preference from AsyncStorage
+  useEffect(() => {
+    const loadSomaticMode = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('isSomaticMode');
+        if (stored !== null) {
+          setIsSomaticMode(stored === 'true');
+        }
+      } catch (error) {
+        console.error('Error loading somatic mode:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadSomaticMode();
+  }, []);
 
   useEffect(() => {
     setTheme(colorScheme || 'light');
@@ -36,7 +56,7 @@ export const ThemeProvider = ({ children }) => {
       try {
         const res = await axios.get(`${API_BASE_URL}/stress/users/${user.id}`);
         setStressCategory(res.data?.stressLevel || null);
-      } catch {}
+      } catch { }
     };
     fetchStress();
     interval = setInterval(fetchStress, 5000);
@@ -47,9 +67,21 @@ export const ThemeProvider = ({ children }) => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
+  const toggleSomaticMode = async () => {
+    try {
+      const newValue = !isSomaticMode;
+      setIsSomaticMode(newValue);
+      await AsyncStorage.setItem('isSomaticMode', newValue.toString());
+    } catch (error) {
+      console.error('Error saving somatic mode:', error);
+    }
+  };
+
   // Selección del tema
   let selectedTheme = themes[theme];
-  if (isSleepModeActive) {
+  if (isSomaticMode) {
+    selectedTheme = stressThemes.somatic;
+  } else if (isSleepModeActive) {
     selectedTheme = stressThemes.sleep;
   } else if (isAntiStressModeActive) {
     selectedTheme = stressThemes.calm;
@@ -113,7 +145,16 @@ export const ThemeProvider = ({ children }) => {
 
   const uiSimplified = Boolean(isSleepModeActive);
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, currentTheme: displayTheme, stressCategory, uiSimplified }}>
+    <ThemeContext.Provider value={{
+      theme,
+      toggleTheme,
+      currentTheme: displayTheme,
+      stressCategory,
+      uiSimplified,
+      isSomaticMode,
+      toggleSomaticMode,
+      isLoading
+    }}>
       {children}
     </ThemeContext.Provider>
   );

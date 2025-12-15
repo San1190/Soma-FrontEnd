@@ -10,6 +10,7 @@ import axios from 'axios';
 import API_BASE_URL from '../constants/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 // --- Swipeable Component ---
 const SwipeableHabitRow = ({ habit, onComplete, onDelete }) => {
@@ -98,6 +99,7 @@ const SwipeableHabitRow = ({ habit, onComplete, onDelete }) => {
 export default function InsomniaScreen() {
   const navigation = useNavigation();
   const { user } = useAuth();
+  const { currentTheme } = useTheme();
   const [barsPhase, setBarsPhase] = useState([20, 28, 36, 22, 30, 26]);
   const [barsDepth, setBarsDepth] = useState([18, 25, 22, 32, 28, 24]);
   const [microAwake, setMicroAwake] = useState(0.15);
@@ -187,10 +189,10 @@ export default function InsomniaScreen() {
   const availableHabits = habitCards.filter(c => !activeHabits.some(h => h.title === c.title));
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
-        <Text style={styles.title}>¿Qué tal tu insomnio?</Text>
+        <Text style={[styles.title, { color: currentTheme.textPrimary }]}>¿Qué tal tu insomnio?</Text>
 
         <View style={styles.suggestionCard}>
           <View style={{ flex: 1 }}>

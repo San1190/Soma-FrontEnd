@@ -197,7 +197,7 @@ const FatigueScreen = () => {
         <View style={styles.suggestionCard}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.suggestTitle, { color: '#2f4f40' }]}>Usa lágrimas artificiales</Text>
-            <Text style={styles.suggestBody}>Consejo del día para Ana</Text>
+            <Text style={styles.suggestBody}>Consejo del día para {user?.first_name || 'ti'}</Text>
           </View>
           <Image source={require('../../assets/gatos/GatoVerde.png')} style={styles.cat} />
         </View>

@@ -116,7 +116,7 @@ const StressScreen = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [summary, setSummary] = useState({ suggestion: 'Prueba el mix en tendencia: Barre', metrics: { hrv: 52, heatVar: 1.2, respiration: 25 }, adviceFor: 'Ana' });
+  const [summary, setSummary] = useState({ suggestion: 'Prueba el mix en tendencia: Barre', metrics: { hrv: 52, heatVar: 1.2, respiration: 25 }, adviceFor: user?.first_name || 'ti' });
   const [bars, setBars] = useState([24, 52, 38, 18, 44, 30]);
   const [locked, setLocked] = useState(false);
   const [music, setMusic] = useState([]);

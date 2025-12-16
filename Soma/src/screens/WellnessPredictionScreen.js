@@ -17,7 +17,6 @@ const WellnessPredictionScreen = () => {
     const [prediction, setPrediction] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [locked, setLocked] = useState(false);
     const isFocused = useIsFocused();
     // Modal State
     const [modalVisible, setModalVisible] = useState(false);
@@ -131,7 +130,7 @@ const WellnessPredictionScreen = () => {
             <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
 
                 {/* Header Navigation */}
-                <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
+                <TopBar onAvatarPress={() => navigation.navigate('Profile')} />
 
                 <Text style={styles.mainTitle}>Predicción de Bienestar</Text>
                 <Text style={styles.subtitle}>

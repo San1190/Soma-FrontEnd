@@ -197,7 +197,7 @@ export default function InsomniaScreen() {
         <View style={styles.suggestionCard}>
           <View style={{ flex: 1 }}>
             <Text style={styles.suggestTitle}>Evita pantallas antes de dormir</Text>
-            <Text style={styles.suggestBody}>Consejo del día para Ana</Text>
+            <Text style={styles.suggestBody}>Consejo del día para {user?.first_name || 'ti'}</Text>
           </View>
           <Image source={require('../../assets/gatos/GatoAzul.png')} style={styles.cat} />
         </View>

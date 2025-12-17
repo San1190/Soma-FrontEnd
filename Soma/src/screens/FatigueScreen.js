@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Animated, PanResponder, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Animated, PanResponder, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FooterNav from '../components/FooterNav';
 import TopBar from '../components/TopBar';
@@ -267,8 +267,8 @@ const FatigueScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  container: { flex: 1 },
+  safeArea: { flex: 1, ...(Platform.OS === 'web' ? { height: '100vh', overflow: 'hidden' } : {}) },
+  container: { flex: 1, ...(Platform.OS === 'web' ? { overflow: 'scroll' } : {}) },
   content: { padding: 16, paddingBottom: 220 },
   title: { marginTop: 10, fontSize: 24, fontWeight: '700' },
   suggestionCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 16, padding: 16, marginTop: 12 },

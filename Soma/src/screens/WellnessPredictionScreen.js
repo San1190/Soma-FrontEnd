@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
@@ -227,8 +227,8 @@ const WellnessPredictionScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: { flex: 1 },
+    safeArea: { flex: 1, ...(Platform.OS === 'web' ? { height: '100vh', overflow: 'hidden' } : {}) },
+    content: { flex: 1, ...(Platform.OS === 'web' ? { overflow: 'scroll' } : {}) },
     scrollContent: { padding: 20, paddingBottom: 140 },
 
     centerContainer: {

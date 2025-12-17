@@ -191,7 +191,13 @@ const FatigueScreen = () => {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <TopBar onAvatarPress={() => navigation.navigate('Profile')} variant="lock" active={locked} onToggle={() => setLocked(v => !v)} />
+        <TopBar
+          showBack={false}
+          onAvatarPress={() => navigation.navigate('Profile')}
+          variant="lock"
+          active={locked}
+          onToggle={() => setLocked(v => !v)}
+        />
         <Text style={[styles.title, { color: currentTheme.textPrimary }]}>¿Qué tal tu fatiga?</Text>
 
         <View style={styles.suggestionCard}>

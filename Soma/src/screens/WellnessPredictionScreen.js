@@ -130,7 +130,11 @@ const WellnessPredictionScreen = () => {
             <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
 
                 {/* Header Navigation */}
-                <TopBar onAvatarPress={() => navigation.navigate('Profile')} />
+                <TopBar
+                    showBack={true}
+                    onBackPress={() => navigation.goBack()}
+                    onAvatarPress={() => navigation.navigate('Profile')}
+                />
 
                 <Text style={styles.mainTitle}>Predicción de Bienestar</Text>
                 <Text style={styles.subtitle}>

@@ -10,6 +10,15 @@ export async function register(userData) {
   return response.data;
 }
 
+// Alias para compatibilidad con AuthContext
+export const registerUser = async (name, email, password) => {
+  return register({
+    first_name: name,
+    email,
+    password_hash: password,
+  });
+};
+
 // Si quieres mantener la función de login aquí también
 export async function login(email, password) {
   const response = await axios.post(`${API_URL}/login`, {

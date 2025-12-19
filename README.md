@@ -192,6 +192,11 @@ npm install
    export const API_BASE_URL = 'http://TU_IP:8080/api';
    ```
 
+> [!IMPORTANT]
+> **🔐 Configuración del Backend**: El backend requiere API keys de servicios externos (Gemini y Spotify).
+> 
+> Antes de ejecutar el frontend, asegúrate de que el backend esté correctamente configurado siguiendo las instrucciones en [Soma-BackEnd/README.md](../../Soma-BackEnd/README.md) y [API_CONFIGURATION.md](../../API_CONFIGURATION.md).
+
 4. **Inicia la aplicación**
 ```bash
 npm start

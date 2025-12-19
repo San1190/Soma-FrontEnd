@@ -16,6 +16,7 @@ import { useTheme } from '../context/ThemeContext';
 const SwipeableHabitRow = ({ habit, onComplete, onDelete }) => {
   const pan = useRef(new Animated.ValueXY()).current;
   const scaleDelete = useRef(new Animated.Value(0)).current;
+  const [expanded, setExpanded] = useState(false);
 
   const isCompletedToday = () => {
     if (!habit.lastCompleted) return false;
@@ -26,10 +27,15 @@ const SwipeableHabitRow = ({ habit, onComplete, onDelete }) => {
 
   const completed = isCompletedToday();
 
+  const toggleExpand = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded(!expanded);
+  };
+
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        return gestureState.dx > 10 && Math.abs(gestureState.dy) < 10;
+        return Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dy) < 10;
       },
       onPanResponderMove: (evt, gestureState) => {
         if (gestureState.dx > 0) {
@@ -75,22 +81,40 @@ const SwipeableHabitRow = ({ habit, onComplete, onDelete }) => {
       </View>
 
       <Animated.View
-        style={[styles.activeHabitRow, { transform: [{ translateX: pan.x }] }]}
+        style={[styles.activeHabitRow, { transform: [{ translateX: pan.x }] }, expanded && { flexDirection: 'column', alignItems: 'flex-start' }]}
         {...panResponder.panHandlers}
       >
-        <View style={{ flex: 1 }}>
-          <Text style={styles.activeHabitTitle}>{habit.title}</Text>
-          <Text style={styles.activeHabitStreak}>
-            🔥 {habit.streak} días {completed ? '(Completado hoy)' : ''}
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={toggleExpand}
+            activeOpacity={1}
+          >
+            <Text style={styles.activeHabitTitle}>{habit.title}</Text>
+            <Text style={styles.activeHabitStreak}>
+              🔥 {habit.streak} días {completed ? '(Completado hoy)' : ''}
+            </Text>
+            <Text style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>
+              {expanded ? 'menos detalles' : 'pulsa para leer'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => !completed && onComplete(habit.id)}
+            activeOpacity={completed ? 1 : 0.7}
+            style={[styles.checkBtn, completed && styles.checkBtnCompleted]}
+          >
+            <Ionicons name="checkmark" size={20} color="#fff" />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          onPress={() => !completed && onComplete(habit.id)}
-          activeOpacity={completed ? 1 : 0.7}
-          style={[styles.checkBtn, completed && styles.checkBtnCompleted]}
-        >
-          <Ionicons name="checkmark" size={20} color="#fff" />
-        </TouchableOpacity>
+
+        {expanded && (
+          <View style={{ marginTop: 10, width: '100%', paddingTop: 10, borderTopWidth: 1, borderTopColor: '#f0f0f0' }}>
+            <Text style={{ color: '#4b5563', fontSize: 14 }}>
+              {habit.description || habit.desc || "Mantén la constancia para mejorar tu higiene del sueño."}
+            </Text>
+          </View>
+        )}
       </Animated.View>
     </View>
   );
@@ -193,7 +217,7 @@ export default function InsomniaScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar
           showBack={false}
-          onAvatarPress={() => navigation.navigate('Profile')}
+          onAvatarPress={() => navigation.getParent()?.navigate('Profile')}
           variant="lock"
           active={locked}
           onToggle={() => setLocked(v => !v)}
@@ -252,18 +276,11 @@ export default function InsomniaScreen() {
             <Text style={styles.sectionTitle}>Nuevos hábitos</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.habitsRow}>
               {availableHabits.map((c) => (
-                <View key={c.key} style={styles.habitCard}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={styles.habitTitle}>{c.title}</Text>
-                    <Text style={{ color: '#2f3f47', width: '25%' }}>pulsa para leer</Text>
-                  </View>
-                  <Text style={styles.habitSub}>{c.subtitle}</Text>
-                  <Text style={styles.habitDesc}>{c.desc}</Text>
-                  <View style={styles.habitActions}>
-                    <TouchableOpacity style={styles.circleBtn} onPress={() => handleCreateHabit(c)}><Text style={styles.circleText}>+</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.circleBtn}><Text style={styles.circleText}>{'>'}</Text></TouchableOpacity>
-                  </View>
-                </View>
+                <ExpandableHabitCard
+                  key={c.key}
+                  habit={c}
+                  onAdd={() => handleCreateHabit(c)}
+                />
               ))}
             </ScrollView>
           </>
@@ -274,6 +291,50 @@ export default function InsomniaScreen() {
     </SafeAreaView>
   );
 }
+
+const ExpandableHabitCard = ({ habit, onAdd }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const toggleExpand = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded(!expanded);
+  };
+
+  return (
+    <View style={[styles.habitCard, expanded && { height: 'auto' }]}>
+      <TouchableOpacity
+        onPress={toggleExpand}
+        activeOpacity={0.7}
+      >
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={styles.habitTitle}>{habit.title}</Text>
+          <Text style={{ color: '#2f3f47', fontSize: 12 }}>{expanded ? 'menos' : 'pulsa para leer'}</Text>
+        </View>
+        <Text style={styles.habitSub}>{habit.subtitle}</Text>
+      </TouchableOpacity>
+
+      {expanded && (
+        <View style={{ marginTop: 8 }}>
+          <Text style={styles.habitDesc}>{habit.desc}</Text>
+          <Text style={{ marginTop: 4, fontStyle: 'italic', color: '#5f6f77', fontSize: 12 }}>
+            Este hábito ayuda a regular tu ritmo circadiano y mejora la calidad del sueño.
+          </Text>
+          <View style={styles.habitActions}>
+            <TouchableOpacity style={styles.circleBtn} onPress={(e) => {
+              e.stopPropagation();
+              onAdd();
+            }}>
+              <Text style={styles.circleText}>+</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleBtn}>
+              <Text style={styles.circleText}>{'>'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, ...(Platform.OS === 'web' ? { height: '100vh', overflow: 'hidden' } : {}) },

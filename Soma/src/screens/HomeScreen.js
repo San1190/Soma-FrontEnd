@@ -175,7 +175,7 @@ export default function HomeScreen({ route }) {
 
         {/* --- Inicio del Contenido --- */}
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.avatar}><Ionicons name="person" size={20} color={currentTheme.textPrimary} /></TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.getParent()?.navigate('Profile')} style={styles.avatar}><Ionicons name="person" size={20} color={currentTheme.textPrimary} /></TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
               style={[

@@ -269,7 +269,7 @@ const StressScreen = () => {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TopBar
           showBack={false}
-          onAvatarPress={() => navigation.navigate('Profile')}
+          onAvatarPress={() => navigation.getParent()?.navigate('Profile')}
           variant="lock"
           active={locked}
           onToggle={() => setLocked(v => !v)}

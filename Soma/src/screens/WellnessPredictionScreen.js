@@ -133,7 +133,7 @@ const WellnessPredictionScreen = () => {
                 <TopBar
                     showBack={true}
                     onBackPress={() => navigation.goBack()}
-                    onAvatarPress={() => navigation.navigate('Profile')}
+                    onAvatarPress={() => navigation.getParent()?.navigate('Profile')}
                 />
 
                 <Text style={styles.mainTitle}>Predicción de Bienestar</Text>
